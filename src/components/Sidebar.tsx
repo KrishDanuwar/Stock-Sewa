@@ -73,7 +73,7 @@ export function Sidebar({
                             <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center shadow-inner p-1 group-hover:scale-105 transition-all duration-300 relative overflow-hidden ring-1 ring-gray-100">
                                 <Image
                                     src="/logo.png"
-                                    alt="StockSewa Logo"
+                                    alt="G.K Paints Logo"
                                     width={40}
                                     height={40}
                                     className="object-contain"
@@ -81,7 +81,7 @@ export function Sidebar({
                                 />
                             </div>
                             <div className="flex flex-col">
-                                <span className="font-poppins font-black text-surface-primary text-xl tracking-tighter leading-none group-hover:text-brand-primary transition-colors">StockSewa</span>
+                                <span className="font-poppins font-black text-surface-primary text-xl tracking-tighter leading-none group-hover:text-brand-primary transition-colors">G.K Paints</span>
                                 <span className="text-[10px] text-brand-primary font-black uppercase tracking-[0.2em] mt-1.5">Enterprise</span>
                             </div>
                         </Link>

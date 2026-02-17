@@ -168,7 +168,7 @@ export default function NewInvoicePage() {
                     </button>
                     <div>
                         <h1 className="text-3xl font-poppins font-black text-surface-primary tracking-tight">Generate Invoice</h1>
-                        <p className="text-surface-muted text-sm font-black uppercase tracking-widest opacity-60">System Context: StockSewa POS</p>
+                        <p className="text-surface-muted text-sm font-black uppercase tracking-widest opacity-60">System Context: G.K Paints POS</p>
                     </div>
                 </div>
                 {items.length > 0 && (

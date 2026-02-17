@@ -17,27 +17,27 @@ export async function getOrgContext() {
             console.warn('getOrgContext: No organization found in database.', error?.message);
             return {
                 userId: 'no-auth',
-                userEmail: 'user@stocksewa.local',
+                userEmail: 'user@gkpaints.local',
                 organizationId: null,
-                organizationName: 'StockSewa Shop',
+                organizationName: 'G.K Paints',
                 subscriptionStatus: 'active',
             };
         }
 
         return {
             userId: 'no-auth',
-            userEmail: 'user@stocksewa.local',
+            userEmail: 'user@gkpaints.local',
             organizationId: org.id,
-            organizationName: org.name || 'StockSewa Shop',
+            organizationName: org.name || 'G.K Paints',
             subscriptionStatus: org.subscription_status || 'active',
         };
     } catch (err) {
         console.error('getOrgContext: Critical error', err);
         return {
             userId: 'no-auth',
-            userEmail: 'user@stocksewa.local',
+            userEmail: 'user@gkpaints.local',
             organizationId: null,
-            organizationName: 'StockSewa Shop',
+            organizationName: 'G.K Paints',
             subscriptionStatus: 'active',
         };
     }

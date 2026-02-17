@@ -116,7 +116,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                         📦
                     </div>
                     <h3 className="text-2xl font-poppins font-black text-surface-primary mb-3">Inventory Empty</h3>
-                    <p className="text-sm text-surface-muted mb-10 max-w-sm mx-auto font-medium leading-relaxed">Build your professional catalog by adding your first product to StockSewa.</p>
+                    <p className="text-sm text-surface-muted mb-10 max-w-sm mx-auto font-medium leading-relaxed">Build your professional catalog by adding your first product to G.K Paints.</p>
                     <button onClick={openAdd} className="btn-primary px-10 py-4 text-xs font-black uppercase tracking-widest shadow-2xl shadow-brand-primary/20">Add First Product</button>
                 </div>
             ) : (

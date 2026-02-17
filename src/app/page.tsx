@@ -6,7 +6,7 @@ import Link from 'next/link';
 import {
     Package,
     CreditCard,
-    DollarSign,
+    Wallet,
     AlertTriangle,
     ArrowRight,
     TrendingUp,
@@ -54,7 +54,7 @@ export default async function Dashboard() {
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h1 className="text-3xl font-poppins font-bold text-surface-primary tracking-tight">
-                        StockSewa Dashboard
+                        G.K Paints Dashboard
                     </h1>
                     <p className="text-surface-secondary mt-1 font-medium">
                         Welcome back! {stats.organizationName} is performing smoothly today.
@@ -91,7 +91,7 @@ export default async function Dashboard() {
                 <StatCard
                     title="Today's Revenue"
                     value={`Rs. ${stats.todayRevenue.toLocaleString('en-IN')}`}
-                    icon={<DollarSign size={24} />}
+                    icon={<Wallet size={24} />}
                     color="green"
                 />
             </div>
@@ -196,7 +196,7 @@ export default async function Dashboard() {
                         </div>
                         <h3 className="font-poppins font-black text-xl mb-2 relative z-10">Premium Account</h3>
                         <p className="text-white/90 text-[11px] font-bold leading-relaxed relative z-10">
-                            Upgrade to **StockSewa Pro** to unlock multi-branch sync and custom branding.
+                            Upgrade to **G.K Paints Pro** to unlock multi-branch sync and custom branding.
                         </p>
                         <Link href="/billing" className="mt-8 btn-primary bg-white text-brand-primary border-none shadow-xl hover:bg-gray-50 relative z-10 py-3 w-full text-xs font-black uppercase tracking-widest">
                             Upgrade Now <ArrowRight size={14} strokeWidth={3} />

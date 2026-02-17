@@ -7,8 +7,8 @@ import { Toaster } from 'sonner';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-    title: 'StockSewa — Your Trusted Inventory Partner',
-    description: 'Precision stock management for modern businesses',
+    title: 'G.K Paints — Your Trusted Paint Inventory Partner',
+    description: 'Precision paint stock management for modern businesses',
 };
 
 export default async function RootLayout({

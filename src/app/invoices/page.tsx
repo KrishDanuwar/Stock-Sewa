@@ -41,7 +41,7 @@ export default async function InvoicesPage({ searchParams }: Props) {
                         key={s}
                         href={`/invoices?status=${s}${searchParams.search ? `&search=${searchParams.search}` : ''}`}
                         className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${(searchParams.status || 'all') === s
-                            ? 'bg-primary-600 text-white'
+                            ? 'bg-brand-primary text-white'
                             : 'bg-surface-100 text-surface-600 hover:bg-surface-200'
                             }`}
                     >
@@ -75,7 +75,7 @@ export default async function InvoicesPage({ searchParams }: Props) {
                             {invoices.map((inv: any) => (
                                 <tr key={inv.id} className="hover:bg-surface-50 transition-colors">
                                     <td className="px-6 py-3">
-                                        <Link href={`/invoices/${inv.id}`} className="text-primary-600 hover:text-primary-700 font-medium text-sm">
+                                        <Link href={`/invoices/${inv.id}`} className="text-brand-primary hover:text-brand-primary/80 font-medium text-sm">
                                             {inv.invoice_number}
                                         </Link>
                                     </td>

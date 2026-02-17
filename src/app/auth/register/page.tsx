@@ -23,11 +23,11 @@ export default function RegisterPage() {
         <div className="card p-10 animate-fade-in max-w-lg w-full">
             <div className="flex flex-col items-center mb-10">
                 <div className="w-20 h-20 mb-6 group relative">
-                    <div className="absolute -inset-1 bg-gradient-to-r from-primary-600 to-emerald-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    <div className="absolute -inset-1 bg-gradient-to-r from-brand-primary to-brand-secondary rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
                     <div className="relative w-full h-full bg-white rounded-2xl flex items-center justify-center shadow-xl p-3 border border-surface-100 overflow-hidden">
                         <Image
                             src="/logo.png"
-                            alt="StockSewa Logo"
+                            alt="G.K Paints Logo"
                             width={80}
                             height={80}
                             className="w-full h-full object-contain"
@@ -127,7 +127,7 @@ export default function RegisterPage() {
             <div className="mt-6 pt-6 border-t border-surface-200 text-center">
                 <p className="text-sm text-surface-500">
                     Already have an account?{' '}
-                    <Link href="/auth/login" className="text-primary-600 font-medium hover:underline">
+                    <Link href="/auth/login" className="text-brand-primary font-medium hover:underline">
                         Login here
                     </Link>
                 </p>

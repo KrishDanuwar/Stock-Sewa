@@ -122,14 +122,14 @@ export default function BillingClient({
                         </h3>
 
                         <p className="text-sm text-surface-secondary leading-relaxed mb-8 relative z-10 font-medium">
-                            StockSewa is powered by local payments. Use these options for instant manual activation by our team.
+                            G.K Paints is powered by local payments. Use these options for instant manual activation by our team.
                         </p>
 
                         <div className="space-y-4 relative z-10">
                             {[
-                                { label: 'eSewa ID', value: '98XXXXXXXX', name: 'StockSewa Official', icon: '💎' },
-                                { label: 'Khalti ID', value: '98XXXXXXXX', name: 'StockSewa Official', icon: '💜' },
-                                { label: 'Bank Transfer', value: 'XXXX-XXXX-XXXX', name: 'Global IME (StockSewa Pvt Ltd)', icon: '🏦' }
+                                { label: 'eSewa ID', value: '98XXXXXXXX', name: 'G.K Paints Official', icon: '💎' },
+                                { label: 'Khalti ID', value: '98XXXXXXXX', name: 'G.K Paints Official', icon: '💜' },
+                                { label: 'Bank Transfer', value: 'XXXX-XXXX-XXXX', name: 'Global IME (G.K Paints)', icon: '🏦' }
                             ].map((method) => (
                                 <div key={method.label} className="p-6 bg-gray-50/50 backdrop-blur rounded-[1.5rem] border border-gray-100 hover:border-brand-primary/40 transition-all group/method hover:shadow-lg hover:shadow-gray-100/50">
                                     <div className="flex justify-between items-start mb-3">

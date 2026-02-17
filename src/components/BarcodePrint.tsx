@@ -47,7 +47,7 @@ export default function BarcodePrint({ value, name, price }: BarcodePrintProps) 
             <canvas ref={canvasRef} className="max-w-full h-auto"></canvas>
             <button
                 onClick={handlePrint}
-                className="mt-2 text-xs font-bold text-primary-600 hover:text-primary-700 underline flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="mt-2 text-xs font-bold text-brand-primary hover:text-brand-primary/80 underline flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
             >
                 Print Thermal Label
             </button>

@@ -1,5 +1,5 @@
 -- ============================================
--- StockSewa SaaS — Supabase PostgreSQL Schema
+-- G.K Paints — Supabase PostgreSQL Schema
 -- Multi-tenant SaaS with Organizations & Profiles
 -- ============================================
 

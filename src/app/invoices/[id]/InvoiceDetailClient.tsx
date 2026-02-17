@@ -75,7 +75,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                     {invoice.status !== 'paid' && (
                         <button
                             onClick={() => setShowPaymentForm(!showPaymentForm)}
-                            className="bg-primary-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md hover:bg-primary-700 transition-all flex items-center gap-2"
+                            className="bg-brand-primary text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md hover:bg-brand-primary/90 transition-all flex items-center gap-2"
                         >
                             <CreditCard size={18} />
                             Record Payment
@@ -96,8 +96,8 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
 
             {/* Payment Quick Entry */}
             {showPaymentForm && (
-                <div className="card p-6 bg-primary-50 border-primary-100 no-print animate-slide-up">
-                    <h3 className="text-sm font-bold text-primary-900 uppercase tracking-wider mb-4">Record New Payment</h3>
+                <div className="card p-6 bg-brand-primary/5 border-brand-primary/20 no-print animate-slide-up">
+                    <h3 className="text-sm font-bold text-brand-primary uppercase tracking-wider mb-4">Record New Payment</h3>
                     {error && (
                         <div className="p-4 bg-white border border-red-100 rounded-xl text-sm text-red-600 mb-4 flex items-center gap-2 shadow-sm">
                             <XCircle size={16} />
@@ -106,7 +106,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                     )}
                     <div className="flex flex-col md:flex-row items-end gap-4">
                         <div className="flex-1 w-full text-left">
-                            <label className="block text-xs font-bold text-primary-700 uppercase mb-1.5 ml-1">
+                            <label className="block text-xs font-bold text-brand-primary uppercase mb-1.5 ml-1">
                                 Amount to Pay (Remaining: {formatCurrency(invoice.remaining_amount)})
                             </label>
                             <div className="relative">
@@ -118,7 +118,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                                     step="0.01"
                                     value={paymentAmount}
                                     onChange={(e) => setPaymentAmount(e.target.value)}
-                                    className="input-field pl-12 bg-white border-primary-200 focus:border-primary-500 text-lg font-bold"
+                                    className="input-field pl-12 bg-white border-brand-primary/20 focus:border-brand-primary text-lg font-bold"
                                     placeholder="0.00"
                                 />
                             </div>
@@ -127,7 +127,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                             <button
                                 onClick={handlePayment}
                                 disabled={loading}
-                                className="flex-1 md:flex-none bg-primary-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-primary-700 disabled:opacity-50 transition-all"
+                                className="flex-1 md:flex-none bg-brand-primary text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-brand-primary/90 disabled:opacity-50 transition-all"
                             >
                                 {loading ? 'Processing...' : 'Confirm'}
                             </button>
@@ -141,25 +141,25 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
 
             {/* Main Invoice Card */}
             <div className="card shadow-2xl overflow-hidden border-none ring-1 ring-surface-200 text-left">
-                <div className="h-2 bg-gradient-to-r from-primary-600 via-primary-500 to-primary-700" />
+                <div className="h-2 bg-gradient-to-r from-brand-primary via-brand-primary/80 to-brand-primary/60" />
                 <div className="p-8 md:p-12">
                     {/* Brand & Meta */}
                     <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-12">
                         <div className="space-y-4 text-left">
                             <div className="flex items-center gap-3">
-                                <div className="w-12 h-12 bg-primary-600 rounded-2xl flex items-center justify-center text-white font-bold shadow-xl">
-                                    SS
+                                <div className="w-12 h-12 bg-brand-primary rounded-2xl flex items-center justify-center text-white font-bold shadow-xl">
+                                    GK
                                 </div>
                                 <div className="text-left">
-                                    <h2 className="text-2xl font-black text-surface-900 tracking-tighter">STOCKSEWA</h2>
-                                    <div className="flex items-center gap-2 text-[10px] text-primary-600 font-bold tracking-[0.2em] uppercase">
-                                        <span className="w-1 h-1 bg-primary-600 rounded-full" />
+                                    <h2 className="text-2xl font-black text-surface-900 tracking-tighter">G.K PAINTS</h2>
+                                    <div className="flex items-center gap-2 text-[10px] text-brand-primary font-bold tracking-[0.2em] uppercase">
+                                        <span className="w-1 h-1 bg-brand-primary rounded-full" />
                                         Inventory Master
                                     </div>
                                 </div>
                             </div>
                             <div className="space-y-1 text-sm text-surface-500 text-left">
-                                <div className="flex items-center gap-2"><Building2 size={14} /> StockSewa Cloud Inventory</div>
+                                <div className="flex items-center gap-2"><Building2 size={14} /> G.K Paints Cloud Inventory</div>
                                 <div className="flex items-center gap-2"><MapPin size={14} /> Global Enterprise SaaS</div>
                             </div>
                         </div>
@@ -255,7 +255,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                             </div>
                             <div className="h-px bg-surface-800 my-2" />
                             <div className="flex justify-between items-center">
-                                <span className="text-primary-400 text-xs font-black uppercase tracking-widest">Balance Due</span>
+                                <span className="text-brand-primary text-xs font-black uppercase tracking-widest">Balance Due</span>
                                 <span className={`text-2xl font-black ${Number(invoice.remaining_amount) > 0 ? 'text-white' : 'text-green-400'}`}>
                                     {formatCurrency(invoice.remaining_amount)}
                                 </span>
@@ -265,8 +265,8 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
 
                     <div className="mt-16 pt-8 border-t border-surface-100 text-center">
                         <div className="flex items-center justify-center gap-2 text-[10px] font-black text-surface-400 uppercase tracking-widest">
-                            <CheckCircle2 size={12} className="text-primary-500" />
-                            Generated Securely via StockSewa SaaS
+                            <CheckCircle2 size={12} className="text-brand-primary" />
+                            Generated Securely via G.K Paints POS
                         </div>
                     </div>
                 </div>
