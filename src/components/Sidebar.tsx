@@ -140,24 +140,12 @@ export function Sidebar({
                         })}
                     </nav>
 
-                    {/* User Profile & Logout */}
+                    {/* Simple Bottom Info */}
                     <div className="p-4 border-t border-surface-100 bg-surface-50/30">
-                        <div className="flex items-center justify-between gap-2 px-2 py-1">
-                            <div className="flex flex-col min-w-0">
-                                <span className="text-xs font-semibold text-surface-900 truncate">
-                                    {userEmail?.split('@')[0] || 'User'}
-                                </span>
-                                <span className="text-[10px] text-surface-400 truncate tracking-tight">
-                                    {userEmail || 'user@example.com'}
-                                </span>
-                            </div>
-                            <button
-                                onClick={() => signOut()}
-                                className="p-2 text-surface-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                                title="Logout"
-                            >
-                                <LogOut size={18} />
-                            </button>
+                        <div className="flex items-center justify-center gap-2 px-2 py-1">
+                            <span className="text-[10px] text-surface-400 truncate tracking-tight font-medium uppercase">
+                                Offline Priority Mode
+                            </span>
                         </div>
                     </div>
                 </div>

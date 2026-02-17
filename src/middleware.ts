@@ -27,33 +27,10 @@ export async function middleware(request: NextRequest) {
         }
     );
 
-    const {
-        data: { user },
-    } = await supabase.auth.getUser();
-
-    // Public paths
-    const isPublicPath = request.nextUrl.pathname.startsWith('/auth');
-
-    if (!user && !isPublicPath) {
-        return NextResponse.redirect(new URL('/auth/login', request.url));
-    }
-
-    // If logged in, check subscription
-    if (user && !isPublicPath) {
-        const { data: profile } = await supabase
-            .from('profiles')
-            .select('organization_id, organizations(subscription_status)')
-            .eq('id', user.id)
-            .single();
-
-        const status = (profile as any)?.organizations?.subscription_status;
-
-        // Redirect to billing if subscription is not active or trialing
-        if (status !== 'active' && status !== 'trialing' && !request.nextUrl.pathname.startsWith('/billing')) {
-            return NextResponse.redirect(new URL('/billing', request.url));
-        }
-    }
-
+    /* 
+       AUTHENTICATION DISABLED
+       All routes are now public. 
+    */
     return supabaseResponse;
 }
 
