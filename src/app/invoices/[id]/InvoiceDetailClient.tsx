@@ -23,7 +23,7 @@ interface InvoiceDetailClientProps {
 }
 
 function formatCurrency(amount: number) {
-    return `$${Number(amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    return `Rs. ${Number(amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
 }
 
 export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProps) {
