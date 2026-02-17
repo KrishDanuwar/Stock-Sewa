@@ -1,6 +1,7 @@
 'use server';
 
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/server';
+import { getOrgContext } from '@/lib/org-context';
 import { revalidatePath } from 'next/cache';
 
 interface InvoiceItem {
@@ -25,9 +26,14 @@ function generateInvoiceNumber(): string {
 }
 
 export async function getInvoices(search?: string, status?: string) {
+    const ctx = await getOrgContext();
+    if (!ctx) return [];
+
+    const supabase = createClient();
     let query = supabase
         .from('invoices')
         .select('*, customers(name)')
+        .eq('organization_id', ctx.organizationId)
         .order('created_at', { ascending: false });
 
     if (search) {
@@ -44,10 +50,15 @@ export async function getInvoices(search?: string, status?: string) {
 }
 
 export async function getInvoice(id: string) {
+    const ctx = await getOrgContext();
+    if (!ctx) throw new Error('Unauthorized');
+
+    const supabase = createClient();
     const { data: invoice, error: invErr } = await supabase
         .from('invoices')
         .select('*, customers(name, phone, address)')
         .eq('id', id)
+        .eq('organization_id', ctx.organizationId)
         .single();
 
     if (invErr) throw new Error(invErr.message);
@@ -55,7 +66,8 @@ export async function getInvoice(id: string) {
     const { data: items, error: itemsErr } = await supabase
         .from('invoice_items')
         .select('*, products(name, barcode)')
-        .eq('invoice_id', id);
+        .eq('invoice_id', id)
+        .eq('organization_id', ctx.organizationId);
 
     if (itemsErr) throw new Error(itemsErr.message);
 
@@ -63,6 +75,7 @@ export async function getInvoice(id: string) {
         .from('payments')
         .select('*')
         .eq('invoice_id', id)
+        .eq('organization_id', ctx.organizationId)
         .order('created_at', { ascending: false });
 
     if (payErr) throw new Error(payErr.message);
@@ -71,9 +84,14 @@ export async function getInvoice(id: string) {
 }
 
 export async function getRecentInvoices(limit: number = 5) {
+    const ctx = await getOrgContext();
+    if (!ctx) return [];
+
+    const supabase = createClient();
     const { data, error } = await supabase
         .from('invoices')
         .select('*, customers(name)')
+        .eq('organization_id', ctx.organizationId)
         .order('created_at', { ascending: false })
         .limit(limit);
 
@@ -82,6 +100,10 @@ export async function getRecentInvoices(limit: number = 5) {
 }
 
 export async function createInvoice(invoiceData: CreateInvoiceData) {
+    const ctx = await getOrgContext();
+    if (!ctx) throw new Error('Unauthorized');
+
+    const supabase = createClient();
     const { customer_id, items, paid_amount } = invoiceData;
 
     // Calculate totals
@@ -105,6 +127,7 @@ export async function createInvoice(invoiceData: CreateInvoiceData) {
     const { data: invoice, error: invErr } = await supabase
         .from('invoices')
         .insert({
+            organization_id: ctx.organizationId,
             invoice_number,
             customer_id,
             total_amount,
@@ -119,6 +142,7 @@ export async function createInvoice(invoiceData: CreateInvoiceData) {
 
     // 2. Insert invoice items
     const invoiceItems = items.map((item) => ({
+        organization_id: ctx.organizationId,
         invoice_id: invoice.id,
         product_id: item.product_id,
         quantity: item.quantity,
@@ -139,6 +163,7 @@ export async function createInvoice(invoiceData: CreateInvoiceData) {
             .from('products')
             .select('stock_quantity')
             .eq('id', item.product_id)
+            .eq('organization_id', ctx.organizationId)
             .single();
 
         if (prodErr) throw new Error(prodErr.message);
@@ -147,12 +172,14 @@ export async function createInvoice(invoiceData: CreateInvoiceData) {
         const { error: updateErr } = await supabase
             .from('products')
             .update({ stock_quantity: Math.max(0, newQty) })
-            .eq('id', item.product_id);
+            .eq('id', item.product_id)
+            .eq('organization_id', ctx.organizationId);
 
         if (updateErr) throw new Error(updateErr.message);
 
         // Create stock movement
         const { error: mvErr } = await supabase.from('stock_movements').insert({
+            organization_id: ctx.organizationId,
             product_id: item.product_id,
             type: 'OUT',
             quantity: item.quantity,
@@ -165,6 +192,7 @@ export async function createInvoice(invoiceData: CreateInvoiceData) {
     // 4. Record initial payment if any
     if (paid_amount > 0) {
         const { error: payErr } = await supabase.from('payments').insert({
+            organization_id: ctx.organizationId,
             invoice_id: invoice.id,
             amount: paid_amount,
         });

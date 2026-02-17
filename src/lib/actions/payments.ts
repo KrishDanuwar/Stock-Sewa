@@ -1,12 +1,18 @@
 'use server';
 
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/server';
+import { getOrgContext } from '@/lib/org-context';
 import { revalidatePath } from 'next/cache';
 
 export async function getPayments(invoiceId?: string) {
+    const ctx = await getOrgContext();
+    if (!ctx) return [];
+
+    const supabase = createClient();
     let query = supabase
         .from('payments')
         .select('*, invoices(invoice_number, customers(name))')
+        .eq('organization_id', ctx.organizationId)
         .order('created_at', { ascending: false });
 
     if (invoiceId) {
@@ -19,11 +25,16 @@ export async function getPayments(invoiceId?: string) {
 }
 
 export async function recordPayment(invoiceId: string, amount: number) {
+    const ctx = await getOrgContext();
+    if (!ctx) throw new Error('Unauthorized');
+
+    const supabase = createClient();
     // Get current invoice
     const { data: invoice, error: invErr } = await supabase
         .from('invoices')
         .select('paid_amount, total_amount, remaining_amount')
         .eq('id', invoiceId)
+        .eq('organization_id', ctx.organizationId)
         .single();
 
     if (invErr) throw new Error(invErr.message);
@@ -42,6 +53,7 @@ export async function recordPayment(invoiceId: string, amount: number) {
 
     // Insert payment record
     const { error: payErr } = await supabase.from('payments').insert({
+        organization_id: ctx.organizationId,
         invoice_id: invoiceId,
         amount,
     });
@@ -56,7 +68,8 @@ export async function recordPayment(invoiceId: string, amount: number) {
             remaining_amount: Math.max(0, newRemaining),
             status,
         })
-        .eq('id', invoiceId);
+        .eq('id', invoiceId)
+        .eq('organization_id', ctx.organizationId);
 
     if (updateErr) throw new Error(updateErr.message);
 

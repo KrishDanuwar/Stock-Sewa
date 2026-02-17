@@ -1,98 +1,75 @@
-# MeroStock — Inventory Management & Billing
+# MeroStock SaaS — Enterprise Inventory & Billing
 
-A complete production-ready inventory management and billing web application built with **Next.js 14+**, **Supabase**, and **Tailwind CSS**.
+A production-ready, multi-tenant SaaS application for modern manufacturing and retail businesses. Built with **Next.js 14+**, **Supabase Auth/SSR**, **Stripe**, and **Tailwind CSS**.
 
-## Features
+## 🚀 Key SaaS Features
 
-- **📦 Inventory Management** — Add, edit, delete, search products with barcode support
-- **🧾 Invoice System** — Create invoices with multiple products, auto-calculate totals
-- **💳 Credit System** — Partial payments, track paid/remaining, update status automatically
-- **👥 Customer Management** — Add customers, view credit balance
-- **📊 Dashboard** — Total products, stock value, unpaid invoices, today's revenue
-- **🖨️ Print** — Printable invoice layout with `window.print()`
-- **📋 Stock History** — Track all stock movements (IN/OUT), manual stock-in
+- **🔐 Robust Authentication** — Supabase Auth with custom `profiles` and secure session management via Next.js middleware.
+- **🏢 Multi-Tenancy** — Strict data isolation using **PostgreSQL Row Level Security (RLS)**. Each organization owns its data.
+- **💳 Subscription Billing** — Integrated with **Stripe Checkout** and **Webhooks**. Support for Basic and Pro plans.
+- **🧾 Professional Invoices** — Dynamic invoice creation with multi-product line items and **PDF generation** (jspdf).
+- **📦 Smart Inventory** — Auto-generated barcodes, real-time stock-out on invoice, and **low stock alerts**.
+- **📊 Executive Dashboard** — Real-time SaaS metrics: Total Products, Stock Value, Unpaid Credit, and Today's Revenue.
+- **📋 Transaction History** — Comprehensive tracking of payments and stock movements.
 
-## Tech Stack
+## 🛠️ Tech Stack
 
-- Next.js 14+ (App Router)
-- Supabase (PostgreSQL)
-- Tailwind CSS
-- TypeScript
-- Server Actions
+- **Framework**: Next.js 14 (App Router)
+- **Database & Auth**: Supabase (PostgreSQL + RLS)
+- **Payments**: Stripe SDK
+- **Styling**: Tailwind CSS + Lucide Icons
+- **PDF**: jsPDF + autoTable
+- **UI Components**: Sonner (Toast), Radix UI (accessible primitives)
 
-## Setup
+## ⚙️ Setup Instructions
 
 ### 1. Clone & Install
-
 ```bash
 git clone <your-repo>
 cd MeroStockPT
 npm install
 ```
 
-### 2. Supabase Setup
+### 2. Supabase Configuration
+1. Create a project at [supabase.com](https://supabase.com).
+2. Run `supabase/schema.sql` in the **SQL Editor**. This sets up tables, RLS, and Auth triggers.
+3. Enable **Google/Email Auth** in the Supabase Dashboard.
+4. Update `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
 
-1. Create a project at [supabase.com](https://supabase.com)
-2. Go to **SQL Editor** and run the contents of `supabase/schema.sql`
-3. Copy your project URL and anon key from **Settings → API**
+### 3. Stripe Configuration
+1. Create a Stripe account.
+2. Create two Prices (Basic & Pro) in the Stripe Dashboard.
+3. Copy the **Secret Key** and **Webhook Secret**.
+4. Use the [Stripe CLI](https://stripe.com/docs/stripe-cli) to forward webhooks: `stripe listen --forward-to localhost:3000/api/webhooks/stripe`.
 
-### 3. Environment Variables
-
+### 4. Environment Variables
 Create `.env.local`:
+```bash
+# Supabase
+NEXT_PUBLIC_SUPABASE_URL=your_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role # For admin tasks if needed
 
+# Stripe
+STRIPE_SECRET_KEY=sk_test_...
+STRIPE_WEBHOOK_SECRET=whsec_...
+NEXT_PUBLIC_STRIPE_BASIC_PRICE_ID=price_...
+NEXT_PUBLIC_STRIPE_PRO_PRICE_ID=price_...
+
+# App
+NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
-NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
-NEXT_PUBLIC_SUPABASE_ANON_KEY=your-anon-key
-```
 
-### 4. Run Development Server
-
+### 5. Run it
 ```bash
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000)
+## 🏗️ Architecture (Multi-Tenant)
 
-## Deployment (Vercel)
+- **Organizations**: Root entity for businesses.
+- **Profiles**: Links Supabase users to a specific Organization.
+- **RLS**: Every table has a `USING (organization_id = (SELECT organization_id FROM profiles...))` policy to ensure data privacy.
 
-1. Push code to GitHub
-2. Import into [vercel.com](https://vercel.com)
-3. Add environment variables:
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-4. Deploy ✅
-
-## Database Schema
-
-See `supabase/schema.sql` — includes 6 tables:
-`products`, `customers`, `invoices`, `invoice_items`, `stock_movements`, `payments`
-
-## Project Structure
-
-```
-src/
-├── app/
-│   ├── layout.tsx          # Root layout with sidebar
-│   ├── page.tsx            # Dashboard
-│   ├── products/           # Products CRUD
-│   ├── customers/          # Customers
-│   ├── invoices/           # Invoices list
-│   │   ├── new/            # Create invoice
-│   │   └── [id]/           # Invoice detail & print
-│   ├── payments/           # Payment history
-│   └── stock/              # Stock movements
-├── components/
-│   ├── Sidebar.tsx
-│   ├── SearchBar.tsx
-│   ├── Modal.tsx
-│   └── StatCard.tsx
-└── lib/
-    ├── supabase.ts         # Supabase client
-    └── actions/            # Server actions
-        ├── products.ts
-        ├── customers.ts
-        ├── invoices.ts
-        ├── payments.ts
-        ├── stock.ts
-        └── dashboard.ts
-```
+## 📄 License
+MIT

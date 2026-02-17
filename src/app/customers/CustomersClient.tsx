@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { createCustomer, updateCustomer } from '@/lib/actions/customers';
+import { createCustomer, updateCustomer, settleCustomerCredit } from '@/lib/actions/customers';
 import SearchBar from '@/components/SearchBar';
 import Modal from '@/components/Modal';
+import { Wallet } from 'lucide-react';
 
 interface Customer {
     id: string;
@@ -26,6 +27,9 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
     const [customers] = useState<Customer[]>(initialCustomers);
     const [modalOpen, setModalOpen] = useState(false);
     const [editCustomer, setEditCustomer] = useState<Customer | null>(null);
+    const [settleModalOpen, setSettleModalOpen] = useState(false);
+    const [settleCustomer, setSettleCustomer] = useState<Customer | null>(null);
+    const [settleAmount, setSettleAmount] = useState<number>(0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -46,6 +50,25 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
             window.location.reload();
         } catch (err: any) {
             setError(err.message || 'Something went wrong');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleSettleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!settleCustomer || settleAmount <= 0) return;
+        setLoading(true);
+        setError('');
+
+        try {
+            await settleCustomerCredit(settleCustomer.id, settleAmount);
+            setSettleModalOpen(false);
+            setSettleCustomer(null);
+            setSettleAmount(0);
+            window.location.reload();
+        } catch (err: any) {
+            setError(err.message || 'Failed to settle credit');
         } finally {
             setLoading(false);
         }
@@ -99,17 +122,73 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
                                 </button>
                             </div>
                             {customer.total_credit !== undefined && customer.total_credit > 0 && (
-                                <div className="mt-3 pt-3 border-t border-surface-100">
-                                    <div className="flex items-center justify-between">
-                                        <span className="text-xs text-surface-500">Credit Balance</span>
-                                        <span className="text-sm font-semibold text-red-600">{formatCurrency(customer.total_credit)}</span>
+                                <div className="mt-4 pt-4 border-t border-surface-100">
+                                    <div className="flex items-center justify-between mb-3">
+                                        <span className="text-xs font-bold text-surface-400 uppercase tracking-widest">Outstanding Credit</span>
+                                        <span className="text-sm font-black text-red-600">{formatCurrency(customer.total_credit)}</span>
                                     </div>
+                                    <button
+                                        onClick={() => {
+                                            setSettleCustomer(customer);
+                                            setSettleAmount(customer.total_credit || 0);
+                                            setSettleModalOpen(true);
+                                        }}
+                                        className="w-full py-2 rounded-xl bg-surface-900 text-white text-xs font-bold hover:bg-surface-800 transition-all flex items-center justify-center gap-2 shadow-sm"
+                                    >
+                                        <Wallet size={14} />
+                                        Settle Balance
+                                    </button>
                                 </div>
                             )}
                         </div>
                     ))}
                 </div>
             )}
+
+            {/* Settlement Modal */}
+            <Modal
+                isOpen={settleModalOpen}
+                onClose={() => { setSettleModalOpen(false); setSettleCustomer(null); setError(''); }}
+                title="Settle Outstanding Credit"
+            >
+                <form onSubmit={handleSettleSubmit} className="space-y-4">
+                    {error && (
+                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
+                    )}
+                    <div className="bg-surface-50 p-4 rounded-xl border border-surface-200">
+                        <p className="text-xs text-surface-500 uppercase font-bold tracking-widest mb-1">Customer</p>
+                        <p className="font-bold text-surface-900">{settleCustomer?.name}</p>
+                        <div className="mt-3 flex items-center justify-between">
+                            <span className="text-xs text-surface-500 font-medium">Current Balance:</span>
+                            <span className="text-sm font-black text-red-600">{settleCustomer && formatCurrency(settleCustomer.total_credit || 0)}</span>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="block text-sm font-medium text-surface-700 mb-1">Settlement Amount (Rs.)</label>
+                        <input
+                            type="number"
+                            step="0.01"
+                            min="0.01"
+                            max={settleCustomer?.total_credit}
+                            value={settleAmount}
+                            onChange={(e) => setSettleAmount(parseFloat(e.target.value) || 0)}
+                            className="input-field font-bold text-lg"
+                            required
+                        />
+                        <p className="text-[10px] text-surface-400 mt-2 font-medium">This amount will be applied to the oldest outstanding invoices first.</p>
+                    </div>
+
+                    <div className="flex justify-end gap-3 pt-4">
+                        <button type="button" onClick={() => setSettleModalOpen(false)} className="btn-secondary">
+                            Cancel
+                        </button>
+                        <button type="submit" disabled={loading} className="btn-primary">
+                            {loading ? 'Processing...' : 'Confirm Settlement'}
+                        </button>
+                    </div>
+                </form>
+            </Modal>
 
             {/* Add/Edit Modal */}
             <Modal

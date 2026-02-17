@@ -40,6 +40,7 @@ export default function NewInvoicePage() {
     const [paidAmount, setPaidAmount] = useState(0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [status, setStatus] = useState<'paid' | 'partial' | 'unpaid'>('unpaid');
     const [productSearch, setProductSearch] = useState('');
 
     useEffect(() => {
@@ -99,6 +100,15 @@ export default function NewInvoicePage() {
 
     const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const remaining = Math.max(0, total - paidAmount);
+
+    const handleStatusChange = (newStatus: 'paid' | 'partial' | 'unpaid') => {
+        setStatus(newStatus);
+        if (newStatus === 'paid') {
+            setPaidAmount(total);
+        } else if (newStatus === 'unpaid') {
+            setPaidAmount(0);
+        }
+    };
 
     const handleSubmit = async () => {
         if (!selectedCustomer) {
@@ -266,34 +276,51 @@ export default function NewInvoicePage() {
                 {/* Payment & Summary */}
                 {items.length > 0 && (
                     <div className="card p-5">
-                        <div className="space-y-3">
+                        <div className="space-y-4">
                             <div className="flex items-center justify-between text-sm">
-                                <span className="text-surface-600">Total Amount</span>
-                                <span className="text-xl font-bold text-surface-900">{formatCurrency(total)}</span>
+                                <span className="text-surface-600 font-medium">Total Amount</span>
+                                <span className="text-2xl font-black text-surface-900">{formatCurrency(total)}</span>
                             </div>
-                            <div className="pt-3 border-t border-surface-200">
-                                <label className="block text-sm font-medium text-surface-700 mb-1">Payment Amount</label>
-                                <input
-                                    type="number"
-                                    min={0}
-                                    max={total}
-                                    step="0.01"
-                                    value={paidAmount}
-                                    onChange={(e) => setPaidAmount(Math.min(total, Math.max(0, parseFloat(e.target.value) || 0)))}
-                                    className="input-field"
-                                    placeholder="0.00"
-                                />
+
+                            <div className="pt-4 border-t border-surface-200">
+                                <label className="block text-xs font-bold text-surface-400 uppercase tracking-widest mb-3">Payment Status</label>
+                                <div className="grid grid-cols-3 gap-2">
+                                    {(['unpaid', 'partial', 'paid'] as const).map((s) => (
+                                        <button
+                                            key={s}
+                                            type="button"
+                                            onClick={() => handleStatusChange(s)}
+                                            className={`py-2 px-3 rounded-xl text-xs font-bold border-2 transition-all capitalize ${status === s
+                                                    ? 'bg-primary-50 border-primary-500 text-primary-700 shadow-sm'
+                                                    : 'bg-white border-surface-100 text-surface-500 hover:border-surface-200'
+                                                }`}
+                                        >
+                                            {s}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
-                            <div className="flex items-center justify-between text-sm pt-2">
-                                <span className="text-surface-600">Remaining</span>
-                                <span className={`text-lg font-bold ${remaining > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+
+                            {status === 'partial' && (
+                                <div className="pt-2 animate-fade-in">
+                                    <label className="block text-xs font-bold text-surface-400 uppercase tracking-widest mb-2">Amount Paid (Rs.)</label>
+                                    <input
+                                        type="number"
+                                        min={0}
+                                        max={total}
+                                        step="0.01"
+                                        value={paidAmount}
+                                        onChange={(e) => setPaidAmount(Math.min(total, Math.max(0, parseFloat(e.target.value) || 0)))}
+                                        className="input-field font-bold text-lg"
+                                        placeholder="0.00"
+                                    />
+                                </div>
+                            )}
+
+                            <div className="flex items-center justify-between text-sm pt-4 border-t border-surface-200">
+                                <span className="text-surface-600 font-medium">Remaining Balance</span>
+                                <span className={`text-xl font-black ${remaining > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
                                     {formatCurrency(remaining)}
-                                </span>
-                            </div>
-                            <div className="flex items-center justify-between text-sm">
-                                <span className="text-surface-600">Status</span>
-                                <span className={`badge-${remaining <= 0 ? 'paid' : paidAmount > 0 ? 'partial' : 'unpaid'}`}>
-                                    {remaining <= 0 ? 'Paid' : paidAmount > 0 ? 'Partial' : 'Unpaid'}
                                 </span>
                             </div>
                         </div>

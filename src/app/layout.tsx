@@ -1,26 +1,37 @@
-import type { Metadata } from 'next';
+import { Inter } from 'next/font/google';
 import './globals.css';
-import Sidebar from '@/components/Sidebar';
+import { Sidebar } from '@/components/Sidebar';
+import { getOrgContext } from '@/lib/org-context';
+import { Toaster } from 'sonner';
 
-export const metadata: Metadata = {
-    title: 'MeroStock — Inventory & Billing',
-    description: 'Production-ready inventory management and billing system',
+const inter = Inter({ subsets: ['latin'] });
+
+export const metadata = {
+    title: 'MeroStock — Modern Inventory & Billing',
+    description: 'Precision stock management for modern businesses',
 };
 
-export default function RootLayout({
+export default async function RootLayout({
     children,
 }: {
     children: React.ReactNode;
 }) {
+    const ctx = await getOrgContext().catch(() => null);
+
     return (
         <html lang="en">
-            <body className="antialiased">
-                <Sidebar />
-                <main className="lg:ml-[260px] min-h-screen">
-                    <div className="p-4 lg:p-8 pt-16 lg:pt-8 max-w-7xl mx-auto">
-                        {children}
+            <body className={inter.className}>
+                {ctx ? (
+                    <div className="flex">
+                        <Sidebar userEmail={ctx.userEmail} organizationName={ctx.organizationName} />
+                        <main className="flex-grow min-h-screen lg:ml-64 bg-surface-50">
+                            {children}
+                        </main>
                     </div>
-                </main>
+                ) : (
+                    <>{children}</>
+                )}
+                <Toaster position="top-right" richColors />
             </body>
         </html>
     );

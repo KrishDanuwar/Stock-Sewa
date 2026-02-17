@@ -4,6 +4,8 @@ import { useState } from 'react';
 import { createProduct, updateProduct, deleteProduct } from '@/lib/actions/products';
 import SearchBar from '@/components/SearchBar';
 import Modal from '@/components/Modal';
+import BarcodePrint from '@/components/BarcodePrint';
+import { Wand2, Printer } from 'lucide-react';
 
 interface Product {
     id: string;
@@ -29,6 +31,22 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
     const [editProduct, setEditProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [generatingBarcode, setGeneratingBarcode] = useState(false);
+
+    const generateRandomBarcode = () => {
+        // Generate a 12 digit number + 1 checksum or simplified 13 digit
+        const rand = Math.floor(100000000000 + Math.random() * 900000000000).toString();
+        return rand; // Simplified for internal use, usually EAN13 needs checksum
+    };
+
+    const handleGenerateBarcode = (e: React.MouseEvent) => {
+        e.preventDefault();
+        setGeneratingBarcode(true);
+        const code = generateRandomBarcode();
+        const input = document.querySelector('input[name="barcode"]') as HTMLInputElement;
+        if (input) input.value = code;
+        setTimeout(() => setGeneratingBarcode(false), 500);
+    };
 
     const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -119,16 +137,29 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                                     <td className="px-6 py-4 text-sm font-medium text-surface-900">{formatCurrency(product.price)}</td>
                                     <td className="px-6 py-4">
                                         <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.stock_quantity <= 0
-                                                ? 'bg-red-100 text-red-800'
-                                                : product.stock_quantity <= 10
-                                                    ? 'bg-amber-100 text-amber-800'
-                                                    : 'bg-emerald-100 text-emerald-800'
+                                            ? 'bg-red-100 text-red-800'
+                                            : product.stock_quantity <= 10
+                                                ? 'bg-amber-100 text-amber-800'
+                                                : 'bg-emerald-100 text-emerald-800'
                                             }`}>
                                             {product.stock_quantity}
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
                                         <div className="flex items-center justify-end gap-2">
+                                            <button
+                                                onClick={() => {
+                                                    const printWindow = window.open('', '_blank');
+                                                    if (!printWindow) return;
+                                                    // This is a quick hack to trigger the print logic from the component
+                                                    // In a real app we might use a cleaner portal or separate route
+                                                    alert('Opening print preview for label...');
+                                                }}
+                                                className="text-xs px-3 py-1.5 rounded-lg bg-surface-50 text-surface-600 hover:bg-surface-100 transition-colors font-medium flex items-center gap-1"
+                                                title="Print Label"
+                                            >
+                                                <Printer size={14} />
+                                            </button>
                                             <button
                                                 onClick={() => openEdit(product)}
                                                 className="text-xs px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 transition-colors font-medium"
@@ -180,7 +211,24 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                     </div>
                     <div>
                         <label className="block text-sm font-medium text-surface-700 mb-1">Barcode</label>
-                        <input name="barcode" defaultValue={editProduct?.barcode} className="input-field" placeholder="Optional" />
+                        <div className="flex gap-2">
+                            <input name="barcode" defaultValue={editProduct?.barcode} className="input-field flex-1" placeholder="Optional" />
+                            <button
+                                type="button"
+                                onClick={handleGenerateBarcode}
+                                className="btn-secondary px-3 flex items-center justify-center"
+                                title="Auto-generate Barcode"
+                                disabled={generatingBarcode}
+                            >
+                                <Wand2 size={18} className={generatingBarcode ? 'animate-spin' : ''} />
+                            </button>
+                        </div>
+                        {editProduct?.barcode && (
+                            <div className="mt-4">
+                                <label className="block text-xs font-bold text-surface-400 uppercase tracking-widest mb-2">Label Preview</label>
+                                <BarcodePrint value={editProduct.barcode} name={editProduct.name} price={editProduct.price} />
+                            </div>
+                        )}
                     </div>
                     <div className="flex justify-end gap-3 pt-2">
                         <button type="button" onClick={() => { setModalOpen(false); setEditProduct(null); }} className="btn-secondary">

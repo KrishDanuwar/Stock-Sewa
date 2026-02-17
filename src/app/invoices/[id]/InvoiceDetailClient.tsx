@@ -4,13 +4,26 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { recordPayment } from '@/lib/actions/payments';
+import { generateInvoicePDF } from '@/utils/pdf-gen';
+import {
+    ArrowLeft,
+    Printer,
+    Download,
+    CreditCard,
+    Building2,
+    Phone,
+    MapPin,
+    CheckCircle2,
+    XCircle,
+    Clock
+} from 'lucide-react';
 
 interface InvoiceDetailClientProps {
     invoice: any;
 }
 
 function formatCurrency(amount: number) {
-    return `Rs. ${Number(amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`;
+    return `$${Number(amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
 }
 
 export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProps) {
@@ -35,7 +48,9 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
         setError('');
         try {
             await recordPayment(invoice.id, amount);
-            window.location.reload();
+            router.refresh();
+            setShowPaymentForm(false);
+            setPaymentAmount('');
         } catch (err: any) {
             setError(err.message || 'Failed to record payment');
         } finally {
@@ -44,185 +59,215 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
     };
 
     return (
-        <div className="max-w-4xl mx-auto animate-fade-in">
-            {/* Header */}
-            <div className="flex items-center justify-between mb-6 no-print">
+        <div className="max-w-4xl mx-auto animate-fade-in space-y-6">
+            {/* Header / Actions */}
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 no-print">
                 <div className="flex items-center gap-3">
-                    <Link href="/invoices" className="p-2 rounded-lg hover:bg-surface-100 transition-colors">
-                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
-                        </svg>
+                    <Link href="/invoices" className="p-2.5 rounded-xl hover:bg-white hover:shadow-sm border border-transparent hover:border-surface-200 transition-all text-surface-500">
+                        <ArrowLeft size={20} />
                     </Link>
-                    <h1 className="page-header mb-0">Invoice {invoice.invoice_number}</h1>
+                    <div>
+                        <h1 className="text-2xl font-bold text-surface-900 tracking-tight">Invoice Detail</h1>
+                        <p className="text-surface-500 text-sm">Managing invoice #{invoice.invoice_number}</p>
+                    </div>
                 </div>
                 <div className="flex items-center gap-2">
                     {invoice.status !== 'paid' && (
                         <button
                             onClick={() => setShowPaymentForm(!showPaymentForm)}
-                            className="btn-success"
+                            className="bg-primary-600 text-white px-5 py-2.5 rounded-xl text-sm font-bold shadow-md hover:bg-primary-700 transition-all flex items-center gap-2"
                         >
-                            💳 Record Payment
+                            <CreditCard size={18} />
+                            Record Payment
                         </button>
                     )}
-                    <button onClick={() => window.print()} className="btn-primary">
-                        🖨️ Print
+                    <button
+                        onClick={() => generateInvoicePDF(invoice)}
+                        className="bg-white border border-surface-200 text-surface-700 px-5 py-2.5 rounded-xl text-sm font-bold shadow-sm hover:bg-surface-50 transition-all flex items-center gap-2"
+                    >
+                        <Download size={18} />
+                        PDF
+                    </button>
+                    <button onClick={() => window.print()} className="p-2.5 bg-white border border-surface-200 text-surface-500 rounded-xl hover:text-surface-900 transition-all">
+                        <Printer size={20} />
                     </button>
                 </div>
             </div>
 
-            {/* Payment Form */}
+            {/* Payment Quick Entry */}
             {showPaymentForm && (
-                <div className="card p-5 mb-6 no-print animate-fade-in">
-                    <h3 className="text-sm font-semibold text-surface-700 uppercase tracking-wider mb-3">Record Payment</h3>
+                <div className="card p-6 bg-primary-50 border-primary-100 no-print animate-slide-up">
+                    <h3 className="text-sm font-bold text-primary-900 uppercase tracking-wider mb-4">Record New Payment</h3>
                     {error && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700 mb-3">{error}</div>
-                    )}
-                    <div className="flex items-end gap-3">
-                        <div className="flex-1">
-                            <label className="block text-sm font-medium text-surface-700 mb-1">
-                                Amount (Remaining: {formatCurrency(invoice.remaining_amount)})
-                            </label>
-                            <input
-                                type="number"
-                                min={0}
-                                max={invoice.remaining_amount}
-                                step="0.01"
-                                value={paymentAmount}
-                                onChange={(e) => setPaymentAmount(e.target.value)}
-                                className="input-field"
-                                placeholder="Enter payment amount"
-                            />
+                        <div className="p-4 bg-white border border-red-100 rounded-xl text-sm text-red-600 mb-4 flex items-center gap-2 shadow-sm">
+                            <XCircle size={16} />
+                            {error}
                         </div>
-                        <button onClick={handlePayment} disabled={loading} className="btn-success">
-                            {loading ? 'Saving...' : 'Submit Payment'}
-                        </button>
-                        <button onClick={() => setShowPaymentForm(false)} className="btn-secondary">
-                            Cancel
-                        </button>
+                    )}
+                    <div className="flex flex-col md:flex-row items-end gap-4">
+                        <div className="flex-1 w-full text-left">
+                            <label className="block text-xs font-bold text-primary-700 uppercase mb-1.5 ml-1">
+                                Amount to Pay (Remaining: {formatCurrency(invoice.remaining_amount)})
+                            </label>
+                            <div className="relative">
+                                <span className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-400 font-bold">Rs.</span>
+                                <input
+                                    type="number"
+                                    min={0}
+                                    max={invoice.remaining_amount}
+                                    step="0.01"
+                                    value={paymentAmount}
+                                    onChange={(e) => setPaymentAmount(e.target.value)}
+                                    className="input-field pl-12 bg-white border-primary-200 focus:border-primary-500 text-lg font-bold"
+                                    placeholder="0.00"
+                                />
+                            </div>
+                        </div>
+                        <div className="flex gap-2 w-full md:w-auto">
+                            <button
+                                onClick={handlePayment}
+                                disabled={loading}
+                                className="flex-1 md:flex-none bg-primary-600 text-white px-8 py-3 rounded-xl font-bold shadow-lg hover:bg-primary-700 disabled:opacity-50 transition-all"
+                            >
+                                {loading ? 'Processing...' : 'Confirm'}
+                            </button>
+                            <button onClick={() => setShowPaymentForm(false)} className="px-6 py-3 text-sm font-bold text-surface-500 hover:text-surface-900 transition-colors">
+                                Cancel
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}
 
-            {/* Printable Invoice */}
-            <div className="card print-invoice">
-                <div className="p-8">
-                    {/* Company Header */}
-                    <div className="flex items-start justify-between mb-8 pb-6 border-b-2 border-primary-600">
-                        <div>
-                            <div className="flex items-center gap-3 mb-1">
-                                <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-primary-700 rounded-lg flex items-center justify-center text-white font-bold text-sm">
+            {/* Main Invoice Card */}
+            <div className="card shadow-2xl overflow-hidden border-none ring-1 ring-surface-200 text-left">
+                <div className="h-2 bg-gradient-to-r from-primary-600 via-primary-500 to-primary-700" />
+                <div className="p-8 md:p-12">
+                    {/* Brand & Meta */}
+                    <div className="flex flex-col md:flex-row justify-between items-start gap-8 mb-12">
+                        <div className="space-y-4 text-left">
+                            <div className="flex items-center gap-3">
+                                <div className="w-12 h-12 bg-primary-600 rounded-2xl flex items-center justify-center text-white font-bold shadow-xl">
                                     MS
                                 </div>
-                                <h2 className="text-2xl font-bold text-surface-900">MeroStock</h2>
+                                <div className="text-left">
+                                    <h2 className="text-2xl font-black text-surface-900 tracking-tighter">MEROSTOCK</h2>
+                                    <div className="flex items-center gap-2 text-[10px] text-primary-600 font-bold tracking-[0.2em] uppercase">
+                                        <span className="w-1 h-1 bg-primary-600 rounded-full" />
+                                        Business Suite
+                                    </div>
+                                </div>
                             </div>
-                            <p className="text-sm text-surface-500">Inventory & Billing System</p>
+                            <div className="space-y-1 text-sm text-surface-500 text-left">
+                                <div className="flex items-center gap-2"><Building2 size={14} /> MeroStock Cloud Inventory</div>
+                                <div className="flex items-center gap-2"><MapPin size={14} /> Global Enterprise SaaS</div>
+                            </div>
                         </div>
-                        <div className="text-right">
-                            <h3 className="text-xl font-bold text-surface-900">INVOICE</h3>
-                            <p className="text-sm text-surface-600 font-mono mt-1">{invoice.invoice_number}</p>
-                            <p className="text-sm text-surface-500 mt-1">
-                                {new Date(invoice.created_at).toLocaleDateString('en-IN', {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric',
-                                })}
-                            </p>
+
+                        <div className="text-left md:text-right space-y-2">
+                            <div className="inline-block px-4 py-1.5 rounded-full bg-surface-100 text-surface-900 text-[10px] font-black tracking-widest uppercase">
+                                Invoice: {invoice.invoice_number}
+                            </div>
+                            <h3 className="text-4xl font-black text-surface-900">{formatCurrency(invoice.total_amount)}</h3>
+                            <div className="flex items-center md:justify-end gap-2 text-sm">
+                                <Clock size={14} className="text-surface-400" />
+                                <span className="text-surface-500">{new Date(invoice.created_at).toLocaleDateString()}</span>
+                                <span className={`px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wider ${invoice.status === 'paid' ? 'bg-green-100 text-green-700' :
+                                    invoice.status === 'partial' ? 'bg-amber-100 text-amber-700' :
+                                        'bg-red-100 text-red-700'
+                                    }`}>
+                                    {invoice.status}
+                                </span>
+                            </div>
                         </div>
                     </div>
 
-                    {/* Customer Info */}
-                    <div className="mb-8">
-                        <h4 className="text-xs font-semibold text-surface-500 uppercase tracking-wider mb-2">Bill To</h4>
-                        <p className="text-lg font-semibold text-surface-900">{invoice.customers?.name || '—'}</p>
-                        {invoice.customers?.phone && (
-                            <p className="text-sm text-surface-600">📞 {invoice.customers.phone}</p>
-                        )}
-                        {invoice.customers?.address && (
-                            <p className="text-sm text-surface-600">📍 {invoice.customers.address}</p>
-                        )}
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12 pb-12 border-b border-surface-100">
+                        <div className="text-left">
+                            <h4 className="text-[10px] font-black text-surface-400 uppercase tracking-widest mb-4">Customer Details</h4>
+                            <div className="space-y-1.5">
+                                <p className="text-xl font-bold text-surface-900">{invoice.customers?.name || 'Walk-in'}</p>
+                                <div className="space-y-1 text-sm text-surface-500">
+                                    {invoice.customers?.phone && <div className="flex items-center gap-2"><Phone size={14} /> {invoice.customers.phone}</div>}
+                                    {invoice.customers?.address && <div className="flex items-center gap-2"><MapPin size={14} /> {invoice.customers.address}</div>}
+                                </div>
+                            </div>
+                        </div>
                     </div>
 
-                    {/* Items Table */}
-                    <div className="mb-8">
-                        <table className="w-full">
-                            <thead>
-                                <tr className="border-b-2 border-surface-200">
-                                    <th className="text-left py-3 text-xs font-semibold text-surface-500 uppercase">#</th>
-                                    <th className="text-left py-3 text-xs font-semibold text-surface-500 uppercase">Product</th>
-                                    <th className="text-center py-3 text-xs font-semibold text-surface-500 uppercase">Qty</th>
-                                    <th className="text-right py-3 text-xs font-semibold text-surface-500 uppercase">Price</th>
-                                    <th className="text-right py-3 text-xs font-semibold text-surface-500 uppercase">Subtotal</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-surface-100">
-                                {invoice.items?.map((item: any, idx: number) => (
-                                    <tr key={item.id}>
-                                        <td className="py-3 text-sm text-surface-500">{idx + 1}</td>
-                                        <td className="py-3">
-                                            <p className="text-sm font-medium text-surface-900">{item.products?.name}</p>
-                                            {item.products?.barcode && (
-                                                <p className="text-xs text-surface-400 font-mono">{item.products.barcode}</p>
-                                            )}
-                                        </td>
-                                        <td className="py-3 text-sm text-center text-surface-700">{item.quantity}</td>
-                                        <td className="py-3 text-sm text-right text-surface-700">{formatCurrency(item.price)}</td>
-                                        <td className="py-3 text-sm text-right font-medium text-surface-900">{formatCurrency(item.subtotal)}</td>
+                    {/* Table */}
+                    <div className="mb-12">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead>
+                                    <tr className="border-b-2 border-surface-900">
+                                        <th className="py-4 text-xs font-black text-surface-900 uppercase tracking-widest">Description</th>
+                                        <th className="py-4 text-center text-xs font-black text-surface-900 uppercase tracking-widest">Qty</th>
+                                        <th className="py-4 text-right text-xs font-black text-surface-900 uppercase tracking-widest">Price</th>
+                                        <th className="py-4 text-right text-xs font-black text-surface-900 uppercase tracking-widest">Total</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                </thead>
+                                <tbody className="divide-y divide-surface-100 text-left">
+                                    {invoice.items?.map((item: any) => (
+                                        <tr key={item.id} className="group">
+                                            <td className="py-5">
+                                                <div className="font-bold text-surface-900">{item.products?.name}</div>
+                                                <div className="text-[10px] text-surface-400 font-mono mt-0.5">{item.products?.barcode}</div>
+                                            </td>
+                                            <td className="py-5 text-center text-surface-700 font-medium">{item.quantity}</td>
+                                            <td className="py-5 text-right text-surface-700 font-medium">{formatCurrency(item.price)}</td>
+                                            <td className="py-5 text-right font-black text-surface-900">{formatCurrency(item.subtotal)}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
                     </div>
 
-                    {/* Summary */}
-                    <div className="flex justify-end">
-                        <div className="w-72 space-y-2">
-                            <div className="flex justify-between text-sm">
-                                <span className="text-surface-600">Total Amount</span>
-                                <span className="font-bold text-lg text-surface-900">{formatCurrency(invoice.total_amount)}</span>
+                    {/* Summary & Sign */}
+                    <div className="flex flex-col md:flex-row justify-between items-end gap-12">
+                        <div className="flex-1 w-full text-left">
+                            <h4 className="text-[10px] font-black text-surface-400 uppercase tracking-widest mb-4">Payment Log</h4>
+                            <div className="space-y-2">
+                                {invoice.payments?.map((p: any) => (
+                                    <div key={p.id} className="flex items-center justify-between py-2.5 px-4 bg-surface-50 rounded-xl">
+                                        <div className="flex items-center gap-3">
+                                            <div className="w-2 h-2 rounded-full bg-green-500" />
+                                            <span className="text-xs text-surface-500">{new Date(p.created_at).toLocaleDateString()}</span>
+                                        </div>
+                                        <span className="text-xs font-bold text-surface-900">+{formatCurrency(p.amount)}</span>
+                                    </div>
+                                ))}
+                                {(!invoice.payments || invoice.payments.length === 0) && (
+                                    <p className="text-xs text-surface-400 italic">No payments recorded yet.</p>
+                                )}
                             </div>
-                            <div className="flex justify-between text-sm">
-                                <span className="text-surface-600">Paid Amount</span>
-                                <span className="font-medium text-emerald-600">{formatCurrency(invoice.paid_amount)}</span>
+                        </div>
+
+                        <div className="w-full md:w-80 space-y-3 bg-surface-900 p-8 rounded-3xl text-white shadow-xl text-left">
+                            <div className="flex justify-between items-center text-surface-400 text-[10px] font-black uppercase tracking-tighter">
+                                <span>Grand Total</span>
+                                <span className="text-white">{formatCurrency(invoice.total_amount)}</span>
                             </div>
-                            <div className="flex justify-between text-sm pt-2 border-t border-surface-200">
-                                <span className="text-surface-600 font-medium">Remaining</span>
-                                <span className={`font-bold text-lg ${Number(invoice.remaining_amount) > 0 ? 'text-red-600' : 'text-emerald-600'}`}>
+                            <div className="flex justify-between items-center text-green-400 text-[10px] font-black uppercase tracking-tighter">
+                                <span>Total Paid</span>
+                                <span>{formatCurrency(invoice.paid_amount)}</span>
+                            </div>
+                            <div className="h-px bg-surface-800 my-2" />
+                            <div className="flex justify-between items-center">
+                                <span className="text-primary-400 text-xs font-black uppercase tracking-widest">Balance Due</span>
+                                <span className={`text-2xl font-black ${Number(invoice.remaining_amount) > 0 ? 'text-white' : 'text-green-400'}`}>
                                     {formatCurrency(invoice.remaining_amount)}
                                 </span>
                             </div>
-                            <div className="flex justify-between items-center text-sm pt-1">
-                                <span className="text-surface-600">Status</span>
-                                <span className={`badge-${invoice.status}`}>{invoice.status}</span>
-                            </div>
                         </div>
                     </div>
 
-                    {/* Payment History */}
-                    {invoice.payments && invoice.payments.length > 0 && (
-                        <div className="mt-8 pt-6 border-t border-surface-200">
-                            <h4 className="text-xs font-semibold text-surface-500 uppercase tracking-wider mb-3">Payment History</h4>
-                            <div className="space-y-2">
-                                {invoice.payments.map((payment: any) => (
-                                    <div key={payment.id} className="flex items-center justify-between py-2 px-3 bg-surface-50 rounded-lg">
-                                        <span className="text-sm text-surface-600">
-                                            {new Date(payment.created_at).toLocaleDateString('en-IN', {
-                                                year: 'numeric',
-                                                month: 'short',
-                                                day: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit',
-                                            })}
-                                        </span>
-                                        <span className="text-sm font-medium text-emerald-600">+ {formatCurrency(payment.amount)}</span>
-                                    </div>
-                                ))}
-                            </div>
+                    <div className="mt-16 pt-8 border-t border-surface-100 text-center">
+                        <div className="flex items-center justify-center gap-2 text-[10px] font-black text-surface-400 uppercase tracking-widest">
+                            <CheckCircle2 size={12} className="text-primary-500" />
+                            Generated Securely via MeroStock SaaS
                         </div>
-                    )}
-
-                    {/* Footer */}
-                    <div className="mt-8 pt-6 border-t border-surface-200 text-center">
-                        <p className="text-xs text-surface-400">Thank you for your business!</p>
                     </div>
                 </div>
             </div>

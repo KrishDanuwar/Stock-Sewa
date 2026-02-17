@@ -1,62 +1,72 @@
 'use server';
 
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/server';
+import { getOrgContext } from '@/lib/org-context';
 
 export async function getDashboardStats() {
-    // Total products count
-    const { count: productCount, error: pcErr } = await supabase
+    const ctx = await getOrgContext();
+    if (!ctx) return null;
+
+    const supabase = createClient();
+
+    // 1. Total Products
+    const { count: totalProducts, error: prodErr } = await supabase
         .from('products')
-        .select('*', { count: 'exact', head: true });
+        .select('*', { count: 'exact', head: true })
+        .eq('organization_id', ctx.organizationId);
 
-    if (pcErr) throw new Error(pcErr.message);
+    if (prodErr) throw new Error(prodErr.message);
 
-    // Stock value (sum of price * stock_quantity)
-    const { data: products, error: pvErr } = await supabase
+    // 2. Total Stock Value
+    const { data: products, error: valErr } = await supabase
         .from('products')
-        .select('price, stock_quantity');
+        .select('price, stock_quantity')
+        .eq('organization_id', ctx.organizationId);
 
-    if (pvErr) throw new Error(pvErr.message);
+    if (valErr) throw new Error(valErr.message);
 
-    const stockValue = products.reduce(
-        (sum: number, p: { price: number; stock_quantity: number }) =>
-            sum + Number(p.price) * p.stock_quantity,
+    const stockValue = (products || []).reduce(
+        (sum, p) => sum + Number(p.price) * p.stock_quantity,
         0
     );
 
-    // Unpaid invoices total
-    const { data: unpaidInvoices, error: uiErr } = await supabase
+    // 3. Total Unpaid Amount (Credit)
+    const { data: unpaidInvoices, error: invErr } = await supabase
         .from('invoices')
         .select('remaining_amount')
+        .eq('organization_id', ctx.organizationId)
         .in('status', ['unpaid', 'partial']);
 
-    if (uiErr) throw new Error(uiErr.message);
+    if (invErr) throw new Error(invErr.message);
 
-    const unpaidTotal = unpaidInvoices.reduce(
-        (sum: number, inv: { remaining_amount: number }) =>
-            sum + Number(inv.remaining_amount),
+    const totalUnpaid = (unpaidInvoices || []).reduce(
+        (sum, inv) => sum + Number(inv.remaining_amount),
         0
     );
 
-    // Today's revenue
+    // 4. Today's Revenue
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    const { data: todayInvoices, error: tiErr } = await supabase
-        .from('invoices')
-        .select('total_amount')
+
+    const { data: todayPayments, error: payErr } = await supabase
+        .from('payments')
+        .select('amount')
+        .eq('organization_id', ctx.organizationId)
         .gte('created_at', today.toISOString());
 
-    if (tiErr) throw new Error(tiErr.message);
+    if (payErr) throw new Error(payErr.message);
 
-    const todayRevenue = todayInvoices.reduce(
-        (sum: number, inv: { total_amount: number }) =>
-            sum + Number(inv.total_amount),
+    const todayRevenue = (todayPayments || []).reduce(
+        (sum, p) => sum + Number(p.amount),
         0
     );
 
     return {
-        totalProducts: productCount || 0,
+        totalProducts: totalProducts || 0,
         stockValue,
-        unpaidTotal,
+        totalUnpaid,
         todayRevenue,
+        organizationName: ctx.organizationName,
+        subscriptionStatus: ctx.subscriptionStatus,
     };
 }
