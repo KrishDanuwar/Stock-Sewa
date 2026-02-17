@@ -33,7 +33,7 @@ export default async function Dashboard() {
                 </div>
                 <h2 className="text-xl font-bold text-surface-900 mb-2">Dashboard Unavailable</h2>
                 <p className="text-surface-500 max-w-md mx-auto mb-6">
-                    We couldn't load your dashboard data. This might be because your organization setup is incomplete or there's a database error.
+                    We couldn&apos;t load your dashboard data. This might be because your organization setup is incomplete or there&apos;s a database error.
                 </p>
                 <div className="flex gap-4">
                     <button onClick={() => window.location.reload()} className="btn-primary">

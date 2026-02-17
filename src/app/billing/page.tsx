@@ -14,7 +14,7 @@ export default async function BillingPage() {
                 </div>
                 <h2 className="text-xl font-bold text-surface-900 mb-2">Account Setup Incomplete</h2>
                 <p className="text-surface-500 max-w-md mx-auto mb-6">
-                    It looks like your organization setup wasn't completed correctly. This usually happens if there was a database error during registration.
+                    It look like your organization setup wasn&apos;t completed correctly. This usually happens if there was a database error during registration.
                 </p>
                 <div className="flex gap-4">
                     <Link href="/auth/register" className="btn-primary">
