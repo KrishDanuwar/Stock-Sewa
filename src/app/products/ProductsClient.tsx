@@ -6,6 +6,7 @@ import SearchBar from '@/components/SearchBar';
 import Modal from '@/components/Modal';
 import BarcodePrint from '@/components/BarcodePrint';
 import { Wand2, Printer } from 'lucide-react';
+import { printProductLabel } from '@/utils/print-utils';
 
 interface Product {
     id: string;
@@ -149,11 +150,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                                         <div className="flex items-center justify-end gap-2">
                                             <button
                                                 onClick={() => {
-                                                    const printWindow = window.open('', '_blank');
-                                                    if (!printWindow) return;
-                                                    // This is a quick hack to trigger the print logic from the component
-                                                    // In a real app we might use a cleaner portal or separate route
-                                                    alert('Opening print preview for label...');
+                                                    printProductLabel(product.name, product.barcode, product.price);
                                                 }}
                                                 className="text-xs px-3 py-1.5 rounded-lg bg-surface-50 text-surface-600 hover:bg-surface-100 transition-colors font-medium flex items-center gap-1"
                                                 title="Print Label"

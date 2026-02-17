@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import JsBarcode from 'jsbarcode';
+import { printProductLabel } from '@/utils/print-utils';
 
 interface BarcodePrintProps {
     value: string;
@@ -38,67 +39,7 @@ export default function BarcodePrint({ value, name, price }: BarcodePrintProps) 
     }, [value]);
 
     const handlePrint = () => {
-        const printWindow = window.open('', '_blank');
-        if (!printWindow) return;
-
-        const canvas = canvasRef.current;
-        if (!canvas) return;
-        const imgData = canvas.toDataURL('image/png');
-
-        printWindow.document.write(`
-            <html>
-                <head>
-                    <title>Print Label - ${name}</title>
-                    <style>
-                        @page {
-                            size: 50mm 30mm;
-                            margin: 0;
-                        }
-                        body {
-                            margin: 0;
-                            display: flex;
-                            flex-direction: column;
-                            align-items: center;
-                            justify-content: center;
-                            height: 30mm;
-                            width: 50mm;
-                            font-family: sans-serif;
-                            text-align: center;
-                        }
-                        .name {
-                            font-size: 10px;
-                            font-weight: bold;
-                            margin-bottom: 2px;
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis;
-                            width: 100%;
-                            padding: 0 2mm;
-                        }
-                        .price {
-                            font-size: 12px;
-                            font-weight: bold;
-                        }
-                        img {
-                            max-width: 45mm;
-                            height: auto;
-                        }
-                    </style>
-                </head>
-                <body>
-                    <div class="name">${name}</div>
-                    <img src="${imgData}" />
-                    <div class="price">Rs. ${price.toLocaleString('en-IN')}</div>
-                    <script>
-                        window.onload = () => {
-                            window.print();
-                            window.onafterprint = () => window.close();
-                        };
-                    </script>
-                </body>
-            </html>
-        `);
-        printWindow.document.close();
+        printProductLabel(name, value, price);
     };
 
     return (
