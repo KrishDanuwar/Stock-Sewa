@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { login } from '@/lib/actions/auth';
-import Link from 'next/link';
+import Image from 'next/image';
 
 export default function LoginPage() {
     const [error, setError] = useState<string | null>(null);
@@ -23,8 +23,15 @@ export default function LoginPage() {
             <div className="flex flex-col items-center mb-10">
                 <div className="w-20 h-20 mb-6 group relative">
                     <div className="absolute -inset-1 bg-gradient-to-r from-primary-600 to-emerald-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
-                    <div className="relative w-full h-full bg-white rounded-2xl flex items-center justify-center shadow-xl p-3 border border-surface-100">
-                        <img src="/logo.png" alt="MeroStock Logo" className="w-full h-full object-contain" />
+                    <div className="relative w-full h-full bg-white rounded-2xl flex items-center justify-center shadow-xl p-3 border border-surface-100 overflow-hidden">
+                        <Image
+                            src="/logo.png"
+                            alt="MeroStock Logo"
+                            width={80}
+                            height={80}
+                            className="w-full h-full object-contain"
+                            priority
+                        />
                     </div>
                 </div>
                 <h1 className="text-3xl font-black text-surface-900 tracking-tight mb-2">Welcome Back</h1>
@@ -76,7 +83,7 @@ export default function LoginPage() {
 
             <div className="mt-6 pt-6 border-t border-surface-200 text-center">
                 <p className="text-sm text-surface-500">
-                    Don't have an account?{' '}
+                    Don&apos;t have an account?{' '}
                     <Link href="/auth/register" className="text-primary-600 font-medium hover:underline">
                         Create an organization
                     </Link>

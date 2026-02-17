@@ -16,8 +16,7 @@ import {
     Plus,
     LogOut,
     Building2
-} from 'lucide-react';
-import { signOut } from '@/lib/actions/auth';
+import Image from 'next/image';
 
 const NAV_ITEMS = [
     { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -71,8 +70,14 @@ export function Sidebar({
                     {/* Brand */}
                     <div className="p-6 border-b border-surface-100">
                         <Link href="/" className="flex items-center gap-3 group">
-                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md p-1.5 border border-surface-100 group-hover:shadow-lg transition-all duration-300">
-                                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
+                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md p-1.5 border border-surface-100 group-hover:shadow-lg transition-all duration-300 overflow-hidden">
+                                <Image
+                                    src="/logo.png"
+                                    alt="Logo"
+                                    width={40}
+                                    height={40}
+                                    className="w-full h-full object-contain"
+                                />
                             </div>
                             <div className="flex flex-col">
                                 <span className="font-bold text-surface-900 tracking-tight leading-none group-hover:text-primary-600 transition-colors">MeroStock</span>
