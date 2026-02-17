@@ -11,7 +11,7 @@ interface InvoiceItem {
 }
 
 interface CreateInvoiceData {
-    customer_id: string;
+    customer_id: string | null;
     items: InvoiceItem[];
     paid_amount: number;
 }

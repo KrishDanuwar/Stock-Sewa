@@ -42,6 +42,11 @@ export default function NewInvoicePage() {
     const [error, setError] = useState('');
     const [status, setStatus] = useState<'paid' | 'partial' | 'unpaid'>('unpaid');
     const [productSearch, setProductSearch] = useState('');
+    const [isWalkIn, setIsWalkIn] = useState(false);
+
+    useEffect(() => {
+        if (isWalkIn) setSelectedCustomer('');
+    }, [isWalkIn]);
 
     useEffect(() => {
         const loadData = async () => {
@@ -111,8 +116,8 @@ export default function NewInvoicePage() {
     };
 
     const handleSubmit = async () => {
-        if (!selectedCustomer) {
-            setError('Please select a customer');
+        if (!isWalkIn && !selectedCustomer) {
+            setError('Please select a customer or mark as Walk-in');
             return;
         }
         if (items.length === 0) {
@@ -125,7 +130,7 @@ export default function NewInvoicePage() {
 
         try {
             const result = await createInvoice({
-                customer_id: selectedCustomer,
+                customer_id: isWalkIn ? null : selectedCustomer,
                 items: items.map((i) => ({
                     product_id: i.product_id,
                     quantity: i.quantity,
@@ -136,6 +141,8 @@ export default function NewInvoicePage() {
 
             if (result.success) {
                 router.push(`/invoices/${result.id}`);
+            } else if (result.error) {
+                setError(result.error);
             }
         } catch (err: any) {
             setError(err.message || 'Failed to create invoice');
@@ -162,19 +169,42 @@ export default function NewInvoicePage() {
             <div className="space-y-6">
                 {/* Customer Selection */}
                 <div className="card p-5">
-                    <h2 className="text-sm font-semibold text-surface-700 uppercase tracking-wider mb-3">Customer</h2>
-                    <select
-                        value={selectedCustomer}
-                        onChange={(e) => setSelectedCustomer(e.target.value)}
-                        className="input-field"
-                    >
-                        <option value="">Select a customer...</option>
-                        {customers.map((c) => (
-                            <option key={c.id} value={c.id}>
-                                {c.name} {c.phone ? `(${c.phone})` : ''}
-                            </option>
-                        ))}
-                    </select>
+                    <div className="flex items-center justify-between mb-3">
+                        <h2 className="text-sm font-semibold text-surface-700 uppercase tracking-wider">Customer</h2>
+                        <label className="flex items-center gap-2 cursor-pointer group">
+                            <input
+                                type="checkbox"
+                                checked={isWalkIn}
+                                onChange={(e) => setIsWalkIn(e.target.checked)}
+                                className="w-4 h-4 rounded border-surface-300 text-primary-600 focus:ring-primary-500"
+                            />
+                            <span className="text-sm font-medium text-surface-600 group-hover:text-surface-900 transition-colors">Walk-in / Cash Sale</span>
+                        </label>
+                    </div>
+
+                    {!isWalkIn && (
+                        <select
+                            value={selectedCustomer}
+                            onChange={(e) => setSelectedCustomer(e.target.value)}
+                            className="input-field animate-fade-in"
+                        >
+                            <option value="">Select a customer...</option>
+                            {customers.map((c) => (
+                                <option key={c.id} value={c.id}>
+                                    {c.name} {c.phone ? `(${c.phone})` : ''}
+                                </option>
+                            ))}
+                        </select>
+                    )}
+
+                    {isWalkIn && (
+                        <div className="p-3 bg-surface-50 rounded-xl border border-surface-200 animate-fade-in">
+                            <p className="text-sm text-surface-500 flex items-center gap-2">
+                                <span className="text-lg">🛍️</span>
+                                Recording as a <strong>Walk-in Customer</strong>. Name will not be required.
+                            </p>
+                        </div>
+                    )}
                 </div>
 
                 {/* Product Search & Add */}
@@ -291,8 +321,8 @@ export default function NewInvoicePage() {
                                             type="button"
                                             onClick={() => handleStatusChange(s)}
                                             className={`py-2 px-3 rounded-xl text-xs font-bold border-2 transition-all capitalize ${status === s
-                                                    ? 'bg-primary-50 border-primary-500 text-primary-700 shadow-sm'
-                                                    : 'bg-white border-surface-100 text-surface-500 hover:border-surface-200'
+                                                ? 'bg-primary-50 border-primary-500 text-primary-700 shadow-sm'
+                                                : 'bg-white border-surface-100 text-surface-500 hover:border-surface-200'
                                                 }`}
                                         >
                                             {s}
