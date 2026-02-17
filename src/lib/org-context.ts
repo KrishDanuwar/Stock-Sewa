@@ -6,9 +6,9 @@ export function getOrgContext() {
 
     return {
         userId: DEFAULT_ID,
-        userEmail: 'guest@merostock.local',
+        userEmail: 'guest@stocksewa.local',
         organizationId: DEFAULT_ID,
-        organizationName: 'MeroStock Shop',
+        organizationName: 'StockSewa Shop',
         subscriptionStatus: 'active',
     };
 }

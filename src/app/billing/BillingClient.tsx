@@ -110,17 +110,17 @@ export default function BillingClient({
                             <div className="p-4 bg-white rounded-xl shadow-sm border border-primary-100">
                                 <p className="text-[10px] font-bold text-surface-400 uppercase tracking-widest mb-1">eSewa ID</p>
                                 <p className="font-bold text-surface-900">98XXXXXXXX</p>
-                                <p className="text-xs text-surface-500">MeroStock Official</p>
+                                <p className="text-xs text-surface-500">StockSewa Official</p>
                             </div>
                             <div className="p-4 bg-white rounded-xl shadow-sm border border-primary-100">
                                 <p className="text-[10px] font-bold text-surface-400 uppercase tracking-widest mb-1">Khalti ID</p>
                                 <p className="font-bold text-surface-900">98XXXXXXXX</p>
-                                <p className="text-xs text-surface-500">MeroStock Official</p>
+                                <p className="text-xs text-surface-500">StockSewa Official</p>
                             </div>
                             <div className="p-4 bg-white rounded-xl shadow-sm border border-primary-100">
                                 <p className="text-[10px] font-bold text-surface-400 uppercase tracking-widest mb-1">Bank Transfer</p>
                                 <p className="font-bold text-surface-900">XXXX-XXXX-XXXX</p>
-                                <p className="text-xs text-surface-500">Global IME Bank (MeroStock Pvt Ltd)</p>
+                                <p className="text-xs text-surface-500">Global IME Bank (StockSewa Pvt Ltd)</p>
                             </div>
                         </div>
 

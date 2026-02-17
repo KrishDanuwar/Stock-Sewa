@@ -82,8 +82,8 @@ export function Sidebar({
                                 />
                             </div>
                             <div className="flex flex-col">
-                                <span className="font-bold text-surface-900 tracking-tight leading-none group-hover:text-primary-600 transition-colors">MeroStock</span>
-                                <span className="text-[10px] text-primary-600 font-bold uppercase tracking-widest mt-1">SaaS Pro</span>
+                                <span className="font-bold text-surface-900 tracking-tight leading-none group-hover:text-primary-600 transition-colors">StockSewa</span>
+                                <span className="text-[10px] text-primary-600 font-bold uppercase tracking-widest mt-1">Pro Account</span>
                             </div>
                         </Link>
                     </div>

@@ -1,4 +1,4 @@
-# MeroStock SaaS — Enterprise Inventory & Billing
+# StockSewa SaaS — Your Trusted Inventory Partner
 
 A production-ready, multi-tenant SaaS application for modern manufacturing and retail businesses. Built with **Next.js 14+**, **Supabase Auth/SSR**, **Stripe**, and **Tailwind CSS**.
 
@@ -26,7 +26,7 @@ A production-ready, multi-tenant SaaS application for modern manufacturing and r
 ### 1. Clone & Install
 ```bash
 git clone <your-repo>
-cd MeroStockPT
+cd StockSewaPT
 npm install
 ```
 

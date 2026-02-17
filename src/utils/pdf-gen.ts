@@ -7,12 +7,12 @@ export function generateInvoicePDF(invoice: any) {
     // Company Info (Placeholder - could be from organization data)
     doc.setFontSize(20);
     doc.setTextColor(40, 40, 40);
-    doc.text('MeroStock SaaS', 14, 22);
+    doc.text('StockSewa SaaS', 14, 22);
 
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
-    doc.text('Inventory & Billing Solution', 14, 28);
-    doc.text('Email: billing@merostock.com', 14, 33);
+    doc.text('Your Trusted Inventory Partner', 14, 28);
+    doc.text('Email: billing@stocksewa.com', 14, 33);
 
     // Invoice Details
     doc.setFontSize(12);

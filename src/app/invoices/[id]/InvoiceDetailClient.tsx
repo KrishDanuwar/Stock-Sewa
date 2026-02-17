@@ -148,18 +148,18 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                         <div className="space-y-4 text-left">
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 bg-primary-600 rounded-2xl flex items-center justify-center text-white font-bold shadow-xl">
-                                    MS
+                                    SS
                                 </div>
                                 <div className="text-left">
-                                    <h2 className="text-2xl font-black text-surface-900 tracking-tighter">MEROSTOCK</h2>
+                                    <h2 className="text-2xl font-black text-surface-900 tracking-tighter">STOCKSEWA</h2>
                                     <div className="flex items-center gap-2 text-[10px] text-primary-600 font-bold tracking-[0.2em] uppercase">
                                         <span className="w-1 h-1 bg-primary-600 rounded-full" />
-                                        Business Suite
+                                        Inventory Master
                                     </div>
                                 </div>
                             </div>
                             <div className="space-y-1 text-sm text-surface-500 text-left">
-                                <div className="flex items-center gap-2"><Building2 size={14} /> MeroStock Cloud Inventory</div>
+                                <div className="flex items-center gap-2"><Building2 size={14} /> StockSewa Cloud Inventory</div>
                                 <div className="flex items-center gap-2"><MapPin size={14} /> Global Enterprise SaaS</div>
                             </div>
                         </div>
@@ -266,7 +266,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                     <div className="mt-16 pt-8 border-t border-surface-100 text-center">
                         <div className="flex items-center justify-center gap-2 text-[10px] font-black text-surface-400 uppercase tracking-widest">
                             <CheckCircle2 size={12} className="text-primary-500" />
-                            Generated Securely via MeroStock SaaS
+                            Generated Securely via StockSewa SaaS
                         </div>
                     </div>
                 </div>

@@ -7,7 +7,7 @@ import { Toaster } from 'sonner';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata = {
-    title: 'MeroStock — Modern Inventory & Billing',
+    title: 'StockSewa — Your Trusted Inventory Partner',
     description: 'Precision stock management for modern businesses',
 };
 
