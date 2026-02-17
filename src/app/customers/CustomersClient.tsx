@@ -136,7 +136,7 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
                                         className="w-full py-2 rounded-xl bg-surface-900 text-white text-xs font-bold hover:bg-surface-800 transition-all flex items-center justify-center gap-2 shadow-sm"
                                     >
                                         <Wallet size={14} />
-                                        Settle Balance
+                                        Settle Credit
                                     </button>
                                 </div>
                             )}
