@@ -19,8 +19,17 @@ export default function RegisterPage() {
     }
 
     return (
-        <div className="card p-8 animate-fade-in">
-            <h2 className="text-xl font-bold text-surface-900 mb-6">Create your organization</h2>
+        <div className="card p-10 animate-fade-in max-w-lg w-full">
+            <div className="flex flex-col items-center mb-10">
+                <div className="w-20 h-20 mb-6 group relative">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-primary-600 to-emerald-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+                    <div className="relative w-full h-full bg-white rounded-2xl flex items-center justify-center shadow-xl p-3 border border-surface-100">
+                        <img src="/logo.png" alt="MeroStock Logo" className="w-full h-full object-contain" />
+                    </div>
+                </div>
+                <h1 className="text-3xl font-black text-surface-900 tracking-tight mb-2">Create Organization</h1>
+                <p className="text-surface-500 font-medium text-center">Start managing your inventory as a team</p>
+            </div>
 
             <form action={handleSubmit} className="space-y-4">
                 {error && (

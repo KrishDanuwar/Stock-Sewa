@@ -107,33 +107,41 @@ ALTER TABLE stock_movements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 
 -- Profiles: Users can only see their own profile
+DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
 
 -- Organizations: Users can only see the organization they belong to
+DROP POLICY IF EXISTS "Users can view own organization" ON organizations;
 CREATE POLICY "Users can view own organization" ON organizations FOR SELECT 
 USING (id IN (SELECT organization_id FROM profiles WHERE id = auth.uid()));
 
 -- Business tables: Isolation based on organization_id
+DROP POLICY IF EXISTS "Org data isolation" ON products;
 CREATE POLICY "Org data isolation" ON products FOR ALL 
 USING (organization_id IN (SELECT organization_id FROM profiles WHERE id = auth.uid()))
 WITH CHECK (organization_id IN (SELECT organization_id FROM profiles WHERE id = auth.uid()));
 
+DROP POLICY IF EXISTS "Org data isolation" ON customers;
 CREATE POLICY "Org data isolation" ON customers FOR ALL 
 USING (organization_id IN (SELECT organization_id FROM profiles WHERE id = auth.uid()))
 WITH CHECK (organization_id IN (SELECT organization_id FROM profiles WHERE id = auth.uid()));
 
+DROP POLICY IF EXISTS "Org data isolation" ON invoices;
 CREATE POLICY "Org data isolation" ON invoices FOR ALL 
 USING (organization_id IN (SELECT organization_id FROM profiles WHERE id = auth.uid()))
 WITH CHECK (organization_id IN (SELECT organization_id FROM profiles WHERE id = auth.uid()));
 
+DROP POLICY IF EXISTS "Org data isolation" ON invoice_items;
 CREATE POLICY "Org data isolation" ON invoice_items FOR ALL 
 USING (organization_id IN (SELECT organization_id FROM profiles WHERE id = auth.uid()))
 WITH CHECK (organization_id IN (SELECT organization_id FROM profiles WHERE id = auth.uid()));
 
+DROP POLICY IF EXISTS "Org data isolation" ON stock_movements;
 CREATE POLICY "Org data isolation" ON stock_movements FOR ALL 
 USING (organization_id IN (SELECT organization_id FROM profiles WHERE id = auth.uid()))
 WITH CHECK (organization_id IN (SELECT organization_id FROM profiles WHERE id = auth.uid()));
 
+DROP POLICY IF EXISTS "Org data isolation" ON payments;
 CREATE POLICY "Org data isolation" ON payments FOR ALL 
 USING (organization_id IN (SELECT organization_id FROM profiles WHERE id = auth.uid()))
 WITH CHECK (organization_id IN (SELECT organization_id FROM profiles WHERE id = auth.uid()));
@@ -141,7 +149,14 @@ WITH CHECK (organization_id IN (SELECT organization_id FROM profiles WHERE id = 
 -- ============================================
 -- Indexes
 -- ============================================
+DROP INDEX IF EXISTS idx_products_org;
 CREATE INDEX idx_products_org ON products(organization_id);
+
+DROP INDEX IF EXISTS idx_customers_org;
 CREATE INDEX idx_customers_org ON customers(organization_id);
+
+DROP INDEX IF EXISTS idx_invoices_org;
 CREATE INDEX idx_invoices_org ON invoices(organization_id);
+
+DROP INDEX IF EXISTS idx_profiles_org;
 CREATE INDEX idx_profiles_org ON profiles(organization_id);

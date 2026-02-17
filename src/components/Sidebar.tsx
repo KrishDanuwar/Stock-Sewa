@@ -70,15 +70,15 @@ export function Sidebar({
                 <div className="flex flex-col h-full">
                     {/* Brand */}
                     <div className="p-6 border-b border-surface-100">
-                        <div className="flex items-center gap-3">
-                            <div className="w-10 h-10 bg-gradient-to-br from-primary-600 to-primary-800 rounded-xl flex items-center justify-center text-white font-bold shadow-lg">
-                                MS
+                        <Link href="/" className="flex items-center gap-3 group">
+                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md p-1.5 border border-surface-100 group-hover:shadow-lg transition-all duration-300">
+                                <img src="/logo.png" alt="Logo" className="w-full h-full object-contain" />
                             </div>
                             <div className="flex flex-col">
-                                <span className="font-bold text-surface-900 tracking-tight leading-none">MeroStock</span>
+                                <span className="font-bold text-surface-900 tracking-tight leading-none group-hover:text-primary-600 transition-colors">MeroStock</span>
                                 <span className="text-[10px] text-primary-600 font-bold uppercase tracking-widest mt-1">SaaS Pro</span>
                             </div>
-                        </div>
+                        </Link>
                     </div>
 
                     {/* Org Switcher / Info */}
