@@ -1,11 +1,7 @@
-import Stripe from 'stripe';
+import stripe from '@/lib/stripe';
 import { createClient } from '@/utils/supabase/server';
 import { getOrgContext } from '@/lib/org-context';
 import { NextResponse } from 'next/server';
-
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-    apiVersion: '2024-04-10' as any,
-});
 
 export async function createCheckoutSession(priceId: string) {
     const ctx = await getOrgContext();
