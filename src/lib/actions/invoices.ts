@@ -26,7 +26,7 @@ function generateInvoiceNumber(): string {
 }
 
 export async function getInvoices(search?: string, status?: string) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) return [];
 
     const supabase = createClient();
@@ -50,7 +50,7 @@ export async function getInvoices(search?: string, status?: string) {
 }
 
 export async function getInvoice(id: string) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) throw new Error('Unauthorized');
 
     const supabase = createClient();
@@ -84,7 +84,7 @@ export async function getInvoice(id: string) {
 }
 
 export async function getRecentInvoices(limit: number = 5) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) return [];
 
     const supabase = createClient();
@@ -100,7 +100,7 @@ export async function getRecentInvoices(limit: number = 5) {
 }
 
 export async function createInvoice(invoiceData: CreateInvoiceData) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) return { error: 'Unauthorized' };
 
     const supabase = createClient();

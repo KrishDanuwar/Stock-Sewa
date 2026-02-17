@@ -16,7 +16,7 @@ export default async function RootLayout({
 }: {
     children: React.ReactNode;
 }) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
 
     return (
         <html lang="en">

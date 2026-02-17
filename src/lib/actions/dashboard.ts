@@ -4,7 +4,7 @@ import { createClient } from '@/utils/supabase/server';
 import { getOrgContext } from '@/lib/org-context';
 
 export async function getDashboardStats() {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) return null;
 
     const supabase = createClient();

@@ -5,7 +5,7 @@ import { getOrgContext } from '@/lib/org-context';
 import { revalidatePath } from 'next/cache';
 
 export async function getCustomers(search?: string) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) return [];
 
     const supabase = createClient();
@@ -25,7 +25,7 @@ export async function getCustomers(search?: string) {
 }
 
 export async function getCustomer(id: string) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) throw new Error('Unauthorized');
 
     const supabase = createClient();
@@ -41,7 +41,7 @@ export async function getCustomer(id: string) {
 }
 
 export async function getCustomerWithCredit(id: string) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) throw new Error('Unauthorized');
 
     const supabase = createClient();
@@ -72,7 +72,7 @@ export async function getCustomerWithCredit(id: string) {
 }
 
 export async function createCustomer(formData: FormData) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) throw new Error('Unauthorized');
 
     const supabase = createClient();
@@ -97,7 +97,7 @@ export async function createCustomer(formData: FormData) {
 }
 
 export async function updateCustomer(id: string, formData: FormData) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) throw new Error('Unauthorized');
 
     const supabase = createClient();
@@ -121,7 +121,7 @@ export async function updateCustomer(id: string, formData: FormData) {
 }
 
 export async function settleCustomerCredit(customerId: string, amount: number) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) throw new Error('Unauthorized');
 
     const supabase = createClient();

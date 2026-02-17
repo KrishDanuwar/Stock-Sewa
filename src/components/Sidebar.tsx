@@ -14,10 +14,8 @@ import {
     Menu,
     X,
     Plus,
-    LogOut,
     Building2
 } from 'lucide-react';
-import { signOut } from '@/lib/actions/auth';
 import Image from 'next/image';
 
 const NAV_ITEMS = [

@@ -11,7 +11,7 @@ interface Props {
 
 export default async function CustomersPage({ searchParams }: Props) {
     try {
-        const ctx = getOrgContext();
+        const ctx = await getOrgContext();
         const supabase = createClient();
 
         let customers: any[] = [];

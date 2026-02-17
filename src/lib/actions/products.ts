@@ -9,7 +9,7 @@ function generateBarcode() {
 }
 
 export async function getProducts(search?: string) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) return [];
 
     const supabase = createClient();
@@ -29,7 +29,7 @@ export async function getProducts(search?: string) {
 }
 
 export async function getProduct(id: string) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) throw new Error('Unauthorized');
 
     const supabase = createClient();
@@ -45,7 +45,7 @@ export async function getProduct(id: string) {
 }
 
 export async function createProduct(formData: FormData) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) return { error: 'Unauthorized' };
 
     const supabase = createClient();
@@ -73,7 +73,7 @@ export async function createProduct(formData: FormData) {
 }
 
 export async function updateProduct(id: string, formData: FormData) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) return { error: 'Unauthorized' };
 
     const supabase = createClient();
@@ -104,7 +104,7 @@ export async function updateProduct(id: string, formData: FormData) {
 }
 
 export async function deleteProduct(id: string) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) return { error: 'Unauthorized' };
 
     const supabase = createClient();

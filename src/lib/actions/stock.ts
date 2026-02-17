@@ -5,7 +5,7 @@ import { getOrgContext } from '@/lib/org-context';
 import { revalidatePath } from 'next/cache';
 
 export async function getStockMovements(productId?: string) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) return [];
 
     const supabase = createClient();
@@ -25,7 +25,7 @@ export async function getStockMovements(productId?: string) {
 }
 
 export async function addStockIn(formData: FormData) {
-    const ctx = getOrgContext();
+    const ctx = await getOrgContext();
     if (!ctx) return { error: 'Unauthorized' };
 
     const supabase = createClient();
