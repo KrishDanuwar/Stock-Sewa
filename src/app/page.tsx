@@ -25,7 +25,27 @@ export default async function Dashboard() {
     // Custom logic for low stock alerts (SaaS feature)
     const lowStockProducts = products.filter(p => p.stock_quantity <= 5).slice(0, 5);
 
-    if (!stats) return null;
+    if (!stats) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-[60vh] p-8 text-center">
+                <div className="w-16 h-16 bg-red-50 text-red-500 rounded-2xl flex items-center justify-center mb-4">
+                    <AlertTriangle size={32} />
+                </div>
+                <h2 className="text-xl font-bold text-surface-900 mb-2">Dashboard Unavailable</h2>
+                <p className="text-surface-500 max-w-md mx-auto mb-6">
+                    We couldn't load your dashboard data. This might be because your organization setup is incomplete or there's a database error.
+                </p>
+                <div className="flex gap-4">
+                    <button onClick={() => window.location.reload()} className="btn-primary">
+                        Retry Loading
+                    </button>
+                    <Link href="/billing" className="btn-secondary">
+                        Check Status
+                    </Link>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="p-4 md:p-8 space-y-8 animate-fade-in">
