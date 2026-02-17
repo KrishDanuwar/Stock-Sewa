@@ -111,43 +111,43 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
             </div>
 
             {products.length === 0 ? (
-                <div className="card p-16 text-center border-dashed border-brand-border bg-transparent">
-                    <div className="w-20 h-20 bg-brand-card rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6 shadow-xl border border-brand-border">
+                <div className="card p-20 text-center border-2 border-dashed border-gray-200 bg-white">
+                    <div className="w-24 h-24 bg-gray-50 rounded-[2.5rem] flex items-center justify-center text-5xl mx-auto mb-8 shadow-inner ring-1 ring-gray-100">
                         📦
                     </div>
-                    <h3 className="text-xl font-bold text-surface-primary mb-2">No Products Yet</h3>
-                    <p className="text-sm text-surface-muted mb-8 max-w-sm mx-auto">Build your inventory by adding your first product to StockSewa.</p>
-                    <button onClick={openAdd} className="btn-primary px-8">Add First Product</button>
+                    <h3 className="text-2xl font-poppins font-black text-surface-primary mb-3">Inventory Empty</h3>
+                    <p className="text-sm text-surface-muted mb-10 max-w-sm mx-auto font-medium leading-relaxed">Build your professional catalog by adding your first product to StockSewa.</p>
+                    <button onClick={openAdd} className="btn-primary px-10 py-4 text-xs font-black uppercase tracking-widest shadow-2xl shadow-brand-primary/20">Add First Product</button>
                 </div>
             ) : (
-                <div className="table-container border border-brand-border/50">
+                <div className="table-container shadow-xl shadow-gray-200/50">
                     <table className="w-full">
                         <thead>
-                            <tr className="bg-brand-teal/20 border-b border-brand-border">
-                                <th className="text-left px-6 py-4 text-[10px] font-black text-surface-muted uppercase tracking-wider">Product Info</th>
-                                <th className="text-left px-6 py-4 text-[10px] font-black text-surface-muted uppercase tracking-wider">Stock Code</th>
-                                <th className="text-left px-6 py-4 text-[10px] font-black text-surface-muted uppercase tracking-wider">Unit Price</th>
-                                <th className="text-left px-6 py-4 text-[10px] font-black text-surface-muted uppercase tracking-wider">Available</th>
-                                <th className="text-right px-6 py-4 text-[10px] font-black text-surface-muted uppercase tracking-wider">Control</th>
+                            <tr className="bg-gray-50 border-b border-brand-border">
+                                <th className="text-left px-8 py-5 text-[10px] font-black text-surface-muted uppercase tracking-[0.2em]">Product Info</th>
+                                <th className="text-left px-8 py-5 text-[10px] font-black text-surface-muted uppercase tracking-[0.2em]">Stock Code</th>
+                                <th className="text-left px-8 py-5 text-[10px] font-black text-surface-muted uppercase tracking-[0.2em]">Unit Price</th>
+                                <th className="text-left px-8 py-5 text-[10px] font-black text-surface-muted uppercase tracking-[0.2em]">Available</th>
+                                <th className="text-right px-8 py-5 text-[10px] font-black text-surface-muted uppercase tracking-[0.2em]">Control</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-brand-border/50">
+                        <tbody className="divide-y divide-gray-100">
                             {products.map((product) => (
-                                <tr key={product.id} className="hover:bg-brand-teal/5 transition-colors animate-fade-in group">
-                                    <td className="px-6 py-4">
-                                        <div>
-                                            <p className="text-sm font-bold text-surface-primary group-hover:text-brand-primary transition-colors">{product.name}</p>
+                                <tr key={product.id} className="hover:bg-gray-50/50 transition-all duration-300 animate-fade-in group">
+                                    <td className="px-8 py-5">
+                                        <div className="flex flex-col">
+                                            <p className="text-sm font-black text-surface-primary group-hover:text-brand-primary transition-colors">{product.name}</p>
                                             {product.description && (
-                                                <p className="text-xs text-surface-muted mt-0.5 line-clamp-1 italic">{product.description}</p>
+                                                <p className="text-[10px] text-surface-muted mt-1 font-medium line-clamp-1 italic">{product.description}</p>
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4">
-                                        <span className="text-[10px] font-mono font-bold text-surface-muted bg-brand-background px-2 py-1 rounded border border-brand-border/50">
+                                    <td className="px-8 py-5">
+                                        <span className="text-[10px] font-mono font-black text-surface-muted bg-gray-50 px-2.5 py-1.5 rounded-lg border border-gray-100 shadow-sm">
                                             {product.barcode || 'NO-CODE'}
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-sm font-black text-brand-primary">{formatCurrency(product.price)}</td>
+                                    <td className="px-8 py-5 text-sm font-black text-brand-primary">{formatCurrency(product.price)}</td>
                                     <td className="px-6 py-4">
                                         <span className={product.stock_quantity <= 0 ? 'badge-unpaid text-[10px]' :
                                             product.stock_quantity <= 10 ? 'badge-partial text-[10px]' :
@@ -156,16 +156,16 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                                             {product.stock_quantity} left
                                         </span>
                                     </td>
-                                    <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0 duration-300">
+                                    <td className="px-8 py-5 text-right">
+                                        <div className="flex items-center justify-end gap-2.5 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0 duration-500">
                                             <button
                                                 onClick={() => {
                                                     printProductLabel(product.name, product.barcode, product.price);
                                                 }}
-                                                className="w-8 h-8 rounded-lg bg-brand-dark border border-brand-border text-surface-muted hover:text-brand-primary hover:border-brand-primary transition-all flex items-center justify-center shadow-sm active:scale-90"
+                                                className="w-9 h-9 rounded-xl bg-white border border-brand-border text-surface-muted hover:text-brand-primary hover:border-brand-primary transition-all flex items-center justify-center shadow-sm active:scale-90"
                                                 title="Print Label"
                                             >
-                                                <Printer size={15} />
+                                                <Printer size={16} />
                                             </button>
                                             <button
                                                 onClick={() => openEdit(product)}

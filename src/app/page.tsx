@@ -108,29 +108,29 @@ export default async function Dashboard() {
                             View All <ArrowRight size={14} />
                         </Link>
                     </div>
-                    <div className="card overflow-hidden">
+                    <div className="card overflow-hidden shadow-sm">
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-brand-teal/20 border-b border-brand-border">
-                                        <th className="px-6 py-4 text-xs font-bold text-surface-muted uppercase tracking-wider">Invoice #</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-surface-muted uppercase tracking-wider">Customer</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-surface-muted uppercase tracking-wider text-right">Amount</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-surface-muted uppercase tracking-wider text-right">Status</th>
+                                    <tr className="bg-gray-50 border-b border-brand-border">
+                                        <th className="px-6 py-4 text-xs font-black text-surface-muted uppercase tracking-widest">Invoice #</th>
+                                        <th className="px-6 py-4 text-xs font-black text-surface-muted uppercase tracking-widest">Customer</th>
+                                        <th className="px-6 py-4 text-xs font-black text-surface-muted uppercase tracking-widest text-right">Amount</th>
+                                        <th className="px-6 py-4 text-xs font-black text-surface-muted uppercase tracking-widest text-right">Status</th>
                                     </tr>
                                 </thead>
                                 <tbody className="divide-y divide-brand-border">
                                     {recentInvoices.map((invoice) => (
-                                        <tr key={invoice.id} className="hover:bg-brand-teal/10 transition-colors group">
+                                        <tr key={invoice.id} className="hover:bg-gray-50/50 transition-colors group">
                                             <td className="px-6 py-4 font-bold text-surface-primary text-sm">
                                                 <Link href={`/invoices/${invoice.id}`} className="hover:text-brand-primary transition-colors">
                                                     {invoice.invoice_number}
                                                 </Link>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-surface-secondary">
+                                            <td className="px-6 py-4 text-sm text-surface-secondary font-medium">
                                                 {invoice.customers?.name || 'Walk-in'}
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-surface-primary font-bold text-right">
+                                            <td className="px-6 py-4 text-sm text-surface-primary font-black text-right">
                                                 Rs. {Number(invoice.total_amount).toLocaleString('en-IN')}
                                             </td>
                                             <td className="px-6 py-4 text-right">
@@ -162,17 +162,17 @@ export default async function Dashboard() {
                         <AlertTriangle size={20} className="text-status-warning" />
                         Stock Alerts
                     </h2>
-                    <div className="card p-5 space-y-4">
+                    <div className="card p-5 space-y-4 shadow-sm">
                         {lowStockProducts.length > 0 ? (
                             lowStockProducts.map(p => (
-                                <div key={p.id} className="flex items-center justify-between p-3 bg-brand-background rounded-xl border border-brand-border group hover:border-brand-primary/50 transition-all">
+                                <div key={p.id} className="flex items-center justify-between p-3 bg-gray-50 rounded-xl border border-brand-border group hover:border-brand-primary/50 transition-all">
                                     <div className="flex flex-col text-left">
                                         <span className="text-sm font-bold text-surface-primary">{p.name}</span>
-                                        <span className="text-[10px] text-surface-muted uppercase tracking-tight">{p.barcode}</span>
+                                        <span className="text-[10px] text-surface-muted uppercase tracking-tight font-bold">{p.barcode}</span>
                                     </div>
                                     <div className="flex flex-col items-end">
-                                        <span className="text-sm font-bold text-status-danger">{p.stock_quantity} left</span>
-                                        <Link href="/products" className="text-[10px] text-brand-primary font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <span className="text-sm font-black text-status-danger">{p.stock_quantity} left</span>
+                                        <Link href="/products" className="text-[10px] text-brand-primary font-black uppercase opacity-0 group-hover:opacity-100 transition-opacity">
                                             Restock
                                         </Link>
                                     </div>
@@ -180,7 +180,7 @@ export default async function Dashboard() {
                             ))
                         ) : (
                             <div className="py-6 text-center">
-                                <div className="w-12 h-12 bg-brand-secondary/10 text-brand-secondary rounded-full flex items-center justify-center mx-auto mb-3 border border-brand-secondary/20">
+                                <div className="w-12 h-12 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-3 border border-emerald-100">
                                     <CheckCircle2 size={24} />
                                 </div>
                                 <p className="text-sm text-surface-muted italic font-medium">All stock levels are healthy.</p>
@@ -190,16 +190,16 @@ export default async function Dashboard() {
                     </div>
 
                     {/* CTA Card */}
-                    <div className="card p-6 bg-brand-primary text-brand-dark relative overflow-hidden group border-none">
-                        <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
+                    <div className="card p-8 bg-brand-primary text-white relative overflow-hidden group border-none shadow-xl shadow-brand-primary/20">
+                        <div className="absolute -right-4 -bottom-4 opacity-20 group-hover:scale-110 transition-transform duration-500">
                             <Zap size={120} />
                         </div>
                         <h3 className="font-poppins font-black text-xl mb-2 relative z-10">Premium Account</h3>
-                        <p className="text-brand-dark/80 text-xs font-bold leading-relaxed relative z-10">
+                        <p className="text-white/90 text-[11px] font-bold leading-relaxed relative z-10">
                             Upgrade to **StockSewa Pro** to unlock multi-branch sync and custom branding.
                         </p>
-                        <Link href="/billing" className="mt-6 btn-primary bg-brand-dark text-brand-primary border-none shadow-none hover:bg-brand-background relative z-10 py-2 w-full text-xs font-black">
-                            Upgrade Now <ArrowRight size={14} />
+                        <Link href="/billing" className="mt-8 btn-primary bg-white text-brand-primary border-none shadow-xl hover:bg-gray-50 relative z-10 py-3 w-full text-xs font-black uppercase tracking-widest">
+                            Upgrade Now <ArrowRight size={14} strokeWidth={3} />
                         </Link>
                     </div>
                 </div>

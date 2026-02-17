@@ -124,39 +124,39 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
                     <button onClick={() => setModalOpen(true)} className="btn-primary px-8">Add Customer</button>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
                     {customers.map((customer) => (
-                        <div key={customer.id} className="card p-6 animate-fade-in group hover:border-brand-primary/30 transition-all duration-300">
-                            <div className="flex items-start justify-between mb-4">
+                        <div key={customer.id} className="card p-8 animate-fade-in group hover:border-brand-primary/40 transition-all duration-500 hover:shadow-2xl hover:shadow-gray-200/50">
+                            <div className="flex items-start justify-between mb-6">
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="font-poppins font-bold text-surface-primary truncate group-hover:text-brand-primary transition-colors">{customer.name}</h3>
-                                    <div className="mt-2 space-y-1">
+                                    <h3 className="text-lg font-poppins font-black text-surface-primary truncate group-hover:text-brand-primary transition-colors">{customer.name}</h3>
+                                    <div className="mt-4 space-y-2">
                                         {customer.phone && (
-                                            <p className="text-xs text-surface-muted flex items-center gap-2">
-                                                <span className="w-4 h-4 bg-brand-background rounded flex items-center justify-center text-[8px]">📞</span>
-                                                <span className="font-medium tracking-wide">{customer.phone}</span>
+                                            <p className="text-xs text-surface-muted flex items-center gap-3">
+                                                <span className="w-6 h-6 bg-gray-50 rounded-lg flex items-center justify-center text-[10px] ring-1 ring-gray-100 shadow-sm">📞</span>
+                                                <span className="font-bold tracking-wider">{customer.phone}</span>
                                             </p>
                                         )}
                                         {customer.address && (
-                                            <p className="text-xs text-surface-muted flex items-center gap-2 truncate">
-                                                <span className="w-4 h-4 bg-brand-background rounded flex items-center justify-center text-[8px]">📍</span>
-                                                <span className="font-medium italic">{customer.address}</span>
+                                            <p className="text-xs text-surface-muted flex items-center gap-3 truncate">
+                                                <span className="w-6 h-6 bg-gray-50 rounded-lg flex items-center justify-center text-[10px] ring-1 ring-gray-100 shadow-sm">📍</span>
+                                                <span className="font-bold italic opacity-80">{customer.address}</span>
                                             </p>
                                         )}
                                     </div>
                                 </div>
                                 <button
                                     onClick={() => openEdit(customer)}
-                                    className="text-[10px] px-3 py-1.5 rounded-lg bg-brand-background border border-brand-border text-surface-muted hover:text-brand-primary hover:border-brand-primary transition-all font-black uppercase tracking-widest active:scale-90"
+                                    className="text-[10px] px-3.5 py-2 rounded-xl bg-gray-50 border border-gray-100 text-surface-muted hover:text-brand-primary hover:border-brand-primary transition-all font-black uppercase tracking-[0.2em] active:scale-90 shadow-sm"
                                 >
                                     Edit
                                 </button>
                             </div>
                             {customer.total_credit !== undefined && customer.total_credit > 0 && (
-                                <div className="mt-6 pt-5 border-t border-brand-border/50">
-                                    <div className="flex items-center justify-between mb-4">
-                                        <span className="text-[10px] font-black text-surface-muted uppercase tracking-[0.2em]">Balance Owed</span>
-                                        <span className="text-sm font-black text-status-danger">{formatCurrency(customer.total_credit)}</span>
+                                <div className="mt-6 pt-6 border-t border-gray-100">
+                                    <div className="flex items-center justify-between mb-6">
+                                        <span className="text-[10px] font-black text-surface-muted uppercase tracking-[0.3em] opacity-70">Balance Owed</span>
+                                        <span className="text-base font-black text-status-danger">{formatCurrency(customer.total_credit)}</span>
                                     </div>
                                     <button
                                         onClick={() => {
@@ -164,9 +164,9 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
                                             setSettleAmount((customer.total_credit || 0).toString());
                                             setSettleModalOpen(true);
                                         }}
-                                        className="w-full py-3 rounded-2xl bg-brand-primary text-brand-dark text-[10px] font-black uppercase tracking-widest hover:bg-brand-background hover:text-brand-primary transition-all flex items-center justify-center gap-2 border border-transparent hover:border-brand-primary active:scale-[0.98] shadow-lg shadow-brand-primary/5"
+                                        className="w-full py-4 rounded-[1.25rem] bg-brand-primary text-white text-[10px] font-black uppercase tracking-[0.2em] hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-3 active:scale-[0.98] shadow-xl shadow-brand-primary/20 border-none"
                                     >
-                                        <Wallet size={14} />
+                                        <Wallet size={16} strokeWidth={2.5} />
                                         Clear Credit
                                     </button>
                                 </div>
@@ -188,12 +188,12 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
                             <span className="text-lg">⚠️</span> {error}
                         </div>
                     )}
-                    <div className="bg-brand-background p-5 rounded-[1.5rem] border border-brand-border">
-                        <p className="text-[10px] text-surface-muted uppercase font-black tracking-widest mb-2 text-center">Debtor Profile</p>
-                        <p className="font-poppins font-black text-surface-primary text-center text-lg">{settleCustomer?.name}</p>
-                        <div className="mt-4 pt-4 border-t border-brand-border flex items-center justify-between text-[10px] font-black text-surface-muted uppercase tracking-widest">
-                            <span>Balance</span>
-                            <span className="text-status-danger">{settleCustomer && formatCurrency(settleCustomer.total_credit || 0)}</span>
+                    <div className="bg-gray-50 p-6 rounded-[2rem] border border-gray-100 shadow-inner">
+                        <p className="text-[10px] text-surface-muted uppercase font-black tracking-[0.3em] mb-3 text-center opacity-70">Debtor Profile</p>
+                        <p className="font-poppins font-black text-surface-primary text-center text-xl">{settleCustomer?.name}</p>
+                        <div className="mt-6 pt-5 border-t border-gray-200 flex items-center justify-between text-[11px] font-black text-surface-muted uppercase tracking-[0.2em]">
+                            <span>Outstanding</span>
+                            <span className="text-status-danger text-base">{settleCustomer && formatCurrency(settleCustomer.total_credit || 0)}</span>
                         </div>
                     </div>
 

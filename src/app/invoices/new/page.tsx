@@ -161,14 +161,14 @@ export default function NewInvoicePage() {
         <div className="max-w-6xl mx-auto animate-fade-in p-4 xl:p-0">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10">
                 <div className="flex items-center gap-4">
-                    <button onClick={() => router.back()} className="p-3 rounded-2xl bg-brand-card border border-brand-border text-surface-muted hover:text-brand-primary hover:border-brand-primary transition-all active:scale-95">
+                    <button onClick={() => router.back()} className="p-3.5 rounded-2xl bg-white border border-gray-100 text-surface-muted hover:text-brand-primary hover:border-brand-primary transition-all active:scale-90 shadow-sm">
                         <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M15 19l-7-7 7-7" />
                         </svg>
                     </button>
                     <div>
-                        <h1 className="text-3xl font-poppins font-bold text-surface-primary tracking-tight">Create Invoice</h1>
-                        <p className="text-surface-muted text-sm font-medium">Drafting a new transaction for StockSewa</p>
+                        <h1 className="text-3xl font-poppins font-black text-surface-primary tracking-tight">Generate Invoice</h1>
+                        <p className="text-surface-muted text-sm font-black uppercase tracking-widest opacity-60">System Context: StockSewa POS</p>
                     </div>
                 </div>
                 {items.length > 0 && (
@@ -192,17 +192,17 @@ export default function NewInvoicePage() {
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-8 space-y-6">
                     {/* Customer Selection */}
-                    <div className="card p-6">
-                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-                            <h2 className="text-xs font-black text-brand-primary uppercase tracking-[0.2em]">Billing Details</h2>
-                            <label className="flex items-center gap-3 cursor-pointer group bg-brand-background px-4 py-2 rounded-xl border border-brand-border hover:border-brand-primary/30 transition-all">
+                    <div className="card p-8 shadow-sm">
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+                            <h2 className="text-xs font-black text-brand-primary uppercase tracking-[0.3em]">Billing Entity</h2>
+                            <label className="flex items-center gap-3 cursor-pointer group bg-gray-50 px-5 py-2.5 rounded-2xl border border-gray-100 hover:border-brand-primary/30 transition-all shadow-inner">
                                 <input
                                     type="checkbox"
                                     checked={isWalkIn}
                                     onChange={(e) => setIsWalkIn(e.target.checked)}
-                                    className="w-5 h-5 rounded-lg border-brand-border bg-brand-dark text-brand-primary focus:ring-brand-primary/20"
+                                    className="w-5 h-5 rounded-lg border-gray-200 bg-white text-brand-primary focus:ring-brand-primary/20"
                                 />
-                                <span className="text-sm font-bold text-surface-secondary group-hover:text-surface-primary transition-colors">Walk-in / Cash Sale</span>
+                                <span className="text-sm font-black text-surface-secondary group-hover:text-surface-primary transition-colors uppercase tracking-widest text-[10px]">Walk-in / Cash Sale</span>
                             </label>
                         </div>
 
@@ -210,7 +210,7 @@ export default function NewInvoicePage() {
                             <select
                                 value={selectedCustomer}
                                 onChange={(e) => setSelectedCustomer(e.target.value)}
-                                className="input-field animate-fade-in"
+                                className="input-field animate-fade-in bg-white"
                             >
                                 <option value="">Select a customer...</option>
                                 {customers.map((c) => (
@@ -222,20 +222,20 @@ export default function NewInvoicePage() {
                         )}
 
                         {isWalkIn && (
-                            <div className="p-4 bg-brand-primary/5 rounded-2xl border border-brand-primary/10 animate-fade-in flex items-center gap-4">
-                                <div className="w-10 h-10 bg-brand-primary/10 rounded-xl flex items-center justify-center text-xl shadow-inner">
+                            <div className="p-5 bg-emerald-50 rounded-2xl border border-emerald-100 animate-fade-in flex items-center gap-4">
+                                <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm border border-emerald-50">
                                     🛍️
                                 </div>
-                                <p className="text-sm text-surface-secondary font-medium">
-                                    Recording as a <strong className="text-brand-primary">Walk-in Customer</strong>. Name will not be required for this transaction.
+                                <p className="text-sm text-emerald-800 font-medium leading-relaxed">
+                                    Recording as a <strong className="text-emerald-950 font-black">Walk-in Customer</strong>. No permanent record will be created for this visitor.
                                 </p>
                             </div>
                         )}
                     </div>
 
                     {/* Product Search & Add */}
-                    <div className="card p-6">
-                        <h2 className="text-xs font-black text-brand-primary uppercase tracking-[0.2em] mb-4">Stock Selection</h2>
+                    <div className="card p-8 shadow-sm">
+                        <h2 className="text-xs font-black text-brand-primary uppercase tracking-[0.3em] mb-6">Inventory Access</h2>
                         <div className="relative group">
                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-muted group-focus-within:text-brand-primary transition-colors">
                                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -247,32 +247,32 @@ export default function NewInvoicePage() {
                                 value={productSearch}
                                 onChange={(e) => setProductSearch(e.target.value)}
                                 placeholder="Find products by name, barcode, or SKU..."
-                                className="input-field pl-12 py-3.5"
+                                className="input-field pl-12 py-4 shadow-sm bg-white"
                             />
                         </div>
                         {productSearch && filteredProducts.length > 0 && (
-                            <div className="mt-4 border border-brand-border rounded-2xl max-h-64 overflow-y-auto divide-y divide-brand-border bg-brand-dark shadow-2xl">
+                            <div className="mt-4 border border-gray-100 rounded-2xl max-h-72 overflow-y-auto divide-y divide-gray-50 bg-white shadow-2xl relative z-10 ring-1 ring-gray-100">
                                 {filteredProducts.slice(0, 10).map((product) => (
                                     <button
                                         key={product.id}
                                         onClick={() => addItem(product)}
-                                        className="w-full flex items-center justify-between px-5 py-4 hover:bg-brand-primary/5 transition-all text-left group/item"
+                                        className="w-full flex items-center justify-between px-6 py-4 hover:bg-brand-primary/5 transition-all text-left group/item"
                                     >
                                         <div>
-                                            <p className="text-sm font-bold text-surface-primary group-hover/item:text-brand-primary transition-colors">{product.name}</p>
-                                            <div className="flex items-center gap-3 mt-1">
-                                                <span className="text-[10px] text-surface-muted font-mono uppercase tracking-widest bg-brand-card px-1.5 py-0.5 rounded border border-brand-border">
+                                            <p className="text-sm font-black text-surface-primary group-hover/item:text-brand-primary transition-colors">{product.name}</p>
+                                            <div className="flex items-center gap-3 mt-1.5">
+                                                <span className="text-[10px] text-surface-muted font-mono font-black uppercase tracking-widest bg-gray-50 px-2 py-0.5 rounded border border-gray-100">
                                                     {product.barcode || 'NO-BARCODE'}
                                                 </span>
-                                                <span className={`text-[10px] font-bold uppercase ${product.stock_quantity <= 5 ? 'text-status-danger' : 'text-brand-secondary'}`}>
+                                                <span className={`text-[10px] font-black uppercase tracking-tighter ${product.stock_quantity <= 5 ? 'text-status-danger' : 'text-emerald-500'}`}>
                                                     Stock: {product.stock_quantity}
                                                 </span>
                                             </div>
                                         </div>
                                         <div className="text-right">
                                             <span className="text-sm font-black text-brand-primary">{formatCurrency(product.price)}</span>
-                                            <div className="text-[10px] text-surface-muted font-bold mt-0.5 group-hover/item:text-surface-secondary opacity-0 group-hover/item:opacity-100 transition-all">
-                                                Click to add
+                                            <div className="text-[10px] text-surface-muted font-black mt-1 group-hover/item:text-brand-primary opacity-0 group-hover/item:opacity-100 transition-all uppercase tracking-widest">
+                                                Add Item +
                                             </div>
                                         </div>
                                     </button>
@@ -280,69 +280,65 @@ export default function NewInvoicePage() {
                             </div>
                         )}
                         {productSearch && filteredProducts.length === 0 && (
-                            <div className="mt-4 p-8 bg-brand-dark rounded-2xl border border-brand-border text-center">
-                                <span className="text-3xl mb-3 block">🔍</span>
-                                <p className="text-sm text-surface-muted font-medium">No inventory matches your search</p>
+                            <div className="mt-4 p-10 bg-gray-50 rounded-2xl border border-gray-100 text-center animate-fade-in">
+                                <span className="text-4xl mb-4 block">🔍</span>
+                                <p className="text-sm text-surface-muted font-bold">No inventory matches your search</p>
                             </div>
                         )}
                     </div>
 
                     {/* Line Items */}
                     {items.length > 0 && (
-                        <div className="card overflow-hidden">
-                            <div className="px-6 py-4 bg-brand-teal/10 border-b border-brand-border flex items-center justify-between">
-                                <h2 className="text-xs font-black text-brand-primary uppercase tracking-[0.2em]">Item List</h2>
-                                <span className="text-[10px] font-bold text-surface-muted">{items.length} Product(s)</span>
+                        <div className="card overflow-hidden shadow-sm">
+                            <div className="px-8 py-5 bg-gray-50 border-b border-gray-100 flex items-center justify-between">
+                                <h2 className="text-xs font-black text-brand-primary uppercase tracking-[0.3em]">Itemized List</h2>
+                                <span className="text-[10px] font-black text-surface-muted uppercase tracking-widest">{items.length} Product(s)</span>
                             </div>
                             <div className="overflow-x-auto">
                                 <table className="w-full">
                                     <thead>
-                                        <tr className="border-b border-brand-border bg-brand-dark/30">
-                                            <th className="text-left px-6 py-3 text-[10px] font-black text-surface-muted uppercase tracking-wider">Product Description</th>
-                                            <th className="text-center px-6 py-3 text-[10px] font-black text-surface-muted uppercase tracking-wider w-28">Quantity</th>
-                                            <th className="text-center px-6 py-3 text-[10px] font-black text-surface-muted uppercase tracking-wider w-36">Rate</th>
-                                            <th className="text-right px-6 py-3 text-[10px] font-black text-surface-muted uppercase tracking-wider">Line Total</th>
-                                            <th className="w-14"></th>
+                                        <tr className="border-b border-gray-100 bg-gray-50/50">
+                                            <th className="text-left px-8 py-4 text-[10px] font-black text-surface-muted uppercase tracking-[0.2em]">Product Description</th>
+                                            <th className="text-center px-8 py-4 text-[10px] font-black text-surface-muted uppercase tracking-[0.2em] w-32">Qty</th>
+                                            <th className="text-center px-8 py-4 text-[10px] font-black text-surface-muted uppercase tracking-[0.2em] w-40">Rate</th>
+                                            <th className="text-right px-8 py-4 text-[10px] font-black text-surface-muted uppercase tracking-[0.2em]">Total</th>
+                                            <th className="w-16"></th>
                                         </tr>
                                     </thead>
-                                    <tbody className="divide-y divide-brand-border/50">
+                                    <tbody className="divide-y divide-gray-100">
                                         {items.map((item, idx) => (
-                                            <tr key={idx} className="animate-fade-in hover:bg-brand-teal/5 transition-colors group">
-                                                <td className="px-6 py-4">
-                                                    <div className="text-sm font-bold text-surface-primary">{item.product_name}</div>
-                                                    <div className="text-[10px] text-surface-muted font-mono mt-0.5">VAT EXCLUSIVE</div>
+                                            <tr key={idx} className="animate-fade-in hover:bg-gray-50 transition-colors group">
+                                                <td className="px-8 py-5">
+                                                    <div className="text-sm font-black text-surface-primary">{item.product_name}</div>
+                                                    <div className="text-[10px] text-surface-muted font-black tracking-widest mt-1 opacity-70">VAT EXEMPT</div>
                                                 </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center justify-center">
-                                                        <input
-                                                            type="number"
-                                                            min={1}
-                                                            max={item.max_qty}
-                                                            value={item.quantity}
-                                                            onChange={(e) => updateItemQty(idx, parseInt(e.target.value) || 1)}
-                                                            className="input-field w-16 px-1 h-9 bg-brand-background text-sm text-center border-brand-border focus:border-brand-primary"
-                                                        />
-                                                    </div>
+                                                <td className="px-8 py-5 text-center">
+                                                    <input
+                                                        type="number"
+                                                        min={1}
+                                                        max={item.max_qty}
+                                                        value={item.quantity}
+                                                        onChange={(e) => updateItemQty(idx, parseInt(e.target.value) || 1)}
+                                                        className="input-field w-16 px-1 h-10 bg-white text-sm text-center font-bold border-gray-200 focus:border-brand-primary/50 shadow-inner"
+                                                    />
                                                 </td>
-                                                <td className="px-6 py-4">
-                                                    <div className="flex items-center justify-center">
-                                                        <input
-                                                            type="number"
-                                                            min={0}
-                                                            step="0.01"
-                                                            value={item.price}
-                                                            onChange={(e) => updateItemPrice(idx, parseFloat(e.target.value) || 0)}
-                                                            className="input-field w-24 px-2 h-9 bg-brand-background text-sm text-center border-brand-border focus:border-brand-primary font-bold text-brand-primary"
-                                                        />
-                                                    </div>
+                                                <td className="px-8 py-5 text-center">
+                                                    <input
+                                                        type="number"
+                                                        min={0}
+                                                        step="0.01"
+                                                        value={item.price}
+                                                        onChange={(e) => updateItemPrice(idx, parseFloat(e.target.value) || 0)}
+                                                        className="input-field w-28 px-2 h-10 bg-white text-sm text-center border-gray-200 focus:border-brand-primary/50 font-black text-brand-primary shadow-inner"
+                                                    />
                                                 </td>
-                                                <td className="px-6 py-4 text-right text-sm font-black text-surface-primary">
+                                                <td className="px-8 py-5 text-right text-sm font-black text-surface-primary">
                                                     {formatCurrency(item.price * item.quantity)}
                                                 </td>
-                                                <td className="px-4 py-4 text-center">
+                                                <td className="px-6 py-5 text-center">
                                                     <button
                                                         onClick={() => removeItem(idx)}
-                                                        className="p-2 rounded-xl bg-brand-dark border border-brand-border text-status-danger hover:bg-status-danger hover:text-white transition-all shadow-sm active:scale-95"
+                                                        className="w-9 h-9 rounded-xl bg-white border border-gray-200 text-status-danger hover:bg-status-danger hover:text-white transition-all shadow-sm active:scale-90 flex items-center justify-center"
                                                         title="Remove item"
                                                     >
                                                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -363,18 +359,18 @@ export default function NewInvoicePage() {
                 {/* Right Column: Payment & Summary */}
                 <div className="lg:col-span-4 space-y-6">
                     {items.length > 0 && (
-                        <div className="card p-6 sticky top-24 border-brand-primary/20 shadow-brand-primary/5">
-                            <h2 className="text-xs font-black text-brand-primary uppercase tracking-[0.2em] mb-6">Order Summary</h2>
+                        <div className="card p-8 sticky top-24 border-brand-primary/20 bg-white shadow-2xl shadow-gray-200/50 ring-1 ring-brand-primary/5">
+                            <h2 className="text-xs font-black text-brand-primary uppercase tracking-[0.3em] mb-8">Financial Summary</h2>
 
-                            <div className="space-y-5">
+                            <div className="space-y-6">
                                 <div className="flex items-center justify-between">
-                                    <span className="text-sm font-bold text-surface-secondary">Grand Total</span>
-                                    <span className="text-3xl font-poppins font-black text-brand-primary">{formatCurrency(total)}</span>
+                                    <span className="text-sm font-black text-surface-secondary uppercase tracking-widest text-[10px]">Grand Total</span>
+                                    <span className="text-4xl font-poppins font-black text-brand-primary tracking-tighter">{formatCurrency(total)}</span>
                                 </div>
 
-                                <div className="pt-6 border-t border-brand-border">
-                                    <label className="block text-xs font-black text-surface-muted uppercase tracking-widest mb-4">Payment Status</label>
-                                    <div className="flex flex-col gap-2">
+                                <div className="pt-8 border-t border-gray-100">
+                                    <label className="block text-[10px] font-black text-surface-muted uppercase tracking-[0.3em] mb-5 opacity-70">Settlement Status</label>
+                                    <div className="flex flex-col gap-3">
                                         {(['unpaid', 'partial', 'paid'] as const).map((s) => {
                                             const isDisabled = isWalkIn && (s === 'unpaid' || s === 'partial');
                                             const isSelected = status === s;
@@ -384,15 +380,15 @@ export default function NewInvoicePage() {
                                                     type="button"
                                                     onClick={() => !isDisabled && handleStatusChange(s)}
                                                     disabled={isDisabled}
-                                                    className={`py-3 px-4 rounded-2xl text-xs font-black border-2 transition-all capitalize flex items-center justify-between ${isSelected
-                                                        ? 'bg-brand-primary/10 border-brand-primary text-brand-primary shadow-lg shadow-brand-primary/5'
+                                                    className={`py-4 px-6 rounded-2xl text-[10px] font-black border-2 transition-all uppercase tracking-widest flex items-center justify-between ${isSelected
+                                                        ? 'bg-brand-primary/5 border-brand-primary text-brand-primary shadow-lg shadow-brand-primary/10'
                                                         : isDisabled
-                                                            ? 'bg-brand-dark/50 border-brand-border text-surface-muted/30 cursor-not-allowed'
-                                                            : 'bg-brand-dark border-brand-border text-surface-muted hover:border-brand-primary/30 hover:text-surface-secondary'
+                                                            ? 'bg-gray-50 border-gray-100 text-surface-muted/30 cursor-not-allowed opacity-50'
+                                                            : 'bg-white border-gray-100 text-surface-muted hover:border-brand-primary/30 hover:text-brand-primary hover:shadow-md'
                                                         }`}
                                                 >
                                                     <span>{s}</span>
-                                                    {isSelected && <div className="w-2 h-2 rounded-full bg-brand-primary animate-pulse" />}
+                                                    {isSelected && <div className="w-2.5 h-2.5 rounded-full bg-brand-primary animate-pulse" />}
                                                 </button>
                                             );
                                         })}
@@ -400,10 +396,10 @@ export default function NewInvoicePage() {
                                 </div>
 
                                 {status === 'partial' && (
-                                    <div className="pt-2 animate-slide-down">
-                                        <label className="block text-xs font-black text-surface-muted uppercase tracking-widest mb-3">Amount Received (Rs.)</label>
-                                        <div className="relative">
-                                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-muted font-bold">Rs.</span>
+                                    <div className="pt-4 animate-slide-down">
+                                        <label className="block text-[10px] font-black text-surface-muted uppercase tracking-[0.3em] mb-4 opacity-70">Payment Received</label>
+                                        <div className="relative group">
+                                            <span className="absolute left-5 top-1/2 -translate-y-1/2 text-surface-muted font-black text-sm group-focus-within:text-brand-primary transition-colors">Rs.</span>
                                             <input
                                                 type="number"
                                                 min={0}
@@ -411,16 +407,16 @@ export default function NewInvoicePage() {
                                                 step="0.01"
                                                 value={paidAmount}
                                                 onChange={(e) => setPaidAmount(Math.min(total, Math.max(0, parseFloat(e.target.value) || 0)))}
-                                                className="input-field pl-12 font-black text-xl text-brand-primary"
+                                                className="input-field pl-14 py-4 font-black text-2xl text-brand-primary bg-gray-50/50 border-gray-200 focus:bg-white"
                                                 placeholder="0.00"
                                             />
                                         </div>
                                     </div>
                                 )}
 
-                                <div className="flex items-center justify-between py-4 px-5 bg-brand-background rounded-2xl border border-brand-border mt-6">
-                                    <span className="text-[10px] font-black text-surface-muted uppercase tracking-widest">Balance Due</span>
-                                    <span className={`text-lg font-black ${remaining > 0 ? 'text-status-danger' : 'text-brand-secondary'}`}>
+                                <div className="flex items-center justify-between py-5 px-6 bg-gray-50 rounded-[1.5rem] border border-gray-100 mt-8 shadow-inner">
+                                    <span className="text-[10px] font-black text-surface-muted uppercase tracking-[0.3em] opacity-70">Receivable</span>
+                                    <span className={`text-xl font-black ${remaining > 0 ? 'text-status-danger' : 'text-emerald-500'}`}>
                                         {formatCurrency(remaining)}
                                     </span>
                                 </div>
@@ -451,12 +447,13 @@ export default function NewInvoicePage() {
                     )}
 
                     {items.length === 0 && (
-                        <div className="card p-10 border-dashed border-brand-border bg-transparent flex flex-col items-center justify-center text-center">
-                            <div className="w-20 h-20 bg-brand-card rounded-3xl flex items-center justify-center text-4xl mb-6 shadow-xl border border-brand-border">
+                        <div className="card p-16 border-dashed border-2 border-gray-100 bg-white flex flex-col items-center justify-center text-center shadow-2xl shadow-gray-200/40 relative overflow-hidden group">
+                            <div className="absolute inset-0 bg-gray-50/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                            <div className="w-24 h-24 bg-gray-50 rounded-[2rem] flex items-center justify-center text-5xl mb-8 shadow-inner border border-gray-100 group-hover:scale-110 transition-transform relative z-10">
                                 🛒
                             </div>
-                            <h3 className="text-lg font-bold text-surface-primary mb-2">Cart is Empty</h3>
-                            <p className="text-sm text-surface-muted max-w-[200px]">Add products from the left to start billing.</p>
+                            <h3 className="text-xl font-black text-surface-primary mb-3 relative z-10 uppercase tracking-widest">Cart is Empty</h3>
+                            <p className="text-sm text-surface-muted max-w-[240px] leading-relaxed relative z-10 font-medium">Select products from the catalog to build your transaction summary.</p>
                         </div>
                     )}
                 </div>

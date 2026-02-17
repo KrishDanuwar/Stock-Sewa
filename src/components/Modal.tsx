@@ -31,14 +31,14 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
     return (
         <div
             ref={overlayRef}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-dark/80 backdrop-blur-md animate-fade-in"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-gray-900/40 backdrop-blur-sm animate-fade-in"
             onClick={(e) => {
                 if (e.target === overlayRef.current) onClose();
             }}
         >
-            <div className="bg-brand-card rounded-[2rem] shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up border border-brand-border">
-                <div className="flex items-center justify-between px-8 py-6 border-b border-brand-border bg-brand-teal/5">
-                    <h2 className="text-xl font-poppins font-bold text-surface-primary tracking-tight">{title}</h2>
+            <div className="bg-white rounded-[2rem] shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up border border-brand-border">
+                <div className="flex items-center justify-between px-8 py-6 border-b border-brand-border bg-gray-50/50">
+                    <h2 className="text-xl font-poppins font-black text-surface-primary tracking-tight">{title}</h2>
                     <button
                         onClick={onClose}
                         className="p-2 rounded-xl bg-brand-background border border-brand-border text-surface-muted hover:text-brand-primary transition-all active:scale-90"

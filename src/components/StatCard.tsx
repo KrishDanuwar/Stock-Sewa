@@ -9,19 +9,19 @@ interface StatCardProps {
 }
 
 const colorMap = {
-    blue: 'from-status-info/40 to-status-info',
-    green: 'from-brand-primary/40 to-brand-primary',
-    amber: 'from-status-warning/40 to-status-warning',
-    red: 'from-status-danger/40 to-status-danger',
-    purple: 'from-purple-500/40 to-purple-700',
+    blue: 'from-blue-400 to-blue-600',
+    green: 'from-brand-primary to-[#96f000]',
+    amber: 'from-amber-400 to-amber-600',
+    red: 'from-red-400 to-red-600',
+    purple: 'from-purple-400 to-purple-600',
 };
 
 const bgColorMap = {
-    blue: 'bg-status-info/10 text-status-info border-status-info/20',
+    blue: 'bg-blue-50 text-blue-600 border-blue-100',
     green: 'bg-brand-primary/10 text-brand-primary border-brand-primary/20',
-    amber: 'bg-status-warning/10 text-status-warning border-status-warning/20',
-    red: 'bg-status-danger/10 text-status-danger border-status-danger/20',
-    purple: 'bg-purple-500/10 text-purple-400 border-purple-500/20',
+    amber: 'bg-amber-50 text-amber-600 border-amber-100',
+    red: 'bg-red-50 text-red-600 border-red-100',
+    purple: 'bg-purple-50 text-purple-600 border-purple-100',
 };
 
 export default function StatCard({

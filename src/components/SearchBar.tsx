@@ -59,7 +59,7 @@ export default function SearchBar({ placeholder = 'Search...' }: SearchBarProps)
                 value={value}
                 onChange={(e) => setValue(e.target.value)}
                 placeholder={placeholder}
-                className="input-field pl-11 py-2.5 bg-brand-background border-brand-border text-surface-primary focus:border-brand-primary/50 transition-all font-medium"
+                className="input-field pl-11 py-2.5 bg-white border-brand-border text-surface-primary focus:border-brand-primary/50 transition-all font-medium shadow-sm"
             />
         </div>
     );

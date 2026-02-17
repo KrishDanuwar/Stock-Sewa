@@ -65,59 +65,60 @@ export function Sidebar({
 
             {/* Sidebar Container */}
             <aside
-                className={`fixed top-0 left-0 h-screen bg-brand-dark border-r border-brand-border z-40 transition-all duration-300 ease-in-out w-64 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed top-0 left-0 h-screen bg-white border-r border-brand-border z-40 transition-all duration-300 ease-in-out w-64 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
                 <div className="flex flex-col h-full">
                     {/* Brand */}
-                    <div className="p-6 border-b border-brand-border bg-brand-background">
-                        <Link href="/" className="flex items-center gap-3 group">
-                            <div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center shadow-lg p-1.5 group-hover:scale-105 transition-all duration-300 overflow-hidden">
+                    <div className="p-8 border-b border-brand-border">
+                        <Link href="/" className="flex items-center gap-4 group">
+                            <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center shadow-inner p-1 group-hover:scale-105 transition-all duration-300 relative overflow-hidden ring-1 ring-gray-100">
                                 <Image
                                     src="/logo.png"
-                                    alt="Logo"
+                                    alt="StockSewa Logo"
                                     width={40}
                                     height={40}
-                                    className="w-full h-full object-contain brightness-0"
+                                    className="object-contain"
+                                    priority
                                 />
                             </div>
                             <div className="flex flex-col">
-                                <span className="font-poppins font-bold text-surface-primary text-lg tracking-tight leading-none group-hover:text-brand-primary transition-colors">StockSewa</span>
-                                <span className="text-[10px] text-brand-primary font-bold uppercase tracking-widest mt-1">Premium Partner</span>
+                                <span className="font-poppins font-black text-surface-primary text-xl tracking-tighter leading-none group-hover:text-brand-primary transition-colors">StockSewa</span>
+                                <span className="text-[10px] text-brand-primary font-black uppercase tracking-[0.2em] mt-1.5">Enterprise</span>
                             </div>
                         </Link>
                     </div>
 
                     {/* Org Info */}
-                    <div className="px-4 py-3 border-b border-brand-border bg-brand-teal/20">
-                        <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-brand-card/50 border border-brand-border shadow-sm">
-                            <div className="w-8 h-8 rounded-lg bg-brand-primary/10 text-brand-primary flex items-center justify-center">
-                                <Building2 size={16} />
+                    <div className="px-5 py-5 border-b border-brand-border bg-gray-50/50">
+                        <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white border border-brand-border shadow-sm">
+                            <div className="w-9 h-9 rounded-xl bg-brand-primary/10 text-brand-primary flex items-center justify-center border border-brand-primary/10">
+                                <Building2 size={18} />
                             </div>
                             <div className="flex flex-col min-w-0">
-                                <span className="text-xs font-bold text-surface-primary truncate">
+                                <span className="text-xs font-black text-surface-primary truncate">
                                     {organizationName || 'My Organization'}
                                 </span>
-                                <span className="text-[10px] text-surface-muted truncate uppercase tracking-tighter">
-                                    Active Account
+                                <span className="text-[9px] text-surface-muted truncate uppercase font-bold tracking-wider">
+                                    Verified Account
                                 </span>
                             </div>
                         </div>
                     </div>
 
                     {/* Quick Action */}
-                    <div className="px-4 py-4">
+                    <div className="px-5 py-6">
                         <Link
                             href="/invoices/new"
-                            className="btn-primary w-full text-sm font-bold active:scale-95"
+                            className="btn-primary w-full text-[11px] font-black uppercase tracking-widest active:scale-95 shadow-xl shadow-brand-primary/10 py-3.5"
                         >
-                            <Plus size={18} />
+                            <Plus size={16} strokeWidth={3} />
                             New Invoice
                         </Link>
                     </div>
 
                     {/* Navigation */}
-                    <nav className="flex-grow overflow-y-auto px-4 py-2 space-y-1 custom-scrollbar">
+                    <nav className="flex-grow overflow-y-auto px-4 py-2 space-y-1.5 custom-scrollbar">
                         {NAV_ITEMS.map((item) => {
                             const isActive = pathname === item.href;
                             const Icon = item.icon;
@@ -125,26 +126,28 @@ export function Sidebar({
                                 <Link
                                     key={item.name}
                                     href={item.href}
-                                    className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${isActive
-                                        ? 'bg-brand-primary/10 text-brand-primary font-bold'
-                                        : 'text-surface-secondary hover:bg-brand-teal/20 hover:text-surface-primary'
+                                    className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive
+                                        ? 'bg-brand-primary text-white font-black shadow-lg shadow-brand-primary/20'
+                                        : 'text-surface-secondary hover:bg-gray-100 hover:text-surface-primary'
                                         }`}
                                 >
                                     <Icon
                                         size={20}
-                                        className={isActive ? 'text-brand-primary' : 'text-surface-muted group-hover:text-surface-secondary'}
+                                        strokeWidth={isActive ? 3 : 2}
+                                        className={isActive ? 'text-white' : 'text-surface-muted group-hover:text-surface-primary transition-colors'}
                                     />
-                                    <span className="text-sm">{item.name}</span>
+                                    <span className={`text-xs ${isActive ? 'tracking-wide' : 'font-medium'}`}>{item.name}</span>
                                 </Link>
                             );
                         })}
                     </nav>
 
                     {/* Bottom Info */}
-                    <div className="p-4 border-t border-brand-border bg-brand-background">
-                        <div className="flex items-center justify-center gap-2 px-2 py-1">
-                            <span className="text-[10px] text-surface-muted truncate tracking-tight font-bold uppercase">
-                                Secure Cloud Channel
+                    <div className="p-6 border-t border-brand-border bg-gray-50">
+                        <div className="flex items-center justify-center gap-3">
+                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                            <span className="text-[10px] text-surface-muted font-black uppercase tracking-[0.2em]">
+                                System Operational
                             </span>
                         </div>
                     </div>
