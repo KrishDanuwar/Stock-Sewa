@@ -1,30 +1,23 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
-import { headers } from 'next/headers';
-
-function getBaseURL(request: Request) {
-    const { origin } = new URL(request.url);
-    if (origin && !origin.includes('localhost')) return origin;
-
-    // Fallback to headers for more robustness
-    const host = headers().get('host');
-    const protocol = host?.includes('localhost') ? 'http' : 'https';
-    return `${protocol}://${host}`;
-}
 
 export async function GET(request: Request) {
-    const url = new URL(request.url);
-    const origin = getBaseURL(request);
-    const code = url.searchParams.get('code');
-    const next = url.searchParams.get('next') ?? '/';
+    const requestUrl = new URL(request.url);
+    const code = requestUrl.searchParams.get('code');
+    const origin = requestUrl.origin;
+    const next = requestUrl.searchParams.get('next') ?? '/';
 
     if (code) {
         const supabase = createClient();
         const { error } = await supabase.auth.exchangeCodeForSession(code);
+
         if (!error) {
             return NextResponse.redirect(`${origin}${next}`);
         }
+
+        console.error('Auth error:', error.message);
+        return NextResponse.redirect(`${origin}/auth/login?error=${encodeURIComponent(error.message)}`);
     }
 
-    return NextResponse.redirect(`${origin}/auth/login?error=OAuth callback failed`);
+    return NextResponse.redirect(`${origin}/auth/login?error=No code provided`);
 }

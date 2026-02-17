@@ -50,8 +50,9 @@ export async function signup(formData: FormData) {
 
 export async function signInWithGoogle() {
     const supabase = createClient();
-    const host = headers().get('host');
-    const protocol = host?.includes('localhost') ? 'http' : 'https';
+    const headersList = headers();
+    const host = headersList.get('x-forwarded-host') || headersList.get('host');
+    const protocol = headersList.get('x-forwarded-proto') || (host?.includes('localhost') ? 'http' : 'https');
     const origin = `${protocol}://${host}`;
 
     const { data, error } = await supabase.auth.signInWithOAuth({
