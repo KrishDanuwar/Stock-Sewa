@@ -171,7 +171,7 @@ export async function settleCustomerCredit(customerId: string, amount: number) {
                     notes: 'Bulk credit settlement'
                 });
 
-            if (payErr) return { error: `Failed to record payment for ${invoice.invoice_number}` };
+            if (payErr) return { error: `Failed to record payment for ${invoice.invoice_number}: ${payErr.message}` };
 
             remainingPayment -= payToApply;
         }
