@@ -27,40 +27,19 @@ export async function signup(formData: FormData) {
     const password = formData.get('password') as string;
     const orgName = formData.get('orgName') as string;
 
-    // 1. Sign up the user
+    // 1. Sign up the user (Database trigger handles Org/Profile creation)
     const { data: authData, error: authError } = await supabase.auth.signUp({
         email,
         password,
+        options: {
+            data: {
+                org_name: orgName,
+            },
+        },
     });
 
     if (authError || !authData.user) {
         return { error: authError?.message || 'Signup failed' };
-    }
-
-    // 2. Create the organization
-    const { data: org, error: orgError } = await supabase
-        .from('organizations')
-        .insert({
-            name: orgName,
-            owner_id: authData.user.id,
-            subscription_status: 'trialing', // Start with a trial
-        })
-        .select()
-        .single();
-
-    if (orgError) {
-        return { error: orgError.message };
-    }
-
-    // 3. Create the profile
-    const { error: profileError } = await supabase.from('profiles').insert({
-        id: authData.user.id,
-        organization_id: org.id,
-        email: email,
-    });
-
-    if (profileError) {
-        return { error: profileError.message };
     }
 
     revalidatePath('/', 'layout');

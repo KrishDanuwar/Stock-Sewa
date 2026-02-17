@@ -94,7 +94,40 @@ CREATE TABLE IF NOT EXISTS payments (
 );
 
 -- ============================================
--- Row Level Security (Multi-tenant isolation)
+-- 9/10. Supabase Native Auth Trigger
+-- Automatically create Org and Profile on signup
+-- ============================================
+
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+DECLARE
+  org_id UUID;
+  org_name TEXT;
+BEGIN
+  -- Extract org_name from metadata
+  org_name := COALESCE(new.raw_user_meta_data->>'org_name', 'My Organization');
+
+  -- 1. Create Organization
+  INSERT INTO public.organizations (name, owner_id, subscription_status)
+  VALUES (org_name, new.id, 'trialing')
+  RETURNING id INTO org_id;
+
+  -- 2. Create Profile
+  INSERT INTO public.profiles (id, organization_id, email)
+  VALUES (new.id, org_id, new.email);
+
+  RETURN new;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Trigger the function every time a user is created in auth.users
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+
+-- ============================================
+-- Row Level Security (STRICT MODE)
 -- ============================================
 
 ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
@@ -106,20 +139,22 @@ ALTER TABLE invoice_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE stock_movements ENABLE ROW LEVEL SECURITY;
 ALTER TABLE payments ENABLE ROW LEVEL SECURITY;
 
--- Profiles: Users can manage their own profile
+-- Profiles: Users can ONLY see their own profile
 DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
 
 DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
-CREATE POLICY "Users can insert own profile" ON profiles FOR INSERT WITH CHECK (true);
+-- No longer needed for frontend as trigger handles it, but keep for safety/manual
+CREATE POLICY "Users can insert own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
--- Organizations: Users can manage organizations they own or belong to
+-- Organizations: Users can ONLY see the organization they belong to
 DROP POLICY IF EXISTS "Users can view own organization" ON organizations;
 CREATE POLICY "Users can view own organization" ON organizations FOR SELECT 
 USING (id IN (SELECT organization_id FROM profiles WHERE id = auth.uid()) OR owner_id = auth.uid());
 
 DROP POLICY IF EXISTS "Users can insert organizations" ON organizations;
-CREATE POLICY "Users can insert organizations" ON organizations FOR INSERT WITH CHECK (true);
+-- No longer needed for frontend as trigger handles it
+CREATE POLICY "Users can insert organizations" ON organizations FOR INSERT WITH CHECK (auth.uid() = owner_id);
 
 DROP POLICY IF EXISTS "Owners can update organization" ON organizations;
 CREATE POLICY "Owners can update organization" ON organizations FOR UPDATE USING (auth.uid() = owner_id);
