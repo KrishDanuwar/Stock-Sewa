@@ -5,7 +5,7 @@ import { getOrgContext } from '@/lib/org-context';
 import { revalidatePath } from 'next/cache';
 
 export async function getStockMovements(productId?: string) {
-    const ctx = await getOrgContext();
+    const ctx = getOrgContext();
     if (!ctx) return [];
 
     const supabase = createClient();
@@ -25,45 +25,47 @@ export async function getStockMovements(productId?: string) {
 }
 
 export async function addStockIn(formData: FormData) {
-    const ctx = await getOrgContext();
-    if (!ctx) throw new Error('Unauthorized');
+    const ctx = getOrgContext();
+    if (!ctx) return { error: 'Unauthorized' };
 
     const supabase = createClient();
     const product_id = formData.get('product_id') as string;
     const quantity = parseInt(formData.get('quantity') as string);
     const reference = formData.get('reference') as string;
 
-    // Update product stock
-    const { data: product, error: prodErr } = await supabase
-        .from('products')
-        .select('stock_quantity')
-        .eq('id', product_id)
-        .eq('organization_id', ctx.organizationId)
-        .single();
+    try {
+        // Update product stock
+        const { data: product, error: prodErr } = await supabase
+            .from('products')
+            .select('stock_quantity')
+            .eq('id', product_id)
+            .eq('organization_id', ctx.organizationId)
+            .single();
 
-    if (prodErr) throw new Error(prodErr.message);
+        if (prodErr) return { error: prodErr.message };
 
-    const { error: updateErr } = await supabase
-        .from('products')
-        .update({ stock_quantity: product.stock_quantity + quantity })
-        .eq('id', product_id)
-        .eq('organization_id', ctx.organizationId);
+        const { error: updateErr } = await supabase
+            .from('products')
+            .update({ stock_quantity: (product?.stock_quantity || 0) + quantity })
+            .eq('id', product_id)
+            .eq('organization_id', ctx.organizationId);
 
-    if (updateErr) throw new Error(updateErr.message);
+        if (updateErr) return { error: updateErr.message };
 
-    // Create stock movement record
-    const { error: mvErr } = await supabase.from('stock_movements').insert({
-        organization_id: ctx.organizationId,
-        product_id,
-        type: 'IN',
-        quantity,
-        reference: reference || 'Manual stock in',
-    });
+        // Create stock movement record
+        const { error: mvErr } = await supabase.from('stock_movements').insert({
+            organization_id: ctx.organizationId,
+            product_id,
+            type: 'IN',
+            quantity,
+            reference: reference || 'Manual stock in',
+        });
 
-    if (mvErr) throw new Error(mvErr.message);
+        if (mvErr) return { error: mvErr.message };
 
-    revalidatePath('/stock');
-    revalidatePath('/products');
-    revalidatePath('/');
-    return { success: true };
+        // revalidatePath removed for stability
+        return { success: true };
+    } catch (err: any) {
+        return { error: err.message || 'Stock update failed' };
+    }
 }
