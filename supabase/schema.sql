@@ -111,7 +111,7 @@ DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
 
 DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
-CREATE POLICY "Users can insert own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
+CREATE POLICY "Users can insert own profile" ON profiles FOR INSERT WITH CHECK (true);
 
 -- Organizations: Users can manage organizations they own or belong to
 DROP POLICY IF EXISTS "Users can view own organization" ON organizations;
@@ -119,7 +119,7 @@ CREATE POLICY "Users can view own organization" ON organizations FOR SELECT
 USING (id IN (SELECT organization_id FROM profiles WHERE id = auth.uid()) OR owner_id = auth.uid());
 
 DROP POLICY IF EXISTS "Users can insert organizations" ON organizations;
-CREATE POLICY "Users can insert organizations" ON organizations FOR INSERT WITH CHECK (auth.uid() = owner_id);
+CREATE POLICY "Users can insert organizations" ON organizations FOR INSERT WITH CHECK (true);
 
 DROP POLICY IF EXISTS "Owners can update organization" ON organizations;
 CREATE POLICY "Owners can update organization" ON organizations FOR UPDATE USING (auth.uid() = owner_id);
