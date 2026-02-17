@@ -5,7 +5,7 @@ import { getOrgContext } from '@/lib/org-context';
 import { revalidatePath } from 'next/cache';
 
 export async function getCustomers(search?: string) {
-    const ctx = await getOrgContext();
+    const ctx = getOrgContext();
     if (!ctx) return [];
 
     const supabase = createClient();
@@ -25,7 +25,7 @@ export async function getCustomers(search?: string) {
 }
 
 export async function getCustomer(id: string) {
-    const ctx = await getOrgContext();
+    const ctx = getOrgContext();
     if (!ctx) throw new Error('Unauthorized');
 
     const supabase = createClient();
@@ -41,7 +41,7 @@ export async function getCustomer(id: string) {
 }
 
 export async function getCustomerWithCredit(id: string) {
-    const ctx = await getOrgContext();
+    const ctx = getOrgContext();
     if (!ctx) throw new Error('Unauthorized');
 
     const supabase = createClient();
@@ -72,7 +72,7 @@ export async function getCustomerWithCredit(id: string) {
 }
 
 export async function createCustomer(formData: FormData) {
-    const ctx = await getOrgContext();
+    const ctx = getOrgContext();
     if (!ctx) throw new Error('Unauthorized');
 
     const supabase = createClient();
@@ -80,20 +80,24 @@ export async function createCustomer(formData: FormData) {
     const phone = formData.get('phone') as string;
     const address = formData.get('address') as string;
 
-    const { error } = await supabase.from('customers').insert({
-        organization_id: ctx.organizationId,
-        name,
-        phone,
-        address,
-    });
+    try {
+        const { error } = await supabase.from('customers').insert({
+            organization_id: ctx.organizationId,
+            name,
+            phone,
+            address,
+        });
 
-    if (error) throw new Error(error.message);
-    revalidatePath('/customers');
-    return { success: true };
+        if (error) return { error: error.message };
+        revalidatePath('/customers');
+        return { success: true };
+    } catch (err: any) {
+        return { error: err.message || 'Database error' };
+    }
 }
 
 export async function updateCustomer(id: string, formData: FormData) {
-    const ctx = await getOrgContext();
+    const ctx = getOrgContext();
     if (!ctx) throw new Error('Unauthorized');
 
     const supabase = createClient();
@@ -101,74 +105,80 @@ export async function updateCustomer(id: string, formData: FormData) {
     const phone = formData.get('phone') as string;
     const address = formData.get('address') as string;
 
-    const { error } = await supabase
-        .from('customers')
-        .update({ name, phone, address })
-        .eq('id', id)
-        .eq('organization_id', ctx.organizationId);
+    try {
+        const { error } = await supabase
+            .from('customers')
+            .update({ name, phone, address })
+            .eq('id', id)
+            .eq('organization_id', ctx.organizationId);
 
-    if (error) throw new Error(error.message);
-    revalidatePath('/customers');
-    return { success: true };
+        if (error) return { error: error.message };
+        revalidatePath('/customers');
+        return { success: true };
+    } catch (err: any) {
+        return { error: err.message || 'Update failed' };
+    }
 }
 
 export async function settleCustomerCredit(customerId: string, amount: number) {
-    const ctx = await getOrgContext();
+    const ctx = getOrgContext();
     if (!ctx) throw new Error('Unauthorized');
 
     const supabase = createClient();
 
-    // Get all pending invoices for this customer
-    const { data: invoices, error: invErr } = await supabase
-        .from('invoices')
-        .select('*')
-        .eq('customer_id', customerId)
-        .eq('organization_id', ctx.organizationId)
-        .in('status', ['unpaid', 'partial'])
-        .order('created_at', { ascending: true }); // Oldest first
-
-    if (invErr) throw new Error(invErr.message);
-    if (!invoices || invoices.length === 0) throw new Error('No pending credit found');
-
-    let remainingPayment = amount;
-
-    for (const invoice of invoices) {
-        if (remainingPayment <= 0) break;
-
-        const payToApply = Math.min(remainingPayment, Number(invoice.remaining_amount));
-        const newPaidAmount = Number(invoice.paid_amount) + payToApply;
-        const newRemainingAmount = Number(invoice.remaining_amount) - payToApply;
-        const newStatus = newRemainingAmount <= 0 ? 'paid' : 'partial';
-
-        // Update invoice
-        const { error: updErr } = await supabase
+    try {
+        // Get all pending invoices for this customer
+        const { data: invoices, error: invErr } = await supabase
             .from('invoices')
-            .update({
-                paid_amount: newPaidAmount,
-                remaining_amount: newRemainingAmount,
-                status: newStatus
-            })
-            .eq('id', invoice.id);
+            .select('*')
+            .eq('customer_id', customerId)
+            .eq('organization_id', ctx.organizationId)
+            .in('status', ['unpaid', 'partial'])
+            .order('created_at', { ascending: true }); // Oldest first
 
-        if (updErr) throw new Error(`Failed to update invoice ${invoice.invoice_number}: ${updErr.message}`);
+        if (invErr) return { error: invErr.message };
+        if (!invoices || invoices.length === 0) return { error: 'No pending credit found' };
 
-        // Create payment record
-        const { error: payErr } = await supabase
-            .from('payments')
-            .insert({
-                organization_id: ctx.organizationId,
-                invoice_id: invoice.id,
-                amount: payToApply,
-                notes: 'Bulk credit settlement'
-            });
+        let remainingPayment = amount;
 
-        if (payErr) throw new Error(`Failed to record payment for ${invoice.invoice_number}`);
+        for (const invoice of invoices) {
+            if (remainingPayment <= 0) break;
 
-        remainingPayment -= payToApply;
+            const payToApply = Math.min(remainingPayment, Number(invoice.remaining_amount));
+            const newPaidAmount = Number(invoice.paid_amount) + payToApply;
+            const newRemainingAmount = Number(invoice.remaining_amount) - payToApply;
+            const newStatus = newRemainingAmount <= 0 ? 'paid' : 'partial';
+
+            // Update invoice
+            const { error: updErr } = await supabase
+                .from('invoices')
+                .update({
+                    paid_amount: newPaidAmount,
+                    remaining_amount: newRemainingAmount,
+                    status: newStatus
+                })
+                .eq('id', invoice.id);
+
+            if (updErr) return { error: `Failed to update invoice ${invoice.invoice_number}: ${updErr.message}` };
+
+            // Create payment record
+            const { error: payErr } = await supabase
+                .from('payments')
+                .insert({
+                    organization_id: ctx.organizationId,
+                    invoice_id: invoice.id,
+                    amount: payToApply,
+                    notes: 'Bulk credit settlement'
+                });
+
+            if (payErr) return { error: `Failed to record payment for ${invoice.invoice_number}` };
+
+            remainingPayment -= payToApply;
+        }
+
+        // revalidatePath removed to prevent RSC crashes
+        return { success: true };
+    } catch (err: any) {
+        return { error: err.message || 'Settlement failed' };
     }
-
-    revalidatePath('/customers');
-    revalidatePath(`/customers/${customerId}`);
-    revalidatePath('/invoices');
-    return { success: true };
 }

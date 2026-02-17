@@ -40,11 +40,18 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
 
         try {
             const formData = new FormData(e.currentTarget);
+            let result: any;
             if (editCustomer) {
-                await updateCustomer(editCustomer.id, formData);
+                result = await updateCustomer(editCustomer.id, formData);
             } else {
-                await createCustomer(formData);
+                result = await createCustomer(formData);
             }
+
+            if (result?.error) {
+                setError(result.error);
+                return;
+            }
+
             setModalOpen(false);
             setEditCustomer(null);
             window.location.reload();
@@ -62,7 +69,11 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
         setError('');
 
         try {
-            await settleCustomerCredit(settleCustomer.id, settleAmount);
+            const result = await settleCustomerCredit(settleCustomer.id, settleAmount) as any;
+            if (result?.error) {
+                setError(result.error);
+                return;
+            }
             setSettleModalOpen(false);
             setSettleCustomer(null);
             setSettleAmount(0);

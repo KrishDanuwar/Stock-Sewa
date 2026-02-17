@@ -26,7 +26,7 @@ function generateInvoiceNumber(): string {
 }
 
 export async function getInvoices(search?: string, status?: string) {
-    const ctx = await getOrgContext();
+    const ctx = getOrgContext();
     if (!ctx) return [];
 
     const supabase = createClient();
@@ -50,7 +50,7 @@ export async function getInvoices(search?: string, status?: string) {
 }
 
 export async function getInvoice(id: string) {
-    const ctx = await getOrgContext();
+    const ctx = getOrgContext();
     if (!ctx) throw new Error('Unauthorized');
 
     const supabase = createClient();
@@ -84,7 +84,7 @@ export async function getInvoice(id: string) {
 }
 
 export async function getRecentInvoices(limit: number = 5) {
-    const ctx = await getOrgContext();
+    const ctx = getOrgContext();
     if (!ctx) return [];
 
     const supabase = createClient();
@@ -100,108 +100,91 @@ export async function getRecentInvoices(limit: number = 5) {
 }
 
 export async function createInvoice(invoiceData: CreateInvoiceData) {
-    const ctx = await getOrgContext();
-    if (!ctx) throw new Error('Unauthorized');
+    const ctx = getOrgContext();
+    if (!ctx) return { error: 'Unauthorized' };
 
     const supabase = createClient();
     const { customer_id, items, paid_amount } = invoiceData;
 
-    // Calculate totals
-    const total_amount = items.reduce(
-        (sum, item) => sum + item.price * item.quantity,
-        0
-    );
-    const remaining_amount = total_amount - paid_amount;
-    let status: string;
-    if (remaining_amount <= 0) {
-        status = 'paid';
-    } else if (paid_amount > 0) {
-        status = 'partial';
-    } else {
-        status = 'unpaid';
-    }
+    try {
+        // Calculate totals
+        const total_amount = items.reduce(
+            (sum, item) => sum + item.price * item.quantity,
+            0
+        );
+        const remaining_amount = total_amount - paid_amount;
+        let status: string;
+        if (remaining_amount <= 0) {
+            status = 'paid';
+        } else if (paid_amount > 0) {
+            status = 'partial';
+        } else {
+            status = 'unpaid';
+        }
 
-    const invoice_number = generateInvoiceNumber();
+        const invoice_number = generateInvoiceNumber();
 
-    // 1. Insert invoice
-    const { data: invoice, error: invErr } = await supabase
-        .from('invoices')
-        .insert({
-            organization_id: ctx.organizationId,
-            invoice_number,
-            customer_id,
-            total_amount,
-            paid_amount,
-            remaining_amount: Math.max(0, remaining_amount),
-            status,
-        })
-        .select()
-        .single();
-
-    if (invErr) throw new Error(invErr.message);
-
-    // 2. Insert invoice items
-    const invoiceItems = items.map((item) => ({
-        organization_id: ctx.organizationId,
-        invoice_id: invoice.id,
-        product_id: item.product_id,
-        quantity: item.quantity,
-        price: item.price,
-        subtotal: item.price * item.quantity,
-    }));
-
-    const { error: itemsErr } = await supabase
-        .from('invoice_items')
-        .insert(invoiceItems);
-
-    if (itemsErr) throw new Error(itemsErr.message);
-
-    // 3. Deduct stock and create stock movements
-    for (const item of items) {
-        // Deduct stock
-        const { data: product, error: prodErr } = await supabase
-            .from('products')
-            .select('stock_quantity')
-            .eq('id', item.product_id)
-            .eq('organization_id', ctx.organizationId)
+        // 1. Insert invoice
+        const { data: invoice, error: invErr } = await supabase
+            .from('invoices')
+            .insert({
+                organization_id: ctx.organizationId,
+                invoice_number,
+                customer_id,
+                total_amount,
+                paid_amount,
+                remaining_amount: Math.max(0, remaining_amount),
+                status,
+            })
+            .select()
             .single();
 
-        if (prodErr) throw new Error(prodErr.message);
+        if (invErr) return { error: invErr.message };
 
-        const newQty = product.stock_quantity - item.quantity;
-        const { error: updateErr } = await supabase
-            .from('products')
-            .update({ stock_quantity: Math.max(0, newQty) })
-            .eq('id', item.product_id)
-            .eq('organization_id', ctx.organizationId);
-
-        if (updateErr) throw new Error(updateErr.message);
-
-        // Create stock movement
-        const { error: mvErr } = await supabase.from('stock_movements').insert({
-            organization_id: ctx.organizationId,
-            product_id: item.product_id,
-            type: 'OUT',
-            quantity: item.quantity,
-            reference: `Invoice ${invoice_number}`,
-        });
-
-        if (mvErr) throw new Error(mvErr.message);
-    }
-
-    // 4. Record initial payment if any
-    if (paid_amount > 0) {
-        const { error: payErr } = await supabase.from('payments').insert({
+        // 2. Insert invoice items
+        const invoiceItems = items.map((item) => ({
             organization_id: ctx.organizationId,
             invoice_id: invoice.id,
-            amount: paid_amount,
-        });
+            product_id: item.product_id,
+            quantity: item.quantity,
+            price: item.price,
+            subtotal: item.price * item.quantity,
+        }));
 
-        if (payErr) throw new Error(payErr.message);
+        const { error: itemsErr } = await supabase.from('invoice_items').insert(invoiceItems);
+        if (itemsErr) return { error: itemsErr.message };
+
+        for (const item of items) {
+            const { data: product } = await supabase
+                .from('products')
+                .select('stock_quantity')
+                .eq('id', item.product_id)
+                .single();
+
+            await supabase
+                .from('products')
+                .update({ stock_quantity: Math.max(0, (product?.stock_quantity || 0) - item.quantity) })
+                .eq('id', item.product_id);
+
+            await supabase.from('stock_movements').insert({
+                organization_id: ctx.organizationId,
+                product_id: item.product_id,
+                type: 'OUT',
+                quantity: item.quantity,
+                reference: `Invoice ${invoice_number}`,
+            });
+        }
+
+        if (paid_amount > 0) {
+            await supabase.from('payments').insert({
+                organization_id: ctx.organizationId,
+                invoice_id: invoice.id,
+                amount: paid_amount,
+            });
+        }
+
+        return { success: true, id: invoice.id };
+    } catch (err: any) {
+        return { error: err.message || 'Invoice creation failed' };
     }
-
-    revalidatePath('/invoices');
-    revalidatePath('/products');
-    revalidatePath('/');
-    return { success: true, id: invoice.id };
 }

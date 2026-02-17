@@ -9,7 +9,7 @@ function generateBarcode() {
 }
 
 export async function getProducts(search?: string) {
-    const ctx = await getOrgContext();
+    const ctx = getOrgContext();
     if (!ctx) return [];
 
     const supabase = createClient();
@@ -29,7 +29,7 @@ export async function getProducts(search?: string) {
 }
 
 export async function getProduct(id: string) {
-    const ctx = await getOrgContext();
+    const ctx = getOrgContext();
     if (!ctx) throw new Error('Unauthorized');
 
     const supabase = createClient();
@@ -45,8 +45,8 @@ export async function getProduct(id: string) {
 }
 
 export async function createProduct(formData: FormData) {
-    const ctx = await getOrgContext();
-    if (!ctx) throw new Error('Unauthorized');
+    const ctx = getOrgContext();
+    if (!ctx) return { error: 'Unauthorized' };
 
     const supabase = createClient();
     const name = formData.get('name') as string;
@@ -55,23 +55,26 @@ export async function createProduct(formData: FormData) {
     const stock_quantity = parseInt(formData.get('stock_quantity') as string);
     const barcode = (formData.get('barcode') as string) || generateBarcode();
 
-    const { error } = await supabase.from('products').insert({
-        organization_id: ctx.organizationId,
-        name,
-        description,
-        price,
-        stock_quantity,
-        barcode,
-    });
+    try {
+        const { error } = await supabase.from('products').insert({
+            organization_id: ctx.organizationId,
+            name,
+            description,
+            price,
+            stock_quantity,
+            barcode,
+        });
 
-    if (error) throw new Error(error.message);
-    revalidatePath('/products');
-    return { success: true };
+        if (error) return { error: error.message };
+        return { success: true };
+    } catch (err: any) {
+        return { error: err.message || 'Creation failed' };
+    }
 }
 
 export async function updateProduct(id: string, formData: FormData) {
-    const ctx = await getOrgContext();
-    if (!ctx) throw new Error('Unauthorized');
+    const ctx = getOrgContext();
+    if (!ctx) return { error: 'Unauthorized' };
 
     const supabase = createClient();
     const name = formData.get('name') as string;
@@ -80,34 +83,40 @@ export async function updateProduct(id: string, formData: FormData) {
     const stock_quantity = parseInt(formData.get('stock_quantity') as string);
     const barcode = formData.get('barcode') as string;
 
-    const { error } = await supabase
-        .from('products')
-        .update({
-            name,
-            description,
-            price,
-            stock_quantity,
-            barcode: barcode || undefined,
-        })
-        .eq('id', id)
-        .eq('organization_id', ctx.organizationId);
+    try {
+        const { error } = await supabase
+            .from('products')
+            .update({
+                name,
+                description,
+                price,
+                stock_quantity,
+                barcode: barcode || undefined,
+            })
+            .eq('id', id)
+            .eq('organization_id', ctx.organizationId);
 
-    if (error) throw new Error(error.message);
-    revalidatePath('/products');
-    return { success: true };
+        if (error) return { error: error.message };
+        return { success: true };
+    } catch (err: any) {
+        return { error: err.message || 'Update failed' };
+    }
 }
 
 export async function deleteProduct(id: string) {
-    const ctx = await getOrgContext();
-    if (!ctx) throw new Error('Unauthorized');
+    const ctx = getOrgContext();
+    if (!ctx) return { error: 'Unauthorized' };
 
     const supabase = createClient();
-    const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id)
-        .eq('organization_id', ctx.organizationId);
-    if (error) throw new Error(error.message);
-    revalidatePath('/products');
-    return { success: true };
+    try {
+        const { error } = await supabase
+            .from('products')
+            .delete()
+            .eq('id', id)
+            .eq('organization_id', ctx.organizationId);
+        if (error) return { error: error.message };
+        return { success: true };
+    } catch (err: any) {
+        return { error: err.message || 'Deletion failed' };
+    }
 }
