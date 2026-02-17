@@ -168,7 +168,6 @@ export async function settleCustomerCredit(customerId: string, amount: number) {
                     organization_id: ctx.organizationId,
                     invoice_id: invoice.id,
                     amount: payToApply,
-                    notes: 'Bulk credit settlement'
                 });
 
             if (payErr) return { error: `Failed to record payment for ${invoice.invoice_number}: ${payErr.message}` };

@@ -29,7 +29,7 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
     const [editCustomer, setEditCustomer] = useState<Customer | null>(null);
     const [settleModalOpen, setSettleModalOpen] = useState(false);
     const [settleCustomer, setSettleCustomer] = useState<Customer | null>(null);
-    const [settleAmount, setSettleAmount] = useState<number>(0);
+    const [settleAmount, setSettleAmount] = useState<string>('0');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -64,19 +64,25 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
 
     const handleSettleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!settleCustomer || settleAmount <= 0) return;
+        if (!settleCustomer || parseFloat(settleAmount) <= 0) return;
         setLoading(true);
         setError('');
 
         try {
-            const result = await settleCustomerCredit(settleCustomer.id, settleAmount) as any;
+            const amount = parseFloat(settleAmount);
+            if (isNaN(amount) || amount <= 0) {
+                setError('Please enter a valid amount');
+                setLoading(false);
+                return;
+            }
+            const result = await settleCustomerCredit(settleCustomer.id, amount) as any;
             if (result?.error) {
                 setError(result.error);
                 return;
             }
             setSettleModalOpen(false);
             setSettleCustomer(null);
-            setSettleAmount(0);
+            setSettleAmount('0');
             window.location.reload();
         } catch (err: any) {
             setError(err.message || 'Failed to settle credit');
@@ -141,7 +147,7 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
                                     <button
                                         onClick={() => {
                                             setSettleCustomer(customer);
-                                            setSettleAmount(customer.total_credit || 0);
+                                            setSettleAmount((customer.total_credit || 0).toString());
                                             setSettleModalOpen(true);
                                         }}
                                         className="w-full py-2 rounded-xl bg-surface-900 text-white text-xs font-bold hover:bg-surface-800 transition-all flex items-center justify-center gap-2 shadow-sm"
@@ -181,9 +187,8 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
                             type="number"
                             step="0.01"
                             min="0.01"
-                            max={settleCustomer?.total_credit}
                             value={settleAmount}
-                            onChange={(e) => setSettleAmount(parseFloat(e.target.value) || 0)}
+                            onChange={(e) => setSettleAmount(e.target.value)}
                             className="input-field font-bold text-lg"
                             required
                         />
