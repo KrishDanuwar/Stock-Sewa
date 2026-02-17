@@ -4,7 +4,7 @@ import { Building2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default async function BillingPage() {
-    const ctx = await getOrgContext().catch(() => null);
+    const ctx = getOrgContext();
 
     if (!ctx) {
         return (

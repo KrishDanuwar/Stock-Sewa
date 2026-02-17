@@ -4,7 +4,7 @@ import { getOrgContext } from '@/lib/org-context';
 import { NextResponse } from 'next/server';
 
 export async function createCheckoutSession(priceId: string) {
-    const ctx = await getOrgContext();
+    const ctx = getOrgContext();
     if (!ctx) throw new Error('Unauthorized');
 
     const { data: organization } = await createClient()
