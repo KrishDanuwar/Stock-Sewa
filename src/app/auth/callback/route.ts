@@ -1,11 +1,22 @@
 import { createClient } from '@/utils/supabase/server';
 import { NextResponse } from 'next/server';
+import { headers } from 'next/headers';
+
+function getBaseURL(request: Request) {
+    const { origin } = new URL(request.url);
+    if (origin && !origin.includes('localhost')) return origin;
+
+    // Fallback to headers for more robustness
+    const host = headers().get('host');
+    const protocol = host?.includes('localhost') ? 'http' : 'https';
+    return `${protocol}://${host}`;
+}
 
 export async function GET(request: Request) {
-    const { searchParams, origin } = new URL(request.url);
-    const code = searchParams.get('code');
-    // if "next" is in param, use it as the redirect URL
-    const next = searchParams.get('next') ?? '/';
+    const url = new URL(request.url);
+    const origin = getBaseURL(request);
+    const code = url.searchParams.get('code');
+    const next = url.searchParams.get('next') ?? '/';
 
     if (code) {
         const supabase = createClient();
@@ -15,6 +26,5 @@ export async function GET(request: Request) {
         }
     }
 
-    // return the user to an error page with instructions
     return NextResponse.redirect(`${origin}/auth/login?error=OAuth callback failed`);
 }
