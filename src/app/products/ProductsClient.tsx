@@ -5,7 +5,7 @@ import { createProduct, updateProduct, deleteProduct } from '@/lib/actions/produ
 import SearchBar from '@/components/SearchBar';
 import Modal from '@/components/Modal';
 import BarcodePrint from '@/components/BarcodePrint';
-import { Wand2, Printer } from 'lucide-react';
+import { Wand2, Printer, Plus } from 'lucide-react';
 import { printProductLabel } from '@/utils/print-utils';
 
 interface Product {
@@ -94,78 +94,88 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
 
     return (
         <>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-                <h1 className="page-header mb-0">Products</h1>
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <div className="flex-1 sm:flex-initial sm:w-64">
-                        <SearchBar placeholder="Search by name or barcode..." />
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10">
+                <div>
+                    <h1 className="text-3xl font-poppins font-bold text-surface-primary tracking-tight">Stock Inventory</h1>
+                    <p className="text-surface-muted text-sm font-medium">Manage and track your product catalog</p>
+                </div>
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                    <div className="flex-1 md:w-80">
+                        <SearchBar placeholder="Search by name, barcode, or SKU..." />
                     </div>
-                    <button onClick={openAdd} className="btn-primary whitespace-nowrap">+ Add Product</button>
+                    <button onClick={openAdd} className="btn-primary flex items-center gap-2 whitespace-nowrap active:scale-95 px-6">
+                        <Plus size={18} />
+                        Add Product
+                    </button>
                 </div>
             </div>
 
             {products.length === 0 ? (
-                <div className="card p-12 text-center">
-                    <p className="text-4xl mb-3">📦</p>
-                    <p className="text-lg font-medium text-surface-700 mb-1">No products found</p>
-                    <p className="text-sm text-surface-500 mb-4">Add your first product to get started</p>
-                    <button onClick={openAdd} className="btn-primary">+ Add Product</button>
+                <div className="card p-16 text-center border-dashed border-brand-border bg-transparent">
+                    <div className="w-20 h-20 bg-brand-card rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6 shadow-xl border border-brand-border">
+                        📦
+                    </div>
+                    <h3 className="text-xl font-bold text-surface-primary mb-2">No Products Yet</h3>
+                    <p className="text-sm text-surface-muted mb-8 max-w-sm mx-auto">Build your inventory by adding your first product to StockSewa.</p>
+                    <button onClick={openAdd} className="btn-primary px-8">Add First Product</button>
                 </div>
             ) : (
-                <div className="table-container">
+                <div className="table-container border border-brand-border/50">
                     <table className="w-full">
                         <thead>
-                            <tr className="border-b border-surface-200 bg-surface-50">
-                                <th className="text-left px-6 py-3 text-xs font-medium text-surface-500 uppercase tracking-wider">Product</th>
-                                <th className="text-left px-6 py-3 text-xs font-medium text-surface-500 uppercase tracking-wider">Barcode</th>
-                                <th className="text-left px-6 py-3 text-xs font-medium text-surface-500 uppercase tracking-wider">Price</th>
-                                <th className="text-left px-6 py-3 text-xs font-medium text-surface-500 uppercase tracking-wider">Stock</th>
-                                <th className="text-right px-6 py-3 text-xs font-medium text-surface-500 uppercase tracking-wider">Actions</th>
+                            <tr className="bg-brand-teal/20 border-b border-brand-border">
+                                <th className="text-left px-6 py-4 text-[10px] font-black text-surface-muted uppercase tracking-wider">Product Info</th>
+                                <th className="text-left px-6 py-4 text-[10px] font-black text-surface-muted uppercase tracking-wider">Stock Code</th>
+                                <th className="text-left px-6 py-4 text-[10px] font-black text-surface-muted uppercase tracking-wider">Unit Price</th>
+                                <th className="text-left px-6 py-4 text-[10px] font-black text-surface-muted uppercase tracking-wider">Available</th>
+                                <th className="text-right px-6 py-4 text-[10px] font-black text-surface-muted uppercase tracking-wider">Control</th>
                             </tr>
                         </thead>
-                        <tbody className="divide-y divide-surface-100">
+                        <tbody className="divide-y divide-brand-border/50">
                             {products.map((product) => (
-                                <tr key={product.id} className="hover:bg-surface-50 transition-colors animate-fade-in">
+                                <tr key={product.id} className="hover:bg-brand-teal/5 transition-colors animate-fade-in group">
                                     <td className="px-6 py-4">
                                         <div>
-                                            <p className="text-sm font-medium text-surface-900">{product.name}</p>
+                                            <p className="text-sm font-bold text-surface-primary group-hover:text-brand-primary transition-colors">{product.name}</p>
                                             {product.description && (
-                                                <p className="text-xs text-surface-500 mt-0.5 line-clamp-1">{product.description}</p>
+                                                <p className="text-xs text-surface-muted mt-0.5 line-clamp-1 italic">{product.description}</p>
                                             )}
                                         </div>
                                     </td>
-                                    <td className="px-6 py-4 text-sm text-surface-600 font-mono">{product.barcode || '—'}</td>
-                                    <td className="px-6 py-4 text-sm font-medium text-surface-900">{formatCurrency(product.price)}</td>
                                     <td className="px-6 py-4">
-                                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${product.stock_quantity <= 0
-                                            ? 'bg-red-100 text-red-800'
-                                            : product.stock_quantity <= 10
-                                                ? 'bg-amber-100 text-amber-800'
-                                                : 'bg-emerald-100 text-emerald-800'
-                                            }`}>
-                                            {product.stock_quantity}
+                                        <span className="text-[10px] font-mono font-bold text-surface-muted bg-brand-background px-2 py-1 rounded border border-brand-border/50">
+                                            {product.barcode || 'NO-CODE'}
+                                        </span>
+                                    </td>
+                                    <td className="px-6 py-4 text-sm font-black text-brand-primary">{formatCurrency(product.price)}</td>
+                                    <td className="px-6 py-4">
+                                        <span className={product.stock_quantity <= 0 ? 'badge-unpaid text-[10px]' :
+                                            product.stock_quantity <= 10 ? 'badge-partial text-[10px]' :
+                                                'badge-paid text-[10px]'
+                                        }>
+                                            {product.stock_quantity} left
                                         </span>
                                     </td>
                                     <td className="px-6 py-4 text-right">
-                                        <div className="flex items-center justify-end gap-2">
+                                        <div className="flex items-center justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity translate-x-2 group-hover:translate-x-0 duration-300">
                                             <button
                                                 onClick={() => {
                                                     printProductLabel(product.name, product.barcode, product.price);
                                                 }}
-                                                className="text-xs px-3 py-1.5 rounded-lg bg-surface-50 text-surface-600 hover:bg-surface-100 transition-colors font-medium flex items-center gap-1"
+                                                className="w-8 h-8 rounded-lg bg-brand-dark border border-brand-border text-surface-muted hover:text-brand-primary hover:border-brand-primary transition-all flex items-center justify-center shadow-sm active:scale-90"
                                                 title="Print Label"
                                             >
-                                                <Printer size={14} />
+                                                <Printer size={15} />
                                             </button>
                                             <button
                                                 onClick={() => openEdit(product)}
-                                                className="text-xs px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 transition-colors font-medium"
+                                                className="text-[10px] px-3 py-1.5 rounded-lg bg-brand-primary/10 text-brand-primary border border-brand-primary/20 hover:bg-brand-primary hover:text-brand-dark transition-all font-black uppercase tracking-widest active:scale-95 shadow-sm"
                                             >
                                                 Edit
                                             </button>
                                             <button
                                                 onClick={() => handleDelete(product.id)}
-                                                className="text-xs px-3 py-1.5 rounded-lg bg-red-50 text-red-700 hover:bg-red-100 transition-colors font-medium"
+                                                className="text-[10px] px-3 py-1.5 rounded-lg bg-status-danger/10 text-status-danger border border-status-danger/20 hover:bg-status-danger hover:text-white transition-all font-black uppercase tracking-widest active:scale-95 shadow-sm"
                                             >
                                                 Delete
                                             </button>
@@ -186,34 +196,36 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {error && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
+                        <div className="p-4 bg-status-danger/10 border border-status-danger/20 rounded-2xl text-sm text-status-danger font-bold flex items-center gap-3">
+                            <span className="text-lg">⚠️</span> {error}
+                        </div>
                     )}
                     <div>
-                        <label className="block text-sm font-medium text-surface-700 mb-1">Name *</label>
-                        <input name="name" defaultValue={editProduct?.name} required className="input-field" />
+                        <label className="block text-xs font-black text-surface-muted uppercase tracking-widest mb-2">Name *</label>
+                        <input name="name" defaultValue={editProduct?.name} required className="input-field py-3" placeholder="e.g. Premium Silk Scarf" />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-surface-700 mb-1">Description</label>
-                        <textarea name="description" defaultValue={editProduct?.description} rows={2} className="input-field" />
+                        <label className="block text-xs font-black text-surface-muted uppercase tracking-widest mb-2">Description</label>
+                        <textarea name="description" defaultValue={editProduct?.description} rows={2} className="input-field" placeholder="Optional product details..." />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <label className="block text-sm font-medium text-surface-700 mb-1">Price *</label>
-                            <input name="price" type="number" step="0.01" min="0" defaultValue={editProduct?.price || ''} required className="input-field" />
+                            <label className="block text-xs font-black text-surface-muted uppercase tracking-widest mb-2">Price *</label>
+                            <input name="price" type="number" step="0.01" min="0" defaultValue={editProduct?.price || ''} required className="input-field font-black text-brand-primary" placeholder="0.00" />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-surface-700 mb-1">Stock Qty *</label>
-                            <input name="stock_quantity" type="number" min="0" defaultValue={editProduct?.stock_quantity ?? 0} required className="input-field" />
+                            <label className="block text-xs font-black text-surface-muted uppercase tracking-widest mb-2">Stock Qty *</label>
+                            <input name="stock_quantity" type="number" min="0" defaultValue={editProduct?.stock_quantity ?? 0} required className="input-field font-bold" />
                         </div>
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-surface-700 mb-1">Barcode</label>
+                        <label className="block text-xs font-black text-surface-muted uppercase tracking-widest mb-2">Barcode / SKU</label>
                         <div className="flex gap-2">
-                            <input name="barcode" defaultValue={editProduct?.barcode} className="input-field flex-1" placeholder="Optional" />
+                            <input name="barcode" defaultValue={editProduct?.barcode} className="input-field flex-1 font-mono uppercase" placeholder="Scan or Enter Code" />
                             <button
                                 type="button"
                                 onClick={handleGenerateBarcode}
-                                className="btn-secondary px-3 flex items-center justify-center"
+                                className="w-12 h-12 rounded-2xl bg-brand-background border border-brand-border text-brand-primary hover:border-brand-primary transition-all flex items-center justify-center active:scale-90"
                                 title="Auto-generate Barcode"
                                 disabled={generatingBarcode}
                             >
@@ -221,18 +233,20 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                             </button>
                         </div>
                         {editProduct?.barcode && (
-                            <div className="mt-4">
-                                <label className="block text-xs font-bold text-surface-400 uppercase tracking-widest mb-2">Label Preview</label>
-                                <BarcodePrint value={editProduct.barcode} name={editProduct.name} price={editProduct.price} />
+                            <div className="mt-6 pt-6 border-t border-brand-border">
+                                <label className="block text-[10px] font-black text-surface-muted uppercase tracking-widest mb-4">Print Preview</label>
+                                <div className="bg-white p-4 rounded-2xl flex justify-center shadow-inner">
+                                    <BarcodePrint value={editProduct.barcode} name={editProduct.name} price={editProduct.price} />
+                                </div>
                             </div>
                         )}
                     </div>
-                    <div className="flex justify-end gap-3 pt-2">
-                        <button type="button" onClick={() => { setModalOpen(false); setEditProduct(null); }} className="btn-secondary">
+                    <div className="flex justify-end gap-3 pt-6 border-t border-brand-border mt-8">
+                        <button type="button" onClick={() => { setModalOpen(false); setEditProduct(null); }} className="btn-secondary px-6">
                             Cancel
                         </button>
-                        <button type="submit" disabled={loading} className="btn-primary">
-                            {loading ? 'Saving...' : editProduct ? 'Update' : 'Add Product'}
+                        <button type="submit" disabled={loading} className="btn-primary px-8 active:scale-95">
+                            {loading ? 'Saving...' : editProduct ? 'Update Product' : 'Register Product'}
                         </button>
                     </div>
                 </form>

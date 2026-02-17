@@ -1,5 +1,5 @@
 -- ============================================
--- MeroStock SaaS — Supabase PostgreSQL Schema
+-- StockSewa SaaS — Supabase PostgreSQL Schema
 -- Multi-tenant SaaS with Organizations & Profiles
 -- ============================================
 

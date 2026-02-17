@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { createCustomer, updateCustomer, settleCustomerCredit } from '@/lib/actions/customers';
 import SearchBar from '@/components/SearchBar';
 import Modal from '@/components/Modal';
-import { Wallet } from 'lucide-react';
+import { Wallet, Plus } from 'lucide-react';
 
 interface Customer {
     id: string;
@@ -98,51 +98,65 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
 
     return (
         <>
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
-                <h1 className="page-header mb-0">Customers</h1>
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                    <div className="flex-1 sm:flex-initial sm:w-64">
-                        <SearchBar placeholder="Search by name or phone..." />
+            <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 mb-10">
+                <div>
+                    <h1 className="text-3xl font-poppins font-bold text-surface-primary tracking-tight">Customer Relations</h1>
+                    <p className="text-surface-muted text-sm font-medium">Manage your client base and outstanding credits</p>
+                </div>
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                    <div className="flex-1 md:w-80">
+                        <SearchBar placeholder="Search by name, phone, or address..." />
                     </div>
-                    <button onClick={() => { setEditCustomer(null); setModalOpen(true); }} className="btn-primary whitespace-nowrap">
-                        + Add Customer
+                    <button onClick={() => { setEditCustomer(null); setModalOpen(true); }} className="btn-primary flex items-center gap-2 whitespace-nowrap active:scale-95 px-6">
+                        <Plus size={18} />
+                        Add Customer
                     </button>
                 </div>
             </div>
 
             {customers.length === 0 ? (
-                <div className="card p-12 text-center">
-                    <p className="text-4xl mb-3">👥</p>
-                    <p className="text-lg font-medium text-surface-700 mb-1">No customers found</p>
-                    <p className="text-sm text-surface-500 mb-4">Add your first customer to get started</p>
-                    <button onClick={() => setModalOpen(true)} className="btn-primary">+ Add Customer</button>
+                <div className="card p-16 text-center border-dashed border-brand-border bg-transparent">
+                    <div className="w-20 h-20 bg-brand-card rounded-3xl flex items-center justify-center text-4xl mx-auto mb-6 shadow-xl border border-brand-border">
+                        👥
+                    </div>
+                    <h3 className="text-xl font-bold text-surface-primary mb-2">No Customers Yet</h3>
+                    <p className="text-sm text-surface-muted mb-8 max-w-sm mx-auto">Start building your client base by registering your first customer.</p>
+                    <button onClick={() => setModalOpen(true)} className="btn-primary px-8">Add Customer</button>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
                     {customers.map((customer) => (
-                        <div key={customer.id} className="card p-5 animate-fade-in">
-                            <div className="flex items-start justify-between">
+                        <div key={customer.id} className="card p-6 animate-fade-in group hover:border-brand-primary/30 transition-all duration-300">
+                            <div className="flex items-start justify-between mb-4">
                                 <div className="flex-1 min-w-0">
-                                    <h3 className="font-semibold text-surface-900 truncate">{customer.name}</h3>
-                                    {customer.phone && (
-                                        <p className="text-sm text-surface-500 mt-1 flex items-center gap-1">📞 {customer.phone}</p>
-                                    )}
-                                    {customer.address && (
-                                        <p className="text-sm text-surface-500 mt-0.5 flex items-center gap-1 truncate">📍 {customer.address}</p>
-                                    )}
+                                    <h3 className="font-poppins font-bold text-surface-primary truncate group-hover:text-brand-primary transition-colors">{customer.name}</h3>
+                                    <div className="mt-2 space-y-1">
+                                        {customer.phone && (
+                                            <p className="text-xs text-surface-muted flex items-center gap-2">
+                                                <span className="w-4 h-4 bg-brand-background rounded flex items-center justify-center text-[8px]">📞</span>
+                                                <span className="font-medium tracking-wide">{customer.phone}</span>
+                                            </p>
+                                        )}
+                                        {customer.address && (
+                                            <p className="text-xs text-surface-muted flex items-center gap-2 truncate">
+                                                <span className="w-4 h-4 bg-brand-background rounded flex items-center justify-center text-[8px]">📍</span>
+                                                <span className="font-medium italic">{customer.address}</span>
+                                            </p>
+                                        )}
+                                    </div>
                                 </div>
                                 <button
                                     onClick={() => openEdit(customer)}
-                                    className="text-xs px-3 py-1.5 rounded-lg bg-primary-50 text-primary-700 hover:bg-primary-100 transition-colors font-medium flex-shrink-0"
+                                    className="text-[10px] px-3 py-1.5 rounded-lg bg-brand-background border border-brand-border text-surface-muted hover:text-brand-primary hover:border-brand-primary transition-all font-black uppercase tracking-widest active:scale-90"
                                 >
                                     Edit
                                 </button>
                             </div>
                             {customer.total_credit !== undefined && customer.total_credit > 0 && (
-                                <div className="mt-4 pt-4 border-t border-surface-100">
-                                    <div className="flex items-center justify-between mb-3">
-                                        <span className="text-xs font-bold text-surface-400 uppercase tracking-widest">Outstanding Credit</span>
-                                        <span className="text-sm font-black text-red-600">{formatCurrency(customer.total_credit)}</span>
+                                <div className="mt-6 pt-5 border-t border-brand-border/50">
+                                    <div className="flex items-center justify-between mb-4">
+                                        <span className="text-[10px] font-black text-surface-muted uppercase tracking-[0.2em]">Balance Owed</span>
+                                        <span className="text-sm font-black text-status-danger">{formatCurrency(customer.total_credit)}</span>
                                     </div>
                                     <button
                                         onClick={() => {
@@ -150,10 +164,10 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
                                             setSettleAmount((customer.total_credit || 0).toString());
                                             setSettleModalOpen(true);
                                         }}
-                                        className="w-full py-2 rounded-xl bg-surface-900 text-white text-xs font-bold hover:bg-surface-800 transition-all flex items-center justify-center gap-2 shadow-sm"
+                                        className="w-full py-3 rounded-2xl bg-brand-primary text-brand-dark text-[10px] font-black uppercase tracking-widest hover:bg-brand-background hover:text-brand-primary transition-all flex items-center justify-center gap-2 border border-transparent hover:border-brand-primary active:scale-[0.98] shadow-lg shadow-brand-primary/5"
                                     >
                                         <Wallet size={14} />
-                                        Settle Credit
+                                        Clear Credit
                                     </button>
                                 </div>
                             )}
@@ -170,37 +184,42 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
             >
                 <form onSubmit={handleSettleSubmit} className="space-y-4">
                     {error && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
+                        <div className="p-4 bg-status-danger/10 border border-status-danger/20 rounded-2xl text-sm text-status-danger font-bold flex items-center gap-3">
+                            <span className="text-lg">⚠️</span> {error}
+                        </div>
                     )}
-                    <div className="bg-surface-50 p-4 rounded-xl border border-surface-200">
-                        <p className="text-xs text-surface-500 uppercase font-bold tracking-widest mb-1">Customer</p>
-                        <p className="font-bold text-surface-900">{settleCustomer?.name}</p>
-                        <div className="mt-3 flex items-center justify-between">
-                            <span className="text-xs text-surface-500 font-medium">Current Balance:</span>
-                            <span className="text-sm font-black text-red-600">{settleCustomer && formatCurrency(settleCustomer.total_credit || 0)}</span>
+                    <div className="bg-brand-background p-5 rounded-[1.5rem] border border-brand-border">
+                        <p className="text-[10px] text-surface-muted uppercase font-black tracking-widest mb-2 text-center">Debtor Profile</p>
+                        <p className="font-poppins font-black text-surface-primary text-center text-lg">{settleCustomer?.name}</p>
+                        <div className="mt-4 pt-4 border-t border-brand-border flex items-center justify-between text-[10px] font-black text-surface-muted uppercase tracking-widest">
+                            <span>Balance</span>
+                            <span className="text-status-danger">{settleCustomer && formatCurrency(settleCustomer.total_credit || 0)}</span>
                         </div>
                     </div>
 
-                    <div>
-                        <label className="block text-sm font-medium text-surface-700 mb-1">Settlement Amount (Rs.)</label>
-                        <input
-                            type="number"
-                            step="0.01"
-                            min="0.01"
-                            value={settleAmount}
-                            onChange={(e) => setSettleAmount(e.target.value)}
-                            className="input-field font-bold text-lg"
-                            required
-                        />
-                        <p className="text-[10px] text-surface-400 mt-2 font-medium">This amount will be applied to the oldest outstanding invoices first.</p>
+                    <div className="pt-2">
+                        <label className="block text-xs font-black text-surface-muted uppercase tracking-widest mb-3">Settlement Received (Rs.)</label>
+                        <div className="relative">
+                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-surface-muted font-bold">Rs.</span>
+                            <input
+                                type="number"
+                                step="0.01"
+                                min="0.01"
+                                value={settleAmount}
+                                onChange={(e) => setSettleAmount(e.target.value)}
+                                className="input-field pl-12 font-black text-xl text-brand-primary"
+                                required
+                            />
+                        </div>
+                        <p className="text-[10px] text-surface-muted mt-4 font-medium italic text-center">Credited amounts will be applied to the earliest invoices.</p>
                     </div>
 
-                    <div className="flex justify-end gap-3 pt-4">
-                        <button type="button" onClick={() => setSettleModalOpen(false)} className="btn-secondary">
+                    <div className="flex justify-end gap-3 pt-6 border-t border-brand-border mt-8">
+                        <button type="button" onClick={() => setSettleModalOpen(false)} className="btn-secondary px-6">
                             Cancel
                         </button>
-                        <button type="submit" disabled={loading} className="btn-primary">
-                            {loading ? 'Processing...' : 'Confirm Settlement'}
+                        <button type="submit" disabled={loading} className="btn-primary px-8 active:scale-95">
+                            {loading ? 'Processing...' : 'Verify Settlement'}
                         </button>
                     </div>
                 </form>
@@ -214,26 +233,28 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
             >
                 <form onSubmit={handleSubmit} className="space-y-4">
                     {error && (
-                        <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-700">{error}</div>
+                        <div className="p-4 bg-status-danger/10 border border-status-danger/20 rounded-2xl text-sm text-status-danger font-bold flex items-center gap-3">
+                            <span className="text-lg">⚠️</span> {error}
+                        </div>
                     )}
                     <div>
-                        <label className="block text-sm font-medium text-surface-700 mb-1">Name *</label>
-                        <input name="name" defaultValue={editCustomer?.name} required className="input-field" />
+                        <label className="block text-xs font-black text-surface-muted uppercase tracking-widest mb-2">Legal Name *</label>
+                        <input name="name" defaultValue={editCustomer?.name} required className="input-field py-3" placeholder="e.g. Shyam Bihari" />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-surface-700 mb-1">Phone</label>
-                        <input name="phone" defaultValue={editCustomer?.phone} className="input-field" placeholder="Optional" />
+                        <label className="block text-xs font-black text-surface-muted uppercase tracking-widest mb-2">Primary Contact</label>
+                        <input name="phone" defaultValue={editCustomer?.phone} className="input-field" placeholder="Mobile number" />
                     </div>
                     <div>
-                        <label className="block text-sm font-medium text-surface-700 mb-1">Address</label>
-                        <textarea name="address" defaultValue={editCustomer?.address} rows={2} className="input-field" placeholder="Optional" />
+                        <label className="block text-xs font-black text-surface-muted uppercase tracking-widest mb-2">Registered Address</label>
+                        <textarea name="address" defaultValue={editCustomer?.address} rows={2} className="input-field" placeholder="Locality and City" />
                     </div>
-                    <div className="flex justify-end gap-3 pt-2">
-                        <button type="button" onClick={() => { setModalOpen(false); setEditCustomer(null); }} className="btn-secondary">
+                    <div className="flex justify-end gap-3 pt-6 border-t border-brand-border mt-8">
+                        <button type="button" onClick={() => { setModalOpen(false); setEditCustomer(null); }} className="btn-secondary px-6">
                             Cancel
                         </button>
-                        <button type="submit" disabled={loading} className="btn-primary">
-                            {loading ? 'Saving...' : editCustomer ? 'Update' : 'Add Customer'}
+                        <button type="submit" disabled={loading} className="btn-primary px-8 active:scale-95">
+                            {loading ? 'Saving...' : editCustomer ? 'Update Client' : 'Add Client'}
                         </button>
                     </div>
                 </form>

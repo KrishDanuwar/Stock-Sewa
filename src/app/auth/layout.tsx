@@ -4,14 +4,14 @@ export default function AuthLayout({
     children: React.ReactNode;
 }) {
     return (
-        <div className="min-h-screen bg-surface-50 flex flex-col items-center justify-center p-4">
+        <div className="min-h-screen bg-brand-background flex flex-col items-center justify-center p-4">
             <div className="w-full max-w-md">
-                <div className="flex flex-col items-center mb-8">
-                    <div className="w-12 h-12 bg-gradient-to-br from-primary-500 to-primary-700 rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg mb-4">
+                <div className="flex flex-col items-center mb-10">
+                    <div className="w-16 h-16 bg-brand-primary rounded-2xl flex items-center justify-center text-brand-dark font-poppins font-bold text-2xl shadow-2xl shadow-brand-primary/20 mb-6">
                         SS
                     </div>
-                    <h1 className="text-2xl font-bold text-surface-900 tracking-tight">StockSewa SaaS</h1>
-                    <p className="text-surface-500 text-sm mt-1">Your Trusted Inventory Partner</p>
+                    <h1 className="text-3xl font-poppins font-bold text-surface-primary tracking-tight">StockSewa SaaS</h1>
+                    <p className="text-surface-muted text-sm mt-2 font-medium">Your Trusted Inventory Partner</p>
                 </div>
                 {children}
             </div>

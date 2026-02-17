@@ -12,7 +12,8 @@ import {
     TrendingUp,
     Clock,
     Plus,
-    CheckCircle2
+    CheckCircle2,
+    Zap
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
@@ -52,11 +53,11 @@ export default async function Dashboard() {
             {/* Welcome Header */}
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-2xl font-bold text-surface-900 tracking-tight">
-                        Dashboard Overview
+                    <h1 className="text-3xl font-poppins font-bold text-surface-primary tracking-tight">
+                        StockSewa Dashboard
                     </h1>
-                    <p className="text-surface-500 mt-1">
-                        Welcome back, {stats.organizationName} is performing well today.
+                    <p className="text-surface-secondary mt-1 font-medium">
+                        Welcome back! {stats.organizationName} is performing smoothly today.
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
@@ -99,11 +100,11 @@ export default async function Dashboard() {
                 {/* Recent Invoices Table */}
                 <div className="lg:col-span-2 space-y-4">
                     <div className="flex items-center justify-between">
-                        <h2 className="text-lg font-bold text-surface-900 flex items-center gap-2">
-                            <Clock size={20} className="text-primary-500" />
+                        <h2 className="text-lg font-bold text-surface-primary flex items-center gap-2">
+                            <Clock size={20} className="text-brand-primary" />
                             Recent Invoices
                         </h2>
-                        <Link href="/invoices" className="text-sm text-primary-600 hover:underline flex items-center gap-1">
+                        <Link href="/invoices" className="text-sm text-brand-primary hover:underline font-bold flex items-center gap-1">
                             View All <ArrowRight size={14} />
                         </Link>
                     </div>
@@ -111,32 +112,32 @@ export default async function Dashboard() {
                         <div className="overflow-x-auto">
                             <table className="w-full text-left border-collapse">
                                 <thead>
-                                    <tr className="bg-surface-50 border-b border-surface-200">
-                                        <th className="px-6 py-4 text-xs font-bold text-surface-500 uppercase tracking-wider">Invoice #</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-surface-500 uppercase tracking-wider">Customer</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-surface-500 uppercase tracking-wider text-right">Amount</th>
-                                        <th className="px-6 py-4 text-xs font-bold text-surface-500 uppercase tracking-wider text-right">Status</th>
+                                    <tr className="bg-brand-teal/20 border-b border-brand-border">
+                                        <th className="px-6 py-4 text-xs font-bold text-surface-muted uppercase tracking-wider">Invoice #</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-surface-muted uppercase tracking-wider">Customer</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-surface-muted uppercase tracking-wider text-right">Amount</th>
+                                        <th className="px-6 py-4 text-xs font-bold text-surface-muted uppercase tracking-wider text-right">Status</th>
                                     </tr>
                                 </thead>
-                                <tbody className="divide-y divide-surface-100">
+                                <tbody className="divide-y divide-brand-border">
                                     {recentInvoices.map((invoice) => (
-                                        <tr key={invoice.id} className="hover:bg-surface-50 transition-colors group">
-                                            <td className="px-6 py-4 font-medium text-surface-900 text-sm">
-                                                <Link href={`/invoices/${invoice.id}`} className="hover:text-primary-600 transition-colors">
+                                        <tr key={invoice.id} className="hover:bg-brand-teal/10 transition-colors group">
+                                            <td className="px-6 py-4 font-bold text-surface-primary text-sm">
+                                                <Link href={`/invoices/${invoice.id}`} className="hover:text-brand-primary transition-colors">
                                                     {invoice.invoice_number}
                                                 </Link>
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-surface-600">
+                                            <td className="px-6 py-4 text-sm text-surface-secondary">
                                                 {invoice.customers?.name || 'Walk-in'}
                                             </td>
-                                            <td className="px-6 py-4 text-sm text-surface-900 font-bold text-right">
+                                            <td className="px-6 py-4 text-sm text-surface-primary font-bold text-right">
                                                 Rs. {Number(invoice.total_amount).toLocaleString('en-IN')}
                                             </td>
                                             <td className="px-6 py-4 text-right">
-                                                <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider ${invoice.status === 'paid' ? 'bg-green-100 text-green-700' :
-                                                    invoice.status === 'partial' ? 'bg-amber-100 text-amber-700' :
-                                                        'bg-red-100 text-red-700'
-                                                    }`}>
+                                                <span className={invoice.status === 'paid' ? 'badge-paid' :
+                                                    invoice.status === 'partial' ? 'badge-partial' :
+                                                        'badge-unpaid'
+                                                }>
                                                     {invoice.status}
                                                 </span>
                                             </td>
@@ -144,7 +145,7 @@ export default async function Dashboard() {
                                     ))}
                                     {recentInvoices.length === 0 && (
                                         <tr>
-                                            <td colSpan={4} className="px-6 py-12 text-center text-surface-400 italic">
+                                            <td colSpan={4} className="px-6 py-12 text-center text-surface-muted italic">
                                                 No transactions recorded yet.
                                             </td>
                                         </tr>
@@ -157,21 +158,21 @@ export default async function Dashboard() {
 
                 {/* Low Stock Alerts (SaaS Enhancement) */}
                 <div className="space-y-4">
-                    <h2 className="text-lg font-bold text-surface-900 flex items-center gap-2">
-                        <AlertTriangle size={20} className="text-amber-500" />
+                    <h2 className="text-lg font-bold text-surface-primary flex items-center gap-2">
+                        <AlertTriangle size={20} className="text-status-warning" />
                         Stock Alerts
                     </h2>
                     <div className="card p-5 space-y-4">
                         {lowStockProducts.length > 0 ? (
                             lowStockProducts.map(p => (
-                                <div key={p.id} className="flex items-center justify-between p-3 bg-amber-50 rounded-xl border border-amber-100 group hover:shadow-sm transition-all">
-                                    <div className="flex flex-col">
-                                        <span className="text-sm font-bold text-surface-900">{p.name}</span>
-                                        <span className="text-[10px] text-surface-500 uppercase tracking-tight">{p.barcode}</span>
+                                <div key={p.id} className="flex items-center justify-between p-3 bg-brand-background rounded-xl border border-brand-border group hover:border-brand-primary/50 transition-all">
+                                    <div className="flex flex-col text-left">
+                                        <span className="text-sm font-bold text-surface-primary">{p.name}</span>
+                                        <span className="text-[10px] text-surface-muted uppercase tracking-tight">{p.barcode}</span>
                                     </div>
                                     <div className="flex flex-col items-end">
-                                        <span className="text-sm font-bold text-red-600">{p.stock_quantity} left</span>
-                                        <Link href="/products" className="text-[10px] text-primary-600 font-bold opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <span className="text-sm font-bold text-status-danger">{p.stock_quantity} left</span>
+                                        <Link href="/products" className="text-[10px] text-brand-primary font-bold opacity-0 group-hover:opacity-100 transition-opacity">
                                             Restock
                                         </Link>
                                     </div>
@@ -179,26 +180,26 @@ export default async function Dashboard() {
                             ))
                         ) : (
                             <div className="py-6 text-center">
-                                <div className="w-12 h-12 bg-green-50 text-green-600 rounded-full flex items-center justify-center mx-auto mb-3">
+                                <div className="w-12 h-12 bg-brand-secondary/10 text-brand-secondary rounded-full flex items-center justify-center mx-auto mb-3 border border-brand-secondary/20">
                                     <CheckCircle2 size={24} />
                                 </div>
-                                <p className="text-sm text-surface-500 italic">All stock levels are healthy.</p>
+                                <p className="text-sm text-surface-muted italic font-medium">All stock levels are healthy.</p>
                             </div>
                         )
                         }
                     </div>
 
-                    {/* Activity Feed placeholder */}
-                    <div className="card p-5 bg-primary-900 text-white relative overflow-hidden group">
+                    {/* CTA Card */}
+                    <div className="card p-6 bg-brand-primary text-brand-dark relative overflow-hidden group border-none">
                         <div className="absolute -right-4 -bottom-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
-                            <Plus size={120} />
+                            <Zap size={120} />
                         </div>
-                        <h3 className="font-bold text-lg mb-2 relative z-10">Premium Feature</h3>
-                        <p className="text-primary-100 text-xs leading-relaxed relative z-10 opacity-80">
-                            Upgrade to **Pro** to unlock multi-user support, custom PDF branding, and advanced inventory forecasting.
+                        <h3 className="font-poppins font-black text-xl mb-2 relative z-10">Premium Account</h3>
+                        <p className="text-brand-dark/80 text-xs font-bold leading-relaxed relative z-10">
+                            Upgrade to **StockSewa Pro** to unlock multi-branch sync and custom branding.
                         </p>
-                        <Link href="/billing" className="mt-4 inline-flex items-center gap-2 text-xs font-bold text-white relative z-10 hover:gap-3 transition-all">
-                            Learn more <ArrowRight size={14} />
+                        <Link href="/billing" className="mt-6 btn-primary bg-brand-dark text-brand-primary border-none shadow-none hover:bg-brand-background relative z-10 py-2 w-full text-xs font-black">
+                            Upgrade Now <ArrowRight size={14} />
                         </Link>
                     </div>
                 </div>

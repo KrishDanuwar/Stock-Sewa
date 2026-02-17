@@ -1,5 +1,5 @@
 -- ==========================================
--- MeroStock OPEN ACCESS UNLOCK SCRIPT
+-- StockSewa OPEN ACCESS UNLOCK SCRIPT
 -- Run this in your Supabase SQL Editor
 -- ==========================================
 
@@ -27,18 +27,18 @@ DROP POLICY IF EXISTS "Org data isolation" ON payments;
 INSERT INTO organizations (id, name, owner_id, subscription_status)
 VALUES (
   '00000000-0000-0000-0000-000000000000', 
-  'MeroStock Shop', 
+  'StockSewa Shop', 
   '00000000-0000-0000-0000-000000000000', 
   'active'
 )
 ON CONFLICT (id) DO UPDATE 
-SET name = 'MeroStock Shop', subscription_status = 'active';
+SET name = 'StockSewa Shop', subscription_status = 'active';
 
 -- 4. Enable a catch-all profile for the guest user (optional safety)
 INSERT INTO profiles (id, organization_id, email)
 VALUES (
   '00000000-0000-0000-0000-000000000000', 
   '00000000-0000-0000-0000-000000000000', 
-  'guest@merostock.local'
+  'guest@stocksewa.local'
 )
 ON CONFLICT (id) DO NOTHING;

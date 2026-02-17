@@ -2,7 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@400;600;700&display=swap');
 
 :root {
   --sidebar-width: 260px;
@@ -10,53 +10,49 @@
 
 body {
   font-family: 'Inter', system-ui, sans-serif;
-  background-color: #f8f9fa;
-  color: #212529;
+  background-color: #0B1F27;
+  color: #E6EDF3;
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary-600 hover:bg-primary-700 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98];
+    @apply bg-brand-primary hover:bg-[#96f000] text-brand-dark font-medium py-2.5 px-6 rounded-xl transition-all duration-200 shadow-lg shadow-brand-primary/10 hover:shadow-brand-primary/20 active:scale-[0.98] flex items-center justify-center gap-2;
   }
 
   .btn-secondary {
-    @apply bg-surface-100 hover:bg-surface-200 text-surface-800 font-medium py-2 px-4 rounded-lg transition-all duration-200 border border-surface-300;
+    @apply bg-brand-card hover:bg-brand-teal text-surface-primary font-medium py-2.5 px-6 rounded-xl transition-all duration-200 border border-brand-border;
   }
 
   .btn-danger {
-    @apply bg-red-500 hover:bg-red-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98];
-  }
-
-  .btn-success {
-    @apply bg-emerald-500 hover:bg-emerald-600 text-white font-medium py-2 px-4 rounded-lg transition-all duration-200 shadow-sm hover:shadow-md active:scale-[0.98];
+    @apply bg-status-danger hover:brightness-110 text-white font-medium py-2.5 px-6 rounded-xl transition-all duration-200 active:scale-[0.98];
   }
 
   .input-field {
-    @apply w-full px-3 py-2 bg-white border border-surface-300 rounded-lg text-surface-800 placeholder-surface-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent transition-all duration-200;
+    @apply w-full px-4 py-2.5 bg-brand-dark border border-brand-border rounded-xl text-surface-primary placeholder-surface-muted focus:outline-none focus:ring-2 focus:ring-brand-primary/30 focus:border-brand-primary transition-all duration-200;
   }
 
   .card {
-    @apply bg-white rounded-xl border border-surface-200 shadow-sm hover:shadow-md transition-shadow duration-200;
+    @apply bg-brand-card rounded-2xl border border-brand-border shadow-xl backdrop-blur-sm transition-all duration-300;
   }
 
   .page-header {
-    @apply text-2xl font-bold text-surface-900 mb-6;
+    @apply text-3xl font-bold text-surface-primary mb-8 tracking-tight;
   }
 
   .table-container {
-    @apply overflow-x-auto rounded-xl border border-surface-200 bg-white;
+    @apply overflow-x-auto rounded-2xl border border-brand-border bg-brand-card;
   }
 
   .badge-paid {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-brand-secondary/10 text-brand-secondary border border-brand-secondary/20;
   }
 
   .badge-partial {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-status-warning/10 text-status-warning border border-status-warning/20;
   }
 
   .badge-unpaid {
-    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800;
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-status-danger/10 text-status-danger border border-status-danger/20;
   }
 }
 
@@ -107,13 +103,27 @@ body {
 
 /* Animations */
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes slideIn {
-  from { opacity: 0; transform: translateX(-12px); }
-  to { opacity: 1; transform: translateX(0); }
+  from {
+    opacity: 0;
+    transform: translateX(-12px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
 }
 
 .animate-fade-in {

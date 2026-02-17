@@ -31,24 +31,24 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
     return (
         <div
             ref={overlayRef}
-            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm animate-fade-in"
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-brand-dark/80 backdrop-blur-md animate-fade-in"
             onClick={(e) => {
                 if (e.target === overlayRef.current) onClose();
             }}
         >
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-fade-in">
-                <div className="flex items-center justify-between px-6 py-4 border-b border-surface-200">
-                    <h2 className="text-lg font-semibold text-surface-900">{title}</h2>
+            <div className="bg-brand-card rounded-[2rem] shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto animate-slide-up border border-brand-border">
+                <div className="flex items-center justify-between px-8 py-6 border-b border-brand-border bg-brand-teal/5">
+                    <h2 className="text-xl font-poppins font-bold text-surface-primary tracking-tight">{title}</h2>
                     <button
                         onClick={onClose}
-                        className="p-1 rounded-lg hover:bg-surface-100 transition-colors"
+                        className="p-2 rounded-xl bg-brand-background border border-brand-border text-surface-muted hover:text-brand-primary transition-all active:scale-90"
                     >
-                        <svg className="w-5 h-5 text-surface-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
                         </svg>
                     </button>
                 </div>
-                <div className="px-6 py-4">{children}</div>
+                <div className="px-8 py-8">{children}</div>
             </div>
         </div>
     );

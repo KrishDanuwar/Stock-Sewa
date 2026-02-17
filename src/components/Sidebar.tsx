@@ -65,41 +65,41 @@ export function Sidebar({
 
             {/* Sidebar Container */}
             <aside
-                className={`fixed top-0 left-0 h-screen bg-white border-r border-surface-200 z-40 transition-all duration-300 ease-in-out w-64 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
+                className={`fixed top-0 left-0 h-screen bg-brand-dark border-r border-brand-border z-40 transition-all duration-300 ease-in-out w-64 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
                     }`}
             >
                 <div className="flex flex-col h-full">
                     {/* Brand */}
-                    <div className="p-6 border-b border-surface-100">
+                    <div className="p-6 border-b border-brand-border bg-brand-background">
                         <Link href="/" className="flex items-center gap-3 group">
-                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md p-1.5 border border-surface-100 group-hover:shadow-lg transition-all duration-300 overflow-hidden">
+                            <div className="w-10 h-10 bg-brand-primary rounded-xl flex items-center justify-center shadow-lg p-1.5 group-hover:scale-105 transition-all duration-300 overflow-hidden">
                                 <Image
                                     src="/logo.png"
                                     alt="Logo"
                                     width={40}
                                     height={40}
-                                    className="w-full h-full object-contain"
+                                    className="w-full h-full object-contain brightness-0"
                                 />
                             </div>
                             <div className="flex flex-col">
-                                <span className="font-bold text-surface-900 tracking-tight leading-none group-hover:text-primary-600 transition-colors">StockSewa</span>
-                                <span className="text-[10px] text-primary-600 font-bold uppercase tracking-widest mt-1">Pro Account</span>
+                                <span className="font-poppins font-bold text-surface-primary text-lg tracking-tight leading-none group-hover:text-brand-primary transition-colors">StockSewa</span>
+                                <span className="text-[10px] text-brand-primary font-bold uppercase tracking-widest mt-1">Premium Partner</span>
                             </div>
                         </Link>
                     </div>
 
-                    {/* Org Switcher / Info */}
-                    <div className="px-4 py-3 border-b border-surface-50 bg-surface-50/50">
-                        <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-white border border-surface-200 shadow-sm">
-                            <div className="w-8 h-8 rounded-lg bg-primary-50 text-primary-600 flex items-center justify-center">
+                    {/* Org Info */}
+                    <div className="px-4 py-3 border-b border-brand-border bg-brand-teal/20">
+                        <div className="flex items-center gap-3 px-3 py-2 rounded-lg bg-brand-card/50 border border-brand-border shadow-sm">
+                            <div className="w-8 h-8 rounded-lg bg-brand-primary/10 text-brand-primary flex items-center justify-center">
                                 <Building2 size={16} />
                             </div>
                             <div className="flex flex-col min-w-0">
-                                <span className="text-xs font-bold text-surface-900 truncate">
+                                <span className="text-xs font-bold text-surface-primary truncate">
                                     {organizationName || 'My Organization'}
                                 </span>
-                                <span className="text-[10px] text-surface-500 truncate uppercase tracking-tighter">
-                                    Free Plan
+                                <span className="text-[10px] text-surface-muted truncate uppercase tracking-tighter">
+                                    Active Account
                                 </span>
                             </div>
                         </div>
@@ -109,7 +109,7 @@ export function Sidebar({
                     <div className="px-4 py-4">
                         <Link
                             href="/invoices/new"
-                            className="flex items-center justify-center gap-2 w-full py-2.5 bg-primary-600 text-white rounded-xl shadow-md hover:bg-primary-700 transition-colors text-sm font-semibold"
+                            className="btn-primary w-full text-sm font-bold active:scale-95"
                         >
                             <Plus size={18} />
                             New Invoice
@@ -126,13 +126,13 @@ export function Sidebar({
                                     key={item.name}
                                     href={item.href}
                                     className={`flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 group ${isActive
-                                        ? 'bg-primary-50 text-primary-700 font-semibold'
-                                        : 'text-surface-600 hover:bg-surface-50 hover:text-surface-900'
+                                        ? 'bg-brand-primary/10 text-brand-primary font-bold'
+                                        : 'text-surface-secondary hover:bg-brand-teal/20 hover:text-surface-primary'
                                         }`}
                                 >
                                     <Icon
                                         size={20}
-                                        className={isActive ? 'text-primary-600' : 'text-surface-400 group-hover:text-surface-600'}
+                                        className={isActive ? 'text-brand-primary' : 'text-surface-muted group-hover:text-surface-secondary'}
                                     />
                                     <span className="text-sm">{item.name}</span>
                                 </Link>
@@ -140,11 +140,11 @@ export function Sidebar({
                         })}
                     </nav>
 
-                    {/* Simple Bottom Info */}
-                    <div className="p-4 border-t border-surface-100 bg-surface-50/30">
+                    {/* Bottom Info */}
+                    <div className="p-4 border-t border-brand-border bg-brand-background">
                         <div className="flex items-center justify-center gap-2 px-2 py-1">
-                            <span className="text-[10px] text-surface-400 truncate tracking-tight font-medium uppercase">
-                                Offline Priority Mode
+                            <span className="text-[10px] text-surface-muted truncate tracking-tight font-bold uppercase">
+                                Secure Cloud Channel
                             </span>
                         </div>
                     </div>

@@ -9,33 +9,30 @@ const config: Config = {
     theme: {
         extend: {
             colors: {
-                primary: {
-                    50: "#f0f4ff",
-                    100: "#dbe4ff",
-                    200: "#bac8ff",
-                    300: "#91a7ff",
-                    400: "#748ffc",
-                    500: "#5c7cfa",
-                    600: "#4c6ef5",
-                    700: "#4263eb",
-                    800: "#3b5bdb",
-                    900: "#364fc7",
+                brand: {
+                    primary: "#84D400",
+                    secondary: "#22C55E",
+                    background: "#0B1F27",
+                    dark: "#0F2A35",
+                    card: "#132F3B",
+                    teal: "#123A47",
+                    border: "#1F4A57",
                 },
                 surface: {
-                    50: "#f8f9fa",
-                    100: "#f1f3f5",
-                    200: "#e9ecef",
-                    300: "#dee2e6",
-                    400: "#ced4da",
-                    500: "#adb5bd",
-                    600: "#868e96",
-                    700: "#495057",
-                    800: "#343a40",
-                    900: "#212529",
+                    primary: "#E6EDF3",
+                    secondary: "#9FB3BD",
+                    muted: "#6B8A96",
                 },
+                status: {
+                    success: "#22C55E",
+                    warning: "#F59E0B",
+                    danger: "#EF4444",
+                    info: "#3B82F6",
+                }
             },
             fontFamily: {
                 sans: ["Inter", "system-ui", "sans-serif"],
+                poppins: ["Poppins", "sans-serif"],
             },
         },
     },
