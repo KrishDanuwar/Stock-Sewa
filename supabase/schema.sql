@@ -104,8 +104,11 @@ DECLARE
   org_id UUID;
   org_name TEXT;
 BEGIN
-  -- Extract org_name from metadata
-  org_name := COALESCE(new.raw_user_meta_data->>'org_name', 'My Organization');
+  -- Extract org_name from metadata or use email prefix
+  org_name := COALESCE(
+    new.raw_user_meta_data->>'org_name', 
+    split_part(new.email, '@', 1) || '''s Shop'
+  );
 
   -- 1. Create Organization
   INSERT INTO public.organizations (name, owner_id, subscription_status)

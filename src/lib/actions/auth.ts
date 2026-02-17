@@ -46,6 +46,24 @@ export async function signup(formData: FormData) {
     redirect('/');
 }
 
+export async function signInWithGoogle() {
+    const supabase = createClient();
+    const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+            redirectTo: `${process.env.NEXT_PUBLIC_APP_URL}/auth/callback`,
+        },
+    });
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    if (data.url) {
+        redirect(data.url);
+    }
+}
+
 export async function signOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
