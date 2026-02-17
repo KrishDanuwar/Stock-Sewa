@@ -1,5 +1,6 @@
 import { getCustomers } from '@/lib/actions/customers';
-import { supabase } from '@/lib/supabase';
+import { createClient } from '@/utils/supabase/server';
+import { getOrgContext } from '@/lib/org-context';
 import CustomersClient from './CustomersClient';
 
 export const dynamic = 'force-dynamic';
@@ -9,16 +10,21 @@ interface Props {
 }
 
 export default async function CustomersPage({ searchParams }: Props) {
+    const ctx = await getOrgContext();
+    const supabase = createClient();
+
     let customers: any[] = [];
+
     try {
         customers = await getCustomers(searchParams.search);
 
-        // Augment with credit info
+        // Augment with credit info using the server-side client
         for (const customer of customers) {
             const { data: invoices } = await supabase
                 .from('invoices')
                 .select('remaining_amount')
                 .eq('customer_id', customer.id)
+                .eq('organization_id', ctx.organizationId)
                 .in('status', ['unpaid', 'partial']);
 
             customer.total_credit = (invoices || []).reduce(
@@ -27,7 +33,7 @@ export default async function CustomersPage({ searchParams }: Props) {
             );
         }
     } catch (e) {
-        // Supabase not configured
+        console.error('Error fetching customers:', e);
     }
 
     return <CustomersClient initialCustomers={customers} />;
