@@ -41,8 +41,8 @@ export default async function InvoicesPage({ searchParams }: Props) {
                         key={s}
                         href={`/invoices?status=${s}${searchParams.search ? `&search=${searchParams.search}` : ''}`}
                         className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors capitalize ${(searchParams.status || 'all') === s
-                                ? 'bg-primary-600 text-white'
-                                : 'bg-surface-100 text-surface-600 hover:bg-surface-200'
+                            ? 'bg-primary-600 text-white'
+                            : 'bg-surface-100 text-surface-600 hover:bg-surface-200'
                             }`}
                     >
                         {s}
@@ -79,7 +79,7 @@ export default async function InvoicesPage({ searchParams }: Props) {
                                             {inv.invoice_number}
                                         </Link>
                                     </td>
-                                    <td className="px-6 py-3 text-sm text-surface-700">{inv.customers?.name || '—'}</td>
+                                    <td className="px-6 py-3 text-sm text-surface-700">{inv.customers?.name || 'Walk-in'}</td>
                                     <td className="px-6 py-3 text-sm font-medium text-surface-900">{formatCurrency(inv.total_amount)}</td>
                                     <td className="px-6 py-3 text-sm text-emerald-600 font-medium">{formatCurrency(inv.paid_amount)}</td>
                                     <td className="px-6 py-3 text-sm text-red-600 font-medium">{formatCurrency(inv.remaining_amount)}</td>
