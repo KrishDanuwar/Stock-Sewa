@@ -44,9 +44,15 @@ export default function NewInvoicePage() {
     const [productSearch, setProductSearch] = useState('');
     const [isWalkIn, setIsWalkIn] = useState(false);
 
+    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+
     useEffect(() => {
-        if (isWalkIn) setSelectedCustomer('');
-    }, [isWalkIn]);
+        if (isWalkIn) {
+            setSelectedCustomer('');
+            setStatus('paid');
+            setPaidAmount(total);
+        }
+    }, [isWalkIn, total]);
 
     useEffect(() => {
         const loadData = async () => {
@@ -103,7 +109,6 @@ export default function NewInvoicePage() {
         setItems(updated);
     };
 
-    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const remaining = Math.max(0, total - paidAmount);
 
     const handleStatusChange = (newStatus: 'paid' | 'partial' | 'unpaid') => {
@@ -315,19 +320,26 @@ export default function NewInvoicePage() {
                             <div className="pt-4 border-t border-surface-200">
                                 <label className="block text-xs font-bold text-surface-400 uppercase tracking-widest mb-3">Payment Status</label>
                                 <div className="grid grid-cols-3 gap-2">
-                                    {(['unpaid', 'partial', 'paid'] as const).map((s) => (
-                                        <button
-                                            key={s}
-                                            type="button"
-                                            onClick={() => handleStatusChange(s)}
-                                            className={`py-2 px-3 rounded-xl text-xs font-bold border-2 transition-all capitalize ${status === s
-                                                ? 'bg-primary-50 border-primary-500 text-primary-700 shadow-sm'
-                                                : 'bg-white border-surface-100 text-surface-500 hover:border-surface-200'
-                                                }`}
-                                        >
-                                            {s}
-                                        </button>
-                                    ))}
+                                    {(['unpaid', 'partial', 'paid'] as const).map((s) => {
+                                        const isDisabled = isWalkIn && (s === 'unpaid' || s === 'partial');
+                                        return (
+                                            <button
+                                                key={s}
+                                                type="button"
+                                                onClick={() => !isDisabled && handleStatusChange(s)}
+                                                disabled={isDisabled}
+                                                className={`py-2 px-3 rounded-xl text-xs font-bold border-2 transition-all capitalize ${status === s
+                                                    ? 'bg-primary-50 border-primary-500 text-primary-700 shadow-sm'
+                                                    : isDisabled
+                                                        ? 'bg-surface-50 border-surface-100 text-surface-300 cursor-not-allowed'
+                                                        : 'bg-white border-surface-100 text-surface-500 hover:border-surface-200'
+                                                    }`}
+                                                title={isDisabled ? "Credit not allowed for walk-in customers" : ""}
+                                            >
+                                                {s}
+                                            </button>
+                                        );
+                                    })}
                                 </div>
                             </div>
 
