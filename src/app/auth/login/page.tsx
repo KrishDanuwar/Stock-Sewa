@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { login } from '@/lib/actions/auth';
+import Link from 'next/link';
 import Image from 'next/image';
 
 export default function LoginPage() {
