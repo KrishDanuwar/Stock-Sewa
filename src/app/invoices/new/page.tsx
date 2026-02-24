@@ -23,8 +23,8 @@ interface Customer {
 interface LineItem {
     product_id: string;
     product_name: string;
-    quantity: number;
-    price: number;
+    quantity: number | string;
+    price: number | string;
     max_qty: number;
 }
 
@@ -38,14 +38,14 @@ export default function NewInvoicePage() {
     const [products, setProducts] = useState<Product[]>([]);
     const [selectedCustomer, setSelectedCustomer] = useState('');
     const [items, setItems] = useState<LineItem[]>([]);
-    const [paidAmount, setPaidAmount] = useState(0);
+    const [paidAmount, setPaidAmount] = useState<number | string>(0);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const [status, setStatus] = useState<'paid' | 'partial' | 'unpaid'>('unpaid');
     const [productSearch, setProductSearch] = useState('');
     const [isWalkIn, setIsWalkIn] = useState(false);
 
-    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
+    const total = items.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 0), 0);
 
     useEffect(() => {
         if (isWalkIn) {
@@ -98,19 +98,29 @@ export default function NewInvoicePage() {
         setItems(items.filter((_, i) => i !== index));
     };
 
-    const updateItemQty = (index: number, qty: number) => {
+    const updateItemQty = (index: number, val: string) => {
         const updated = [...items];
-        updated[index].quantity = Math.max(1, Math.min(qty, updated[index].max_qty));
+        if (val === '') {
+            updated[index].quantity = '';
+        } else {
+            const num = parseInt(val);
+            updated[index].quantity = isNaN(num) ? '' : Math.max(1, Math.min(num, updated[index].max_qty));
+        }
         setItems(updated);
     };
 
-    const updateItemPrice = (index: number, price: number) => {
+    const updateItemPrice = (index: number, val: string) => {
         const updated = [...items];
-        updated[index].price = Math.max(0, price);
+        if (val === '') {
+            updated[index].price = '';
+        } else {
+            const num = parseFloat(val);
+            updated[index].price = isNaN(num) ? '' : Math.max(0, num);
+        }
         setItems(updated);
     };
 
-    const remaining = Math.max(0, total - paidAmount);
+    const remaining = Math.max(0, total - (Number(paidAmount) || 0));
 
     const handleStatusChange = (newStatus: 'paid' | 'partial' | 'unpaid') => {
         setStatus(newStatus);
@@ -131,6 +141,18 @@ export default function NewInvoicePage() {
             return;
         }
 
+        // Validate line items
+        for (const item of items) {
+            if (item.quantity === '' || Number(item.quantity) <= 0) {
+                setError(`Please enter a valid quantity for ${item.product_name}`);
+                return;
+            }
+            if (item.price === '' || Number(item.price) < 0) {
+                setError(`Please enter a valid price for ${item.product_name}`);
+                return;
+            }
+        }
+
         setLoading(true);
         setError('');
 
@@ -139,10 +161,10 @@ export default function NewInvoicePage() {
                 customer_id: isWalkIn ? null : selectedCustomer,
                 items: items.map((i) => ({
                     product_id: i.product_id,
-                    quantity: i.quantity,
-                    price: i.price,
+                    quantity: Number(i.quantity),
+                    price: Number(i.price),
                 })),
-                paid_amount: paidAmount,
+                paid_amount: Number(paidAmount) || 0,
             });
 
             if (result.success) {
@@ -318,7 +340,7 @@ export default function NewInvoicePage() {
                                                         min={1}
                                                         max={item.max_qty}
                                                         value={item.quantity}
-                                                        onChange={(e) => updateItemQty(idx, parseInt(e.target.value) || 1)}
+                                                        onChange={(e) => updateItemQty(idx, e.target.value)}
                                                         className="input-field w-16 px-1 h-10 bg-white text-sm text-center font-bold border-gray-200 focus:border-brand-primary/50 shadow-inner"
                                                     />
                                                 </td>
@@ -328,12 +350,12 @@ export default function NewInvoicePage() {
                                                         min={0}
                                                         step="0.01"
                                                         value={item.price}
-                                                        onChange={(e) => updateItemPrice(idx, parseFloat(e.target.value) || 0)}
+                                                        onChange={(e) => updateItemPrice(idx, e.target.value)}
                                                         className="input-field w-28 px-2 h-10 bg-white text-sm text-center border-gray-200 focus:border-brand-primary/50 font-black text-brand-primary shadow-inner"
                                                     />
                                                 </td>
                                                 <td className="px-8 py-5 text-right text-sm font-black text-surface-primary">
-                                                    {formatCurrency(item.price * item.quantity)}
+                                                    {formatCurrency((Number(item.price) || 0) * (Number(item.quantity) || 0))}
                                                 </td>
                                                 <td className="px-6 py-5 text-center">
                                                     <button
@@ -406,7 +428,10 @@ export default function NewInvoicePage() {
                                                 max={total}
                                                 step="0.01"
                                                 value={paidAmount}
-                                                onChange={(e) => setPaidAmount(Math.min(total, Math.max(0, parseFloat(e.target.value) || 0)))}
+                                                onChange={(e) => {
+                                                    const val = e.target.value;
+                                                    setPaidAmount(val === '' ? '' : Math.min(total, Math.max(0, parseFloat(val))));
+                                                }}
                                                 className="input-field pl-14 py-4 font-black text-2xl text-brand-primary bg-gray-50/50 border-gray-200 focus:bg-white"
                                                 placeholder="0.00"
                                             />

@@ -29,7 +29,7 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
     const [editCustomer, setEditCustomer] = useState<Customer | null>(null);
     const [settleModalOpen, setSettleModalOpen] = useState(false);
     const [settleCustomer, setSettleCustomer] = useState<Customer | null>(null);
-    const [settleAmount, setSettleAmount] = useState<string>('0');
+    const [settleAmount, setSettleAmount] = useState<string>('');
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
@@ -64,17 +64,18 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
 
     const handleSettleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!settleCustomer || parseFloat(settleAmount) <= 0) return;
+        if (!settleCustomer) return;
+
+        const amount = parseFloat(settleAmount);
+        if (isNaN(amount) || amount <= 0) {
+            setError('Please enter a valid amount greater than 0');
+            return;
+        }
+
         setLoading(true);
         setError('');
 
         try {
-            const amount = parseFloat(settleAmount);
-            if (isNaN(amount) || amount <= 0) {
-                setError('Please enter a valid amount');
-                setLoading(false);
-                return;
-            }
             const result = await settleCustomerCredit(settleCustomer.id, amount) as any;
             if (result?.error) {
                 setError(result.error);
@@ -82,7 +83,7 @@ export default function CustomersClient({ initialCustomers }: CustomersClientPro
             }
             setSettleModalOpen(false);
             setSettleCustomer(null);
-            setSettleAmount('0');
+            setSettleAmount('');
             window.location.reload();
         } catch (err: any) {
             setError(err.message || 'Failed to settle credit');
