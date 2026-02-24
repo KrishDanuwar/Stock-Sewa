@@ -19,7 +19,7 @@ const navItems = [
     { href: '/dashboard/products', icon: Package, label: 'Products', labelNp: 'उत्पादन' },
     { href: '/dashboard/customers', icon: Users, label: 'Customers', labelNp: 'ग्राहक' },
     { href: '/dashboard/pos', icon: ShoppingCart, label: 'POS', labelNp: 'बिक्री' },
-    { href: '/dashboard/invoices', icon: FileText, label: 'Invoices', labelNp: 'बीजक' },
+    { href: '/dashboard/invoices', icon: FileText, label: 'Bills', labelNp: 'बिल' },
     { href: '/dashboard/reports', icon: BarChart2, label: 'Reports', labelNp: 'रिपोर्ट' },
     { href: '/dashboard/settings', icon: Settings, label: 'Settings', labelNp: 'सेटिङ' },
 ];

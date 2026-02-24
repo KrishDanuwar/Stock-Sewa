@@ -69,9 +69,9 @@ export default function InvoicesClient({ invoices, organization }: { invoices: a
         <div className="animate-fade-in-up">
             <div className="page-header">
                 <div>
-                    <h1 className="page-title">बीजक ईतिहास — Invoices</h1>
+                    <h1 className="page-title">बिल ईतिहास — Bills</h1>
                     <p className="page-subtitle">
-                        बीजक — {invoices.length} total | Collection: रु {totalCollected.toLocaleString()} | Due: रु {totalDue.toLocaleString()}
+                        बिल — {invoices.length} total | Collection: रु {totalCollected.toLocaleString()} | Due: रु {totalDue.toLocaleString()}
                     </p>
                 </div>
             </div>
@@ -80,7 +80,7 @@ export default function InvoicesClient({ invoices, organization }: { invoices: a
                 <table className="glass-table">
                     <thead>
                         <tr>
-                            <th>Invoice #</th>
+                            <th>Bill #</th>
                             <th>Customer</th>
                             <th>Type</th>
                             <th>Status</th>

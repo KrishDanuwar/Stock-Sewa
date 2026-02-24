@@ -58,7 +58,7 @@ export default async function DashboardPage() {
     const stats = [
         { label: 'Total Products', labelNp: 'कुल उत्पादन', value: productCount ?? 0, icon: Package, color: 'var(--brand-primary)' },
         { label: 'Customers', labelNp: 'ग्राहकहरू', value: customerCount ?? 0, icon: Users, color: 'var(--brand-secondary)' },
-        { label: 'Invoices', labelNp: 'बीजकहरू', value: invoiceCount ?? 0, icon: FileText, color: 'var(--brand-accent)' },
+        { label: 'Bills', labelNp: 'बिलहरू', value: invoiceCount ?? 0, icon: FileText, color: 'var(--brand-accent)' },
         { label: 'Revenue', labelNp: 'आजको आम्दानी', value: `Rs. ${dailyRevenue.toLocaleString()}`, icon: TrendingUp, color: 'var(--brand-success)' },
     ];
 
@@ -105,13 +105,13 @@ export default async function DashboardPage() {
                 {/* Recent Invoices */}
                 <div className="glass-card" style={{ padding: 24 }}>
                     <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 20 }}>
-                        {language === 'np' ? 'हालका बीजकहरू — Recent Invoices' : 'Recent Invoices'}
+                        {language === 'np' ? 'हालका बिलहरू — Recent Bills' : 'Recent Bills'}
                     </h2>
                     {recentInvoices && recentInvoices.length > 0 ? (
                         <table className="glass-table">
                             <thead>
                                 <tr>
-                                    <th>{language === 'np' ? 'बीजक #' : 'Invoice #'}</th>
+                                    <th>{language === 'np' ? 'बिल #' : 'Bill #'}</th>
                                     <th>{language === 'np' ? 'प्रकार' : 'Type'}</th>
                                     <th>{language === 'np' ? 'मिति (B.S.)' : 'Date (B.S.)'}</th>
                                     <th style={{ textAlign: 'right' }}>{language === 'np' ? 'कुल' : 'Total'}</th>
@@ -131,7 +131,7 @@ export default async function DashboardPage() {
                     ) : (
                         <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-muted)' }}>
                             <FileText size={40} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
-                            <p>{language === 'np' ? 'कुनै बीजक छैन। POS बाट बिक्री सुरु गर्नुहोस्!' : 'No invoices yet. Start selling from the POS!'}</p>
+                            <p>{language === 'np' ? 'कुनै बिल छैन। POS बाट बिक्री सुरु गर्नुहोस्!' : 'No bills yet. Start selling from the POS!'}</p>
                         </div>
                     )}
                 </div>

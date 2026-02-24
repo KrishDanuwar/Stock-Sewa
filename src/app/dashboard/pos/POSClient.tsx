@@ -237,7 +237,7 @@ export default function POSClient({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10, borderTop: '1px solid var(--glass-border)', paddingTop: 14 }}>
                     <div>
                         <label className="glass-label">
-                            {organization?.preferred_language === 'np' ? 'बीजक प्रकार' : 'Invoice Type'}
+                            {organization?.preferred_language === 'np' ? 'बिल प्रकार' : 'Bill Type'}
                         </label>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
                             {(['normal', 'pan', 'vat'] as const).map(t => (
@@ -365,7 +365,7 @@ export default function POSClient({
                     {/* Totals & Status */}
                     <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                            <span>{organization?.preferred_language === 'np' ? 'कुल रकम' : 'Total Amount'}</span>
+                            <span>{organization?.preferred_language === 'np' ? 'कुल बिल' : 'Total Bill'}</span>
                             <span>{organization?.preferred_language === 'np' ? 'रु' : 'Rs.'} {total.toLocaleString()}</span>
                         </div>
 

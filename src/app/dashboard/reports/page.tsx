@@ -121,26 +121,26 @@ export default async function ReportsPage() {
                 {/* Invoice Type Breakdown */}
                 <div className="glass-card" style={{ padding: 24 }}>
                     <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 20 }}>
-                        {language === 'np' ? 'बीजक विवरण — Invoice Breakdown' : 'Invoice Breakdown'}
+                        {language === 'np' ? 'बिल विवरण — Bill Breakdown' : 'Bill Breakdown'}
                     </h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                         <div className="breakdown-item">
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{language === 'np' ? 'भ्याट बीजक' : 'VAT Invoices'}</span>
+                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{language === 'np' ? 'भ्याट बिल' : 'VAT Bills'}</span>
                                 <span style={{ fontSize: '0.875rem', color: 'var(--brand-success)' }}>{vatInvoices.length}</span>
                             </div>
                             <div className="progress-bar-bg"><div className="progress-bar-fill" style={{ width: `${(vatInvoices.length / (invoices?.length || 1)) * 100}%`, backgroundColor: 'var(--brand-success)' }}></div></div>
                         </div>
                         <div className="breakdown-item">
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{language === 'np' ? 'प्यान बीजक' : 'PAN Invoices'}</span>
+                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{language === 'np' ? 'प्यान बिल' : 'PAN Bills'}</span>
                                 <span style={{ fontSize: '0.875rem', color: 'var(--brand-primary)' }}>{panInvoices.length}</span>
                             </div>
                             <div className="progress-bar-bg"><div className="progress-bar-fill" style={{ width: `${(panInvoices.length / (invoices?.length || 1)) * 100}%`, backgroundColor: 'var(--brand-primary)' }}></div></div>
                         </div>
                         <div className="breakdown-item">
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{language === 'np' ? 'साधारण रसिद' : 'Normal Receipts'}</span>
+                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{language === 'np' ? 'साधारण रसिद' : 'Normal Bills'}</span>
                                 <span style={{ fontSize: '0.875rem', color: 'var(--brand-secondary)' }}>{normalInvoices.length}</span>
                             </div>
                             <div className="progress-bar-bg"><div className="progress-bar-fill" style={{ width: `${(normalInvoices.length / (invoices?.length || 1)) * 100}%`, backgroundColor: 'var(--brand-secondary)' }}></div></div>
