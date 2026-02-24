@@ -150,7 +150,7 @@ function prepareInvoiceDoc(data: InvoiceData): jsPDF {
     // branding at the very bottom
     doc.setFontSize(8);
     doc.setTextColor(150);
-    doc.text('Software by Stock Sewa (stock-seva.vercel.app)', pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+    doc.text('Software by Stock Sewa', pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
 
     return doc;
 }
