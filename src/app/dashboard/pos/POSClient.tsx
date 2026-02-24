@@ -10,7 +10,18 @@ type Product = { id: string; name: string; price: number; stock_quantity: number
 type Customer = { id: string; name: string; pan_number: string | null; tax_type?: 'pan' | 'vat'; };
 type Organization = { name: string; pan_vat: string | null; address: string | null; phone: string | null; preferred_language: string | null; } | null;
 
-export default function POSClient({ products, customers, organization }: { products: Product[]; customers: Customer[]; organization: Organization; }) {
+export default function POSClient({
+    products = [],
+    customers = [],
+    organization
+}: {
+    products?: Product[];
+    customers?: Customer[];
+    organization?: Organization;
+}) {
+    const productsList = products || [];
+    const customersList = customers || [];
+
     const [cart, setCart] = useState<CartItem[]>([]);
     const [invoiceType, setInvoiceType] = useState<'normal' | 'pan' | 'vat'>('normal');
     const [paymentMethod, setPaymentMethod] = useState('cash');
@@ -23,14 +34,17 @@ export default function POSClient({ products, customers, organization }: { produ
     const [amountPaid, setAmountPaid] = useState<number>(0);
     const [manualCustomerName, setManualCustomerName] = useState('');
     const [manualCustomerPan, setManualCustomerPan] = useState('');
+    const [errorOccurred, setErrorOccurred] = useState(false);
 
-    const filteredProducts = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
-    const filteredCustomers = customers.filter(c =>
-        c.name.toLowerCase().includes(customerSearch.toLowerCase()) ||
-        (c.pan_number ?? '').includes(customerSearch)
+    const filteredProducts = productsList.filter(p =>
+        (p?.name || '').toLowerCase().includes(search.toLowerCase())
+    );
+    const filteredCustomers = customersList.filter(c =>
+        (c?.name || '').toLowerCase().includes(customerSearch.toLowerCase()) ||
+        (c?.pan_number ?? '').includes(customerSearch)
     );
 
-    const selectedCustomer = customers.find(c => c.id === customerId);
+    const selectedCustomer = customersList.find(c => c.id === customerId);
 
     const addToCart = (p: Product) => {
         setCart(prev => {

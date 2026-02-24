@@ -23,7 +23,17 @@ export async function getOrganization() {
         .eq('id', profile.organization_id)
         .single();
 
-    return org;
+    if (!org) return null;
+
+    return {
+        id: org.id,
+        name: org.name,
+        pan_vat: org.pan_vat || null,
+        address: org.address || null,
+        phone: org.phone || null,
+        logo_url: org.logo_url || null,
+        preferred_language: org.preferred_language || 'en'
+    };
 }
 
 export async function updateOrganizationLogo(formData: FormData) {

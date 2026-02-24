@@ -12,8 +12,16 @@ export async function getCustomers() {
         .select('*')
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: false });
-    if (error) throw new Error(error.message);
-    return data ?? [];
+    if (error) return [];
+    return (data || []).map(c => ({
+        id: c.id,
+        name: c.name,
+        phone: c.phone || '',
+        email: c.email || '',
+        pan_number: c.pan_number || '',
+        tax_type: c.tax_type || 'pan',
+        address: c.address || ''
+    }));
 }
 
 export async function addCustomer(formData: FormData) {

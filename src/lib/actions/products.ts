@@ -13,8 +13,19 @@ export async function getProducts() {
         .eq('organization_id', organizationId)
         .order('created_at', { ascending: false });
 
-    if (error) throw new Error(error.message);
-    return data ?? [];
+    if (error) return [];
+    return (data || []).map(p => ({
+        id: p.id,
+        name: p.name,
+        price: Number(p.price) || 0,
+        stock_quantity: Number(p.stock_quantity) || 0,
+        unit: p.unit || 'pcs',
+        category: p.category || 'Uncategorized',
+        barcode: p.barcode || '',
+        mfg_date: p.mfg_date || '',
+        expiry_date: p.expiry_date || '',
+        batch_number: p.batch_number || ''
+    }));
 }
 
 export async function addProduct(formData: FormData) {
