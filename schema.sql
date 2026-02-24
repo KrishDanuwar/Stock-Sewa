@@ -43,6 +43,8 @@ CREATE TABLE IF NOT EXISTS products (
     stock_quantity  INTEGER NOT NULL DEFAULT 0,
     unit            TEXT DEFAULT 'pcs',
     category        TEXT,
+    mfg_date        TEXT,
+    batch_number    TEXT,
     created_at      TIMESTAMPTZ DEFAULT NOW()
 );
 

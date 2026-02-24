@@ -27,11 +27,21 @@ export async function addProduct(formData: FormData) {
     const stock_quantity = parseInt(formData.get('stock_quantity') as string);
     const unit = formData.get('unit') as string;
     const category = formData.get('category') as string;
-    const barcode = formData.get('barcode') as string;
+    const mfg_date = formData.get('mfg_date') as string;
+    const batch_number = formData.get('batch_number') as string;
+    let barcode = formData.get('barcode') as string;
+
+    // Auto-generate barcode if empty
+    if (!barcode) {
+        const timestamp = Date.now().toString().slice(-8);
+        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+        barcode = `${timestamp}${random}`;
+    }
 
     const { error } = await supabase.from('products').insert({
         organization_id: organizationId,
-        name, price, cost_price, stock_quantity, unit, category, barcode,
+        name, price, cost_price, stock_quantity, unit, category,
+        barcode, mfg_date, batch_number
     });
 
     if (error) return { error: error.message };
@@ -54,6 +64,8 @@ export async function updateProduct(id: string, formData: FormData) {
             stock_quantity: parseInt(formData.get('stock_quantity') as string),
             unit: formData.get('unit') as string,
             category: formData.get('category') as string,
+            mfg_date: formData.get('mfg_date') as string,
+            batch_number: formData.get('batch_number') as string,
         })
         .eq('id', id)
         .eq('organization_id', organizationId);

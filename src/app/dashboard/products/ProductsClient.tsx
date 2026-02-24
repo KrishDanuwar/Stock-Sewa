@@ -3,22 +3,26 @@
 import { useState } from 'react';
 import { addProduct, deleteProduct } from '@/lib/actions/products';
 import { toast } from 'sonner';
-import { Plus, Trash2, Package, X, Search } from 'lucide-react';
+import { Printer, Trash2, Package, X, Search, Plus } from 'lucide-react';
+import BarcodeLabel from '@/components/BarcodeLabel';
 
 type Product = {
     id: string; name: string; barcode: string | null;
     price: number; cost_price: number; stock_quantity: number;
     unit: string; category: string | null; created_at: string;
+    mfg_date?: string | null; batch_number?: string | null;
 };
 
 export default function ProductsClient({ products }: { products: Product[] }) {
     const [showModal, setShowModal] = useState(false);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
+    const [printProduct, setPrintProduct] = useState<Product | null>(null);
 
     const filtered = products.filter(p =>
         p.name.toLowerCase().includes(search.toLowerCase()) ||
-        (p.category ?? '').toLowerCase().includes(search.toLowerCase())
+        (p.category ?? '').toLowerCase().includes(search.toLowerCase()) ||
+        (p.barcode ?? '').toLowerCase().includes(search.toLowerCase())
     );
 
     async function handleAdd(e: React.FormEvent<HTMLFormElement>) {
@@ -27,7 +31,10 @@ export default function ProductsClient({ products }: { products: Product[] }) {
         const fd = new FormData(e.currentTarget);
         const result = await addProduct(fd);
         if (result?.error) toast.error(result.error);
-        else { toast.success('Product added!'); setShowModal(false); }
+        else {
+            toast.success('Product added!');
+            setShowModal(false);
+        }
         setLoading(false);
     }
 
@@ -38,6 +45,14 @@ export default function ProductsClient({ products }: { products: Product[] }) {
         else toast.success('Product deleted');
     }
 
+    const handlePrint = (product: Product) => {
+        setPrintProduct(product);
+        setTimeout(() => {
+            window.print();
+            setPrintProduct(null);
+        }, 300);
+    };
+
     const stockBadge = (qty: number) => {
         if (qty <= 0) return <span className="badge badge-danger">Out of Stock</span>;
         if (qty <= 5) return <span className="badge badge-warning">Low: {qty}</span>;
@@ -46,6 +61,19 @@ export default function ProductsClient({ products }: { products: Product[] }) {
 
     return (
         <div className="animate-fade-in-up">
+            {/* Print Container (Hidden usually) */}
+            {printProduct && (
+                <div className="print-only">
+                    <BarcodeLabel
+                        name={printProduct.name}
+                        price={printProduct.price}
+                        barcode={printProduct.barcode || ''}
+                        mfg={printProduct.mfg_date || 'N/A'}
+                        batch={printProduct.batch_number || 'N/A'}
+                    />
+                </div>
+            )}
+
             <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <div>
                     <h1 className="page-title">Products</h1>
@@ -62,7 +90,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                 <input
                     className="glass-input"
                     style={{ paddingLeft: 38 }}
-                    placeholder="Search products..."
+                    placeholder="Search by name, category or barcode..."
                     value={search}
                     onChange={e => setSearch(e.target.value)}
                 />
@@ -79,12 +107,12 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                     <table className="glass-table">
                         <thead>
                             <tr>
-                                <th>Name</th>
+                                <th>Name & Barcode</th>
                                 <th>Category</th>
                                 <th>Price</th>
-                                <th>Cost</th>
                                 <th>Stock</th>
                                 <th>Unit</th>
+                                <th>MFG / Batch</th>
                                 <th></th>
                             </tr>
                         </thead>
@@ -93,17 +121,27 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                 <tr key={p.id}>
                                     <td>
                                         <div style={{ fontWeight: 500 }}>{p.name}</div>
-                                        {p.barcode && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{p.barcode}</div>}
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>
+                                            {p.barcode || 'NO BARCODE'}
+                                        </div>
                                     </td>
                                     <td><span style={{ color: 'var(--text-secondary)' }}>{p.category || '—'}</span></td>
-                                    <td style={{ fontWeight: 600 }}>NPR {Number(p.price).toLocaleString()}</td>
-                                    <td style={{ color: 'var(--text-secondary)' }}>NPR {Number(p.cost_price).toLocaleString()}</td>
+                                    <td style={{ fontWeight: 600 }}>रु {Number(p.price).toLocaleString()}</td>
                                     <td>{stockBadge(p.stock_quantity)}</td>
                                     <td style={{ color: 'var(--text-secondary)' }}>{p.unit}</td>
+                                    <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>
+                                        <div>M: {p.mfg_date || '—'}</div>
+                                        <div>B: {p.batch_number || '—'}</div>
+                                    </td>
                                     <td>
-                                        <button onClick={() => handleDelete(p.id, p.name)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand-danger)', padding: 6, borderRadius: 6, transition: 'background 0.2s' }}>
-                                            <Trash2 size={15} />
-                                        </button>
+                                        <div style={{ display: 'flex', gap: 4 }}>
+                                            <button onClick={() => handlePrint(p)} className="action-button action-info" title="Print Barcode Label">
+                                                <Printer size={15} />
+                                            </button>
+                                            <button onClick={() => handleDelete(p.id, p.name)} className="action-button action-danger" title="Delete Product">
+                                                <Trash2 size={15} />
+                                            </button>
+                                        </div>
                                     </td>
                                 </tr>
                             ))}
@@ -114,33 +152,119 @@ export default function ProductsClient({ products }: { products: Product[] }) {
 
             {/* Add Product Modal */}
             {showModal && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
-                    <div className="glass-card animate-fade-in-up" style={{ width: '100%', maxWidth: 480, padding: 28, position: 'relative' }}>
+                <div className="glass-modal">
+                    <div className="glass-card animate-fade-in-up" style={{ width: '100%', maxWidth: 520, padding: 28, position: 'relative' }}>
                         <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
                             <X size={20} />
                         </button>
-                        <h2 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: 20 }}>Add New Product</h2>
-                        <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                            <input name="name" required className="glass-input" placeholder="Product name *" />
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                                <input name="price" type="number" min="0" step="0.01" required className="glass-input" placeholder="Selling Price (NPR) *" />
-                                <input name="cost_price" type="number" min="0" step="0.01" className="glass-input" placeholder="Cost Price (NPR)" />
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 20 }}>Add New Product</h2>
+                        <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                            <div className="form-group">
+                                <label className="form-label">Product Name *</label>
+                                <input name="name" required className="glass-input" placeholder="e.g. Berger Silk 10L" />
                             </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                                <input name="stock_quantity" type="number" min="0" required className="glass-input" placeholder="Stock Qty *" />
-                                <input name="unit" className="glass-input" placeholder="Unit (pcs, kg, ltr...)" defaultValue="pcs" />
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                                <div className="form-group">
+                                    <label className="form-label">Selling Price रु *</label>
+                                    <input name="price" type="number" min="0" step="0.01" required className="glass-input" placeholder="0.00" />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Cost Price रु</label>
+                                    <input name="cost_price" type="number" min="0" step="0.01" className="glass-input" placeholder="0.00" />
+                                </div>
                             </div>
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
-                                <input name="category" className="glass-input" placeholder="Category" />
-                                <input name="barcode" className="glass-input" placeholder="Barcode (optional)" />
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                                <div className="form-group">
+                                    <label className="form-label">Initial Stock *</label>
+                                    <input name="stock_quantity" type="number" min="0" required className="glass-input" placeholder="Qty" />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Unit</label>
+                                    <input name="unit" className="glass-input" placeholder="pcs, ltr, kg..." defaultValue="pcs" />
+                                </div>
                             </div>
-                            <button type="submit" disabled={loading} className="glass-button glass-button-primary" style={{ justifyContent: 'center', marginTop: 8 }}>
-                                {loading ? 'Adding...' : 'Add Product'}
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                                <div className="form-group">
+                                    <label className="form-label">Category</label>
+                                    <input name="category" className="glass-input" placeholder="e.g. Paint" />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Barcode (Auto-gen if blank)</label>
+                                    <input name="barcode" className="glass-input" placeholder="Scan or leave blank" />
+                                </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                                <div className="form-group">
+                                    <label className="form-label">MFG Date</label>
+                                    <input name="mfg_date" className="glass-input" placeholder="2024/01/01" />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Batch Number</label>
+                                    <input name="batch_number" className="glass-input" placeholder="e.g. BN-998" />
+                                </div>
+                            </div>
+
+                            <button type="submit" disabled={loading} className="glass-button glass-button-primary" style={{ justifyContent: 'center', marginTop: 10, padding: 14 }}>
+                                {loading ? 'Saving Product...' : 'Add Product'}
                             </button>
                         </form>
                     </div>
                 </div>
             )}
+
+            <style jsx>{`
+                .glass-modal {
+                    position: fixed;
+                    inset: 0;
+                    z-index: 100;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(0,0,0,0.6);
+                    backdrop-filter: blur(8px);
+                    padding: 20px;
+                }
+                .form-group {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 6px;
+                }
+                .form-label {
+                    font-size: 0.75rem;
+                    font-weight: 600;
+                    color: var(--text-secondary);
+                }
+                .action-button {
+                    background: rgba(255,255,255,0.05);
+                    border: 1px solid rgba(255,255,255,0.1);
+                    cursor: pointer;
+                    padding: 7px;
+                    border-radius: 8px;
+                    transition: all 0.2s;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .action-info:hover {
+                    background: rgba(59, 130, 246, 0.2);
+                    border-color: rgba(59, 130, 246, 0.4);
+                    color: #60a5fa;
+                }
+                .action-danger:hover {
+                    background: rgba(239, 68, 68, 0.2);
+                    border-color: rgba(239, 68, 68, 0.4);
+                    color: #f87171;
+                }
+                @media print {
+                    .print-only { display: block !important; }
+                    body > *:not(.print-only) { display: none !important; }
+                }
+                .print-only { display: none; }
+            `}</style>
         </div>
     );
 }
