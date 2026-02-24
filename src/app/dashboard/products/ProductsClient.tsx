@@ -22,6 +22,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
     const [restockQty, setRestockQty] = useState('');
     const [restockPrice, setRestockPrice] = useState('');
     const [restockCost, setRestockCost] = useState('');
+    const [restockMfg, setRestockMfg] = useState('');
     const [restocking, setRestocking] = useState(false);
 
     const filtered = products.filter(p =>
@@ -61,7 +62,8 @@ export default function ProductsClient({ products }: { products: Product[] }) {
             restockItem.id,
             qty,
             parseFloat(restockPrice),
-            parseFloat(restockCost)
+            parseFloat(restockCost),
+            restockMfg
         );
         if (result?.success) {
             toast.success(`Restocked ${qty} ${restockItem.unit} of ${restockItem.name}`);
@@ -69,6 +71,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
             setRestockQty('');
             setRestockPrice('');
             setRestockCost('');
+            setRestockMfg('');
         } else {
             toast.error(result?.error || 'Failed to restock');
         }
@@ -182,6 +185,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                                 setRestockQty('');
                                                 setRestockPrice(p.price.toString());
                                                 setRestockCost(p.cost_price.toString());
+                                                setRestockMfg(p.mfg_date || '');
                                             }} className="action-button action-success" title="Restock Product">
                                                 <RefreshCw size={15} />
                                             </button>
@@ -320,6 +324,16 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                 </div>
                             </div>
 
+                            <div className="form-group">
+                                <label className="form-label">Update MFG Date</label>
+                                <input
+                                    className="glass-input"
+                                    placeholder="2024/01/01"
+                                    value={restockMfg}
+                                    onChange={e => setRestockMfg(e.target.value)}
+                                />
+                            </div>
+
                             <button type="submit" disabled={restocking} className="glass-button glass-button-primary" style={{ justifyContent: 'center', marginTop: 10, padding: 14 }}>
                                 {restocking ? 'Restocking...' : 'Add to Stock & Update Prices'}
                             </button>
@@ -387,6 +401,6 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                 }
                 .print-only { display: none; }
             `}</style>
-        </div>
+        </div >
     );
 }
