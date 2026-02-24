@@ -45,16 +45,14 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batch, shopNam
             boxSizing: 'border-box'
         }}>
             <div style={{
-                fontWeight: 700,
                 textAlign: 'center',
                 width: '100%',
-                fontSize: '8pt',
+                fontSize: '7pt',
                 marginBottom: '1mm',
-                whiteSpace: 'nowrap',
-                overflow: 'hidden',
-                textOverflow: 'ellipsis'
+                color: '#333',
+                fontWeight: 500
             }}>
-                {name}
+                MFG: {mfg || 'N/A'}
             </div>
 
             <svg ref={svgRef} style={{ width: '100%', maxWidth: '46mm', height: 'auto' }}></svg>
@@ -63,11 +61,11 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batch, shopNam
                 width: '100%',
                 display: 'flex',
                 justifyContent: 'center',
-                marginTop: '1mm',
+                marginTop: '1.5mm',
                 fontWeight: 800,
-                fontSize: '9pt'
+                fontSize: '10pt'
             }}>
-                <span>रु {price.toLocaleString()}</span>
+                <span>MRP: रु {price.toLocaleString()}</span>
             </div>
 
             <style jsx global>{`
