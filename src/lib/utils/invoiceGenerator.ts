@@ -46,10 +46,19 @@ function prepareInvoiceDoc(data: InvoiceData): jsPDF {
         doc.text(`Address: ${data.organization.address}`, 15, detailY);
         detailY += 5;
     }
-    if (data.organization.pan_vat) {
-        doc.text(`${data.invoice_type === 'vat' ? 'VAT' : 'PAN'} No: ${data.organization.pan_vat}`, 15, detailY);
+
+    // Header PAN/VAT logic based on invoice type
+    if (data.invoice_type === 'vat' && data.organization.pan_vat) {
+        doc.text(`PAN No: ${data.organization.pan_vat}`, 15, detailY);
+        detailY += 5;
+        doc.text(`VAT No: ${data.organization.pan_vat}`, 15, detailY);
+        detailY += 5;
+    } else if (data.invoice_type === 'pan' && data.organization.pan_vat) {
+        doc.text(`PAN No: ${data.organization.pan_vat}`, 15, detailY);
         detailY += 5;
     }
+    // Normal bills (matching Sample 2) hide PAN/VAT in header
+
     if (data.organization.phone) {
         doc.text(`Phone: ${data.organization.phone}`, 15, detailY);
         detailY += 5;
@@ -58,7 +67,7 @@ function prepareInvoiceDoc(data: InvoiceData): jsPDF {
     // Title
     doc.setFontSize(14);
     doc.setFont('helvetica', 'bold');
-    const title = data.invoice_type === 'vat' ? 'TAX INVOICE' :
+    const title = data.invoice_type === 'vat' ? 'TAX INVOICE (VAT BILL)' :
         data.invoice_type === 'pan' ? 'BILL (PAN Registered)' : 'BILL';
     doc.text(title, 15, 48);
     doc.line(15, 52, pageWidth - 15, 52);
@@ -67,7 +76,7 @@ function prepareInvoiceDoc(data: InvoiceData): jsPDF {
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.text(`Invoice No: ${data.invoice_number}`, 15, 60);
-    doc.text(`Date: ${data.date_bs}`, 15, 65); // Standardized to BS as per samples
+    doc.text(`Date: ${data.date_bs}`, 15, 65);
 
     // Customer Info
     doc.text(`Customer Name: ${data.customer_name || '-'}`, 15, 72);
