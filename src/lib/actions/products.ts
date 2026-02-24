@@ -55,7 +55,10 @@ export async function addProduct(formData: FormData) {
     const { error } = await supabase.from('products').insert({
         organization_id: organizationId,
         name, price, cost_price, stock_quantity, unit, category,
-        barcode, mfg_date, expiry_date, batch_number
+        barcode,
+        mfg_date: mfg_date || null,
+        expiry_date: expiry_date || null,
+        batch_number: batch_number || null
     });
 
     if (error) return { error: error.message };
@@ -140,9 +143,9 @@ export async function restockProduct(
 
     if (newPrice !== undefined && !isNaN(newPrice)) updates.price = newPrice;
     if (newCostPrice !== undefined && !isNaN(newCostPrice)) updates.cost_price = newCostPrice;
-    if (newMfgDate !== undefined) updates.mfg_date = newMfgDate;
-    if (newExpiryDate !== undefined) updates.expiry_date = newExpiryDate;
-    if (newBatchNumber !== undefined) updates.batch_number = newBatchNumber;
+    if (newMfgDate !== undefined) updates.mfg_date = newMfgDate || null;
+    if (newExpiryDate !== undefined) updates.expiry_date = newExpiryDate || null;
+    if (newBatchNumber !== undefined) updates.batch_number = newBatchNumber || null;
 
     const { error: updateError } = await supabase
         .from('products')
