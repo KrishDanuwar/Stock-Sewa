@@ -19,28 +19,75 @@ export default function SettingsClient({ organization }: { organization: Organiz
     const [loading, setLoading] = useState(false);
     const [logoPreview, setLogoPreview] = useState<string | null>(organization?.logo_url || null);
 
+    const compressImage = (file: File, maxWidth: number, maxHeight: number, quality: number): Promise<Blob> => {
+        return new Promise((resolve, reject) => {
+            const reader = new FileReader();
+            reader.readAsDataURL(file);
+            reader.onload = (event) => {
+                const img = new (window as any).Image();
+                img.src = event.target?.result as string;
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    if (width > height) {
+                        if (width > maxWidth) {
+                            height *= maxWidth / width;
+                            width = maxWidth;
+                        }
+                    } else {
+                        if (height > maxHeight) {
+                            width *= maxHeight / height;
+                            height = maxHeight;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx?.drawImage(img, 0, 0, width, height);
+                    canvas.toBlob((blob) => {
+                        if (blob) resolve(blob);
+                        else reject(new Error('Canvas toBlob failed'));
+                    }, 'image/jpeg', quality);
+                };
+                img.onerror = () => reject(new Error('Image load failed'));
+            };
+            reader.onerror = () => reject(new Error('FileReader failed'));
+        });
+    };
+
     async function handleLogoChange(e: React.ChangeEvent<HTMLInputElement>) {
         const file = e.target.files?.[0];
         if (!file) return;
 
-        // Preview
-        const reader = new FileReader();
-        reader.onloadend = () => setLogoPreview(reader.result as string);
-        reader.readAsDataURL(file);
-
-        // Upload
         setLoading(true);
-        const formData = new FormData();
-        formData.append('logo', file);
+        try {
+            // 1. Compress
+            const compressedBlob = await compressImage(file, 512, 512, 0.7);
 
-        const result = await updateOrganizationLogo(formData);
-        if (result.success) {
-            toast.success('Logo updated successfully!');
-        } else {
-            toast.error(result.error || 'Failed to update logo');
-            setLogoPreview(organization?.logo_url || null);
+            // 2. Preview
+            const previewUrl = URL.createObjectURL(compressedBlob);
+            setLogoPreview(previewUrl);
+
+            // 3. Upload
+            const formData = new FormData();
+            formData.append('logo', compressedBlob, 'logo.jpg');
+
+            const result = await updateOrganizationLogo(formData);
+            if (result.success) {
+                toast.success('Logo compressed and updated successfully!');
+            } else {
+                toast.error(result.error || 'Failed to update logo');
+                setLogoPreview(organization?.logo_url || null);
+            }
+        } catch (error) {
+            toast.error('Error processing image');
+            console.error(error);
+        } finally {
+            setLoading(false);
         }
-        setLoading(false);
     }
 
     return (
