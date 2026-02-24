@@ -67,14 +67,11 @@ export default function POSClient({ products, customers, organization }: { produ
             if (customerMode === 'registered' && !effectiveCustomerId) {
                 toast.error('Please select a customer for PAN/VAT invoice'); return;
             }
-            if (customerMode === 'walkin' && !manualCustomerName) {
-                toast.error('Please enter customer name for PAN/VAT invoice'); return;
-            }
         }
 
         // Validation for credit/unpaid sales without customers
-        if (getPaymentStatus() !== 'paid' && !effectiveCustomerId && !manualCustomerName) {
-            toast.error('Customer name is required for credit/unpaid sales'); return;
+        if (getPaymentStatus() !== 'paid' && !effectiveCustomerId) {
+            toast.error('Customer is required for credit/unpaid sales'); return;
         }
 
         setLoading(true);
@@ -100,7 +97,7 @@ export default function POSClient({ products, customers, organization }: { produ
                 invoice_type: invoiceType,
                 date_ad: new Date().toISOString().split('T')[0],
                 date_bs: result.invoice.date_bs || '',
-                customer_name: customerMode === 'registered' ? selectedCustomer?.name : manualCustomerName,
+                customer_name: customerMode === 'registered' ? selectedCustomer?.name : (manualCustomerName || 'Walk-in Customer'),
                 customer_pan: customerMode === 'registered' ? selectedCustomer?.pan_number || undefined : manualCustomerPan || undefined,
                 customer_tax_type: customerMode === 'registered' ? selectedCustomer?.tax_type : (manualCustomerPan ? (invoiceType as 'pan' | 'vat') : undefined),
                 subtotal,
