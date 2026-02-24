@@ -10,7 +10,7 @@ type Product = {
     id: string; name: string; barcode: string | null;
     price: number; cost_price: number; stock_quantity: number;
     unit: string; category: string | null; created_at: string;
-    mfg_date?: string | null; batch_number?: string | null;
+    mfg_date?: string | null; expiry_date?: string | null; batch_number?: string | null;
 };
 
 export default function ProductsClient({ products }: { products: Product[] }) {
@@ -89,6 +89,18 @@ export default function ProductsClient({ products }: { products: Product[] }) {
         return <span className="badge badge-success">{qty}</span>;
     };
 
+    const expiryBadge = (date?: string | null) => {
+        if (!date) return null;
+        const expiry = new Date(date);
+        const now = new Date();
+        const diff = expiry.getTime() - now.getTime();
+        const days = Math.ceil(diff / (1000 * 60 * 60 * 24));
+
+        if (days <= 0) return <span className="badge badge-danger" style={{ fontSize: '0.65rem' }}>Expired</span>;
+        if (days <= 30) return <span className="badge badge-warning" style={{ fontSize: '0.65rem' }}>Expires in {days}d</span>;
+        return <span className="badge badge-success" style={{ fontSize: '0.65rem' }}>{date}</span>;
+    };
+
     return (
         <div className="animate-fade-in-up">
             {/* Print Container (Hidden usually) */}
@@ -141,6 +153,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                 <th>Category</th>
                                 <th>Price</th>
                                 <th>Stock</th>
+                                <th>Expiry Status</th>
                                 <th>Unit</th>
                                 <th>MFG / Batch</th>
                                 <th></th>
@@ -158,6 +171,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                     <td><span style={{ color: 'var(--text-secondary)' }}>{p.category || '—'}</span></td>
                                     <td style={{ fontWeight: 600 }}>रु {Number(p.price).toLocaleString()}</td>
                                     <td>{stockBadge(p.stock_quantity)}</td>
+                                    <td>{expiryBadge(p.expiry_date)}</td>
                                     <td style={{ color: 'var(--text-secondary)' }}>{p.unit}</td>
                                     <td style={{ color: 'var(--text-secondary)', fontSize: '0.8125rem' }}>
                                         <div>M: {p.mfg_date || '—'}</div>
@@ -241,9 +255,14 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                     <input name="mfg_date" className="glass-input" placeholder="2024/01/01" />
                                 </div>
                                 <div className="form-group">
-                                    <label className="form-label">Batch Number</label>
-                                    <input name="batch_number" className="glass-input" placeholder="e.g. BN-998" />
+                                    <label className="form-label">Expiry Date</label>
+                                    <input name="expiry_date" type="date" className="glass-input" />
                                 </div>
+                            </div>
+
+                            <div className="form-group">
+                                <label className="form-label">Batch Number</label>
+                                <input name="batch_number" className="glass-input" placeholder="e.g. BN-998" />
                             </div>
 
                             <button type="submit" disabled={loading} className="glass-button glass-button-primary" style={{ justifyContent: 'center', marginTop: 10, padding: 14 }}>

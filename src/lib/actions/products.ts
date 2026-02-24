@@ -28,6 +28,7 @@ export async function addProduct(formData: FormData) {
     const unit = formData.get('unit') as string;
     const category = formData.get('category') as string;
     const mfg_date = formData.get('mfg_date') as string;
+    const expiry_date = formData.get('expiry_date') as string;
     const batch_number = formData.get('batch_number') as string;
     let barcode = formData.get('barcode') as string;
 
@@ -41,7 +42,7 @@ export async function addProduct(formData: FormData) {
     const { error } = await supabase.from('products').insert({
         organization_id: organizationId,
         name, price, cost_price, stock_quantity, unit, category,
-        barcode, mfg_date, batch_number
+        barcode, mfg_date, expiry_date, batch_number
     });
 
     if (error) return { error: error.message };
@@ -65,6 +66,7 @@ export async function updateProduct(id: string, formData: FormData) {
             unit: formData.get('unit') as string,
             category: formData.get('category') as string,
             mfg_date: formData.get('mfg_date') as string,
+            expiry_date: formData.get('expiry_date') as string,
             batch_number: formData.get('batch_number') as string,
         })
         .eq('id', id)

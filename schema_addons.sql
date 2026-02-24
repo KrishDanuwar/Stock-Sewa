@@ -18,6 +18,9 @@ ALTER TABLE customers ADD COLUMN IF NOT EXISTS tax_type TEXT DEFAULT 'pan' CHECK
 
 ALTER TABLE organizations ADD COLUMN IF NOT EXISTS preferred_language TEXT DEFAULT 'en' CHECK (preferred_language IN ('en', 'np'));
 
+-- Add expiry_date to products
+ALTER TABLE products ADD COLUMN IF NOT EXISTS expiry_date DATE;
+
 -- ======================================================
 -- REPAIR FUNCTION V2: Bypasses RLS to fix broken signups
 -- ======================================================
