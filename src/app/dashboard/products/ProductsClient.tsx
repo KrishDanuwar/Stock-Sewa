@@ -191,7 +191,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
             {/* Add Product Modal */}
             {showModal && (
                 <div className="glass-modal">
-                    <div className="glass-card animate-fade-in-up" style={{ width: '100%', maxWidth: 520, padding: 28, position: 'relative' }}>
+                    <div className="glass-card glass-modal-card animate-fade-in-up" style={{ width: '100%', maxWidth: 520, padding: 28, position: 'relative' }}>
                         <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
                             <X size={20} />
                         </button>
@@ -257,7 +257,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
             {/* Restock Modal */}
             {restockItem && (
                 <div className="glass-modal">
-                    <div className="glass-card animate-fade-in-up" style={{ width: '100%', maxWidth: 400, padding: 28, position: 'relative' }}>
+                    <div className="glass-card glass-modal-card animate-fade-in-up" style={{ width: '100%', maxWidth: 400, padding: 28, position: 'relative' }}>
                         <button onClick={() => setRestockItem(null)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
                             <X size={20} />
                         </button>
@@ -317,11 +317,17 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                     inset: 0;
                     z-index: 100;
                     display: flex;
-                    align-items: center;
+                    align-items: flex-start;
                     justify-content: center;
                     background: rgba(0,0,0,0.6);
-                    backdrop-filter: blur(8px);
+                    backdrop-filter: blur(12px);
                     padding: 20px;
+                    padding-top: 10vh;
+                }
+                .glass-modal-card {
+                    background: rgba(15, 22, 41, 0.95) !important;
+                    backdrop-filter: blur(24px) !important;
+                    border: 1px solid rgba(255, 255, 255, 0.15) !important;
                 }
                 .form-group {
                     display: flex;
