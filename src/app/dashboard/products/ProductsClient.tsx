@@ -80,7 +80,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
         setTimeout(() => {
             window.print();
             setPrintProduct(null);
-        }, 800);
+        }, 1500);
     };
 
     const stockBadge = (qty: number) => {
