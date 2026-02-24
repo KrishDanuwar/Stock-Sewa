@@ -257,7 +257,11 @@ export default function POSClient({
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                         <div style={{ display: 'flex', gap: 12, fontSize: '0.8125rem' }}>
                             <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
-                                <input type="radio" checked={customerMode === 'walkin'} onChange={() => { setCustomerMode('walkin'); setCustomerId(''); }} />
+                                <input type="radio" checked={customerMode === 'walkin'} onChange={() => {
+                                    setCustomerMode('walkin');
+                                    setCustomerId('');
+                                    if (paymentMethod === 'credit') setPaymentMethod('cash');
+                                }} />
                                 {organization?.preferred_language === 'np' ? 'वाक-इन ग्राहक' : 'Walk-in'}
                             </label>
                             <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
@@ -340,7 +344,7 @@ export default function POSClient({
                                 <option value="khalti">Khalti</option>
                                 <option value="ime_pay">IME Pay</option>
                                 <option value="bank_transfer">Bank Transfer</option>
-                                <option value="credit">Credit / Unpaid</option>
+                                <option value="credit" disabled={customerMode === 'walkin'}>Credit / Unpaid {customerMode === 'walkin' ? '(Registered Only)' : ''}</option>
                             </select>
                         </div>
                         <div>
