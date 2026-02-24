@@ -121,7 +121,7 @@ export function printInvoice(invoice: any) {
             <body>
                 <div class="container">
                     <div class="header">
-                        <div class="company-name">${org.name || 'G.K PAINTS'}</div>
+                        <div class="company-name">${org.name || 'STOCK SEWA'}</div>
                         <div class="company-details">
                             ${org.address ? `Address: ${org.address}<br>` : ''}
                             ${org.pan_no ? `PAN No: ${org.pan_no}` : ''}
@@ -183,7 +183,7 @@ export function printInvoice(invoice: any) {
 
                     <div class="footer-note">
                         ${note}<br>
-                        Generated via ${org.name || 'GK Paints'} POS System
+                        Generated via ${org.name || 'Stock Sewa'} POS System
                     </div>
                 </div>
                 <script>

@@ -163,7 +163,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                                 </div>
                                 <div className="text-left">
                                     <h2 className="text-2xl font-black text-surface-900 tracking-tighter uppercase">
-                                        {invoice.organizations?.name || 'G.K PAINTS'}
+                                        {invoice.organizations?.name || 'STOCK SEWA'}
                                     </h2>
                                     <div className="flex items-center gap-2 text-[10px] text-brand-primary font-bold tracking-[0.2em] uppercase">
                                         <span className="w-1 h-1 bg-brand-primary rounded-full" />
@@ -321,7 +321,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                     <div className="mt-16 pt-8 border-t border-surface-100 text-center">
                         <div className="flex items-center justify-center gap-2 text-[10px] font-black text-surface-400 uppercase tracking-widest">
                             <CheckCircle2 size={12} className="text-brand-primary" />
-                            Generated Securely via {invoice.organizations?.name || 'GK Paints'} POS System
+                            Generated Securely via {invoice.organizations?.name || 'Stock Sewa'} POS System
                         </div>
                     </div>
                 </div>

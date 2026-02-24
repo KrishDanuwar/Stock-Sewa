@@ -27,7 +27,7 @@ export default function RegisterPage() {
                     <div className="relative w-full h-full bg-white rounded-2xl flex items-center justify-center shadow-xl p-3 border border-surface-100 overflow-hidden">
                         <Image
                             src="/logo.png"
-                            alt="G.K Paints Logo"
+                            alt="Stock Sewa Logo"
                             width={80}
                             height={80}
                             className="w-full h-full object-contain"

@@ -14,7 +14,7 @@ export function generateInvoicePDF(invoice: any) {
     // Company Info
     doc.setFontSize(20);
     doc.setTextColor(40, 40, 40);
-    doc.text(org.name || 'G.K Paints POS', 14, 22);
+    doc.text(org.name || 'Stock Sewa POS', 14, 22);
 
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);

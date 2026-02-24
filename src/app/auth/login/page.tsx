@@ -27,7 +27,7 @@ export default function LoginPage() {
                     <div className="relative w-full h-full bg-white rounded-2xl flex items-center justify-center shadow-xl p-3 border border-surface-100 overflow-hidden">
                         <Image
                             src="/logo.png"
-                            alt="G.K Paints Logo"
+                            alt="Stock Sewa Logo"
                             width={80}
                             height={80}
                             className="w-full h-full object-contain"
@@ -36,7 +36,7 @@ export default function LoginPage() {
                     </div>
                 </div>
                 <h1 className="text-3xl font-black text-surface-900 tracking-tight mb-2">Welcome Back</h1>
-                <p className="text-surface-500 font-medium text-center">Manage your inventory with precision</p>
+                <p className="text-surface-500 font-medium text-center">Stock Sewa — Manage with precision</p>
             </div>
 
             <form action={handleSubmit} className="space-y-4">
