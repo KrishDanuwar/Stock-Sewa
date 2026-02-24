@@ -344,7 +344,7 @@ export default function POSClient({
                                 <option value="khalti">Khalti</option>
                                 <option value="ime_pay">IME Pay</option>
                                 <option value="bank_transfer">Bank Transfer</option>
-                                <option value="credit" disabled={customerMode === 'walkin'}>Credit / Unpaid {customerMode === 'walkin' ? '(Registered Only)' : ''}</option>
+                                <option value="credit" disabled={customerMode === 'walkin'}>Credit / Unpaid</option>
                             </select>
                         </div>
                         <div>
