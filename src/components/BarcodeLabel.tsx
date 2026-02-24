@@ -75,20 +75,18 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batch, shopNam
                     margin: 0 !important;
                 }
                 @media print {
-                    /* Hide EVERYTHING by default */
-                    body * {
-                        visibility: hidden !important;
-                        display: none !important;
-                    }
-
-                    /* Atomically show ONLY the print container and its contents */
+                    /* Reset everything to hidden/suppressed */
                     html, body {
-                        visibility: hidden !important;
+                        background: white !important;
                         margin: 0 !important;
                         padding: 0 !important;
-                        background: white !important;
+                        height: 25mm !important;
+                        width: 50mm !important;
+                        overflow: hidden !important;
+                        visibility: hidden !important;
                     }
 
+                    /* Atomically show ONLY the printer content */
                     .print-only, .print-only *,
                     .label-container, .label-container * {
                         visibility: visible !important;
@@ -97,13 +95,15 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batch, shopNam
 
                     .print-only {
                         display: block !important;
-                        position: absolute !important;
+                        position: fixed !important;
                         left: 0 !important;
                         top: 0 !important;
                         width: 50mm !important;
                         height: 25mm !important;
-                        z-index: 9999999 !important;
+                        z-index: 2147483647 !important;
                         background: white !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
                     }
 
                     .label-container {
@@ -112,17 +112,28 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batch, shopNam
                         top: 0 !important;
                         width: 50mm !important;
                         height: 25mm !important;
-                        margin: 0 !important;
-                        padding: 1mm 1.5mm !important;
                         flex-direction: column !important;
                         align-items: center !important;
                         justify-content: center !important;
+                        padding: 1mm 1.5mm !important;
                         box-sizing: border-box !important;
+                        background: white !important;
                     }
-                    
-                    /* Reset SVG display */
+
+                    /* Force hide layout elements to prevent white area leaks */
+                    .glass-sidebar, .sidebar, aside, nav, footer, .page-header, table {
+                        display: none !important;
+                    }
+
+                    /* Explicitly suppress any other SVGs (icons) that might leak */
+                    body svg:not(.label-container svg) {
+                        display: none !important;
+                    }
+
                     svg {
                         display: block !important;
+                        max-width: 46mm !important;
+                        height: 14mm !important;
                     }
                 }
             `}</style>

@@ -151,7 +151,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                             <tr>
                                 <th>Name & Barcode</th>
                                 <th>Category</th>
-                                <th>Price</th>
+                                <th>MRP</th>
                                 <th>Stock</th>
                                 <th>Expiry Status</th>
                                 <th>Unit</th>
