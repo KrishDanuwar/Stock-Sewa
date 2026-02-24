@@ -179,6 +179,23 @@ body {
   width: 100%;
   outline: none;
   transition: border-color 0.2s ease, background 0.2s ease;
+  appearance: none;
+  /* For custom arrows if needed, but select usually needs a hint */
+}
+
+/* Fix for Select Dropdowns */
+select.glass-input {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='white'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  background-size: 16px;
+  padding-right: 40px;
+}
+
+.glass-input option {
+  background-color: #0f172a;
+  /* Dark background for options */
+  color: #ffffff;
 }
 
 .glass-input::placeholder {
