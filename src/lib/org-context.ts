@@ -31,6 +31,7 @@ export async function getOrgContext(): Promise<OrgContext> {
         .single();
 
     if (profileError || !profile) {
+        console.error('Profile missing for user:', user.id);
         redirect('/setup');
     }
 
