@@ -20,6 +20,8 @@ export default function ProductsClient({ products }: { products: Product[] }) {
     const [printProduct, setPrintProduct] = useState<Product | null>(null);
     const [restockItem, setRestockItem] = useState<Product | null>(null);
     const [restockQty, setRestockQty] = useState('');
+    const [restockPrice, setRestockPrice] = useState('');
+    const [restockCost, setRestockCost] = useState('');
     const [restocking, setRestocking] = useState(false);
 
     const filtered = products.filter(p =>
@@ -55,11 +57,18 @@ export default function ProductsClient({ products }: { products: Product[] }) {
         if (isNaN(qty) || qty <= 0) return toast.error('Enter valid quantity');
 
         setRestocking(true);
-        const result = await restockProduct(restockItem.id, qty);
+        const result = await restockProduct(
+            restockItem.id,
+            qty,
+            parseFloat(restockPrice),
+            parseFloat(restockCost)
+        );
         if (result?.success) {
             toast.success(`Restocked ${qty} ${restockItem.unit} of ${restockItem.name}`);
             setRestockItem(null);
             setRestockQty('');
+            setRestockPrice('');
+            setRestockCost('');
         } else {
             toast.error(result?.error || 'Failed to restock');
         }
@@ -156,7 +165,12 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', gap: 4 }}>
-                                            <button onClick={() => { setRestockItem(p); setRestockQty(''); }} className="action-button action-success" title="Restock Product">
+                                            <button onClick={() => {
+                                                setRestockItem(p);
+                                                setRestockQty('');
+                                                setRestockPrice(p.price.toString());
+                                                setRestockCost(p.cost_price.toString());
+                                            }} className="action-button action-success" title="Restock Product">
                                                 <RefreshCw size={15} />
                                             </button>
                                             <button onClick={() => handlePrint(p)} className="action-button action-info" title="Print Barcode Label">
@@ -265,8 +279,32 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                     required
                                 />
                             </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                                <div className="form-group">
+                                    <label className="form-label">Update Selling Price रु</label>
+                                    <input
+                                        className="glass-input"
+                                        type="number"
+                                        step="0.01"
+                                        value={restockPrice}
+                                        onChange={e => setRestockPrice(e.target.value)}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Update Cost Price रु</label>
+                                    <input
+                                        className="glass-input"
+                                        type="number"
+                                        step="0.01"
+                                        value={restockCost}
+                                        onChange={e => setRestockCost(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
                             <button type="submit" disabled={restocking} className="glass-button glass-button-primary" style={{ justifyContent: 'center', marginTop: 10, padding: 14 }}>
-                                {restocking ? 'Restocking...' : 'Add to Stock'}
+                                {restocking ? 'Restocking...' : 'Add to Stock & Update Prices'}
                             </button>
                         </form>
                     </div>

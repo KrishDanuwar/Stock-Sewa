@@ -93,7 +93,7 @@ export async function deleteProduct(id: string) {
     return { success: true };
 }
 
-export async function restockProduct(id: string, quantity: number) {
+export async function restockProduct(id: string, quantity: number, newPrice?: number, newCostPrice?: number) {
     const { organizationId } = await getOrgContext();
     const supabase = await createClient();
 
@@ -102,7 +102,7 @@ export async function restockProduct(id: string, quantity: number) {
     // Fetch current stock
     const { data: product, error: fetchError } = await supabase
         .from('products')
-        .select('stock_quantity')
+        .select('stock_quantity, price, cost_price')
         .eq('id', id)
         .eq('organization_id', organizationId)
         .single();
@@ -111,11 +111,16 @@ export async function restockProduct(id: string, quantity: number) {
         return { error: 'Product not found' };
     }
 
+    const updates: any = {
+        stock_quantity: product.stock_quantity + quantity
+    };
+
+    if (newPrice !== undefined && !isNaN(newPrice)) updates.price = newPrice;
+    if (newCostPrice !== undefined && !isNaN(newCostPrice)) updates.cost_price = newCostPrice;
+
     const { error: updateError } = await supabase
         .from('products')
-        .update({
-            stock_quantity: product.stock_quantity + quantity
-        })
+        .update(updates)
         .eq('id', id)
         .eq('organization_id', organizationId);
 
