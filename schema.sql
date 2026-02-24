@@ -145,8 +145,8 @@ CREATE TRIGGER on_auth_user_created
 -- 9. ROW LEVEL SECURITY (RLS)
 -- ======================================================
 
--- Helper function to get current user's org_id
-CREATE OR REPLACE FUNCTION auth.current_org_id()
+-- Helper function to get current user's org_id (in public schema to avoid permission errors)
+CREATE OR REPLACE FUNCTION public.current_org_id()
 RETURNS UUID AS $$
     SELECT organization_id FROM public.profiles WHERE id = auth.uid();
 $$ LANGUAGE sql SECURITY DEFINER STABLE;
@@ -154,38 +154,38 @@ $$ LANGUAGE sql SECURITY DEFINER STABLE;
 -- ORGANIZATIONS: Users can only see their own org
 ALTER TABLE organizations ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "org_isolation" ON organizations
-    FOR ALL USING (id = auth.current_org_id());
+    FOR ALL USING (id = public.current_org_id());
 
 -- PROFILES: Users can only see their own profile
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "profile_isolation" ON profiles
-    FOR ALL USING (organization_id = auth.current_org_id());
+    FOR ALL USING (organization_id = public.current_org_id());
 
 -- PRODUCTS
 ALTER TABLE products ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "products_isolation" ON products
-    FOR ALL USING (organization_id = auth.current_org_id());
+    FOR ALL USING (organization_id = public.current_org_id());
 
 -- CUSTOMERS
 ALTER TABLE customers ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "customers_isolation" ON customers
-    FOR ALL USING (organization_id = auth.current_org_id());
+    FOR ALL USING (organization_id = public.current_org_id());
 
 -- INVOICES
 ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "invoices_isolation" ON invoices
-    FOR ALL USING (organization_id = auth.current_org_id());
+    FOR ALL USING (organization_id = public.current_org_id());
 
 -- INVOICE_ITEMS (via invoice's org)
 ALTER TABLE invoice_items ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "invoice_items_isolation" ON invoice_items
     FOR ALL USING (
         invoice_id IN (
-            SELECT id FROM invoices WHERE organization_id = auth.current_org_id()
+            SELECT id FROM invoices WHERE organization_id = public.current_org_id()
         )
     );
 
 -- STOCK_MOVEMENTS
 ALTER TABLE stock_movements ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "stock_movements_isolation" ON stock_movements
-    FOR ALL USING (organization_id = auth.current_org_id());
+    FOR ALL USING (organization_id = public.current_org_id());
