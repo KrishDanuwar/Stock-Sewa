@@ -147,6 +147,11 @@ function prepareInvoiceDoc(data: InvoiceData): jsPDF {
         doc.text(isNp ? 'द्रष्टव्य: भ्याट लागू हुँदैन (व्यवसाय केवल प्यान दर्ता गरिएको छ)।' : 'Note: VAT Not Applicable (Business is PAN registered only).', 15, finalY);
     }
 
+    // branding at the very bottom
+    doc.setFontSize(8);
+    doc.setTextColor(150);
+    doc.text('Software by Stock Sewa (stock-seva.vercel.app)', pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+
     return doc;
 }
 
