@@ -159,7 +159,7 @@ export default function POSClient({
                     <p className="page-subtitle">{organization?.preferred_language === 'np' ? 'बिक्री केन्द्र' : 'Point of Sale'}</p>
                 </div>
                 <div style={{ position: 'relative' }}>
-                    <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                    <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
                     <input className="glass-input" style={{ paddingLeft: 36 }} placeholder="Search products..." value={search} onChange={e => setSearch(e.target.value)} />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(175px, 1fr))', gap: 12, overflowY: 'auto', paddingBottom: 8 }}>
@@ -211,8 +211,8 @@ export default function POSClient({
                 {/* Cart Items */}
                 <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8 }}>
                     {cart.length === 0 ? (
-                        <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-muted)' }}>
-                            <ShoppingCart size={36} style={{ margin: '0 auto 10px', opacity: 0.3 }} />
+                        <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-secondary)' }}>
+                            <ShoppingCart size={36} style={{ margin: '0 auto 10px', opacity: 0.5 }} />
                             <p style={{ fontSize: '0.875rem' }}>{organization?.preferred_language === 'np' ? 'थप्नको लागि उत्पादनहरू क्लिक गर्नुहोस्' : 'Click products to add'}</p>
                         </div>
                     ) : cart.map(item => (
@@ -268,7 +268,7 @@ export default function POSClient({
 
                         {customerMode === 'registered' && (
                             <div style={{ position: 'relative' }}>
-                                <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
+                                <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', opacity: 0.8 }} />
                                 <input
                                     className="glass-input"
                                     style={{ paddingLeft: 30, fontSize: '0.8125rem' }}

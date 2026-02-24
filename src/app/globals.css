@@ -27,9 +27,11 @@
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
 
   /* Text */
-  --text-primary: #f1f5f9;
-  --text-secondary: #94a3b8;
-  --text-muted: #475569;
+  --text-primary: #f8fafc;
+  --text-secondary: #cbd5e1;
+  /* Much brighter than #94a3b8 */
+  --text-muted: #64748b;
+  /* Brighter than #475569 */
 
   /* Sidebar */
   --sidebar-width: 260px;
@@ -50,8 +52,8 @@
 
   /* Text */
   --text-primary: #0f172a;
-  --text-secondary: #475569;
-  --text-muted: #94a3b8;
+  --text-secondary: #334155;
+  --text-muted: #64748b;
 
   /* Sidebar */
   --sidebar-bg: rgba(255, 255, 255, 0.9);
@@ -166,10 +168,12 @@ body {
 }
 
 .glass-input {
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.08);
+  /* Slightly more opaque */
   border: 1px solid var(--glass-border);
   border-radius: 10px;
-  color: var(--text-primary);
+  color: #ffffff !important;
+  /* Force white text */
   font-size: 0.875rem;
   padding: 10px 14px;
   width: 100%;
@@ -178,7 +182,8 @@ body {
 }
 
 .glass-input::placeholder {
-  color: var(--text-muted);
+  color: rgba(255, 255, 255, 0.4);
+  /* Brighter placeholder */
 }
 
 .glass-input:focus {
