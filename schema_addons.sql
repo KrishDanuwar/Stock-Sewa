@@ -13,3 +13,5 @@ END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
 ALTER TABLE invoices ADD COLUMN IF NOT EXISTS customer_name_manual TEXT;
 ALTER TABLE invoices ADD COLUMN IF NOT EXISTS customer_pan_manual TEXT;
+
+ALTER TABLE customers ADD COLUMN IF NOT EXISTS tax_type TEXT DEFAULT 'pan' CHECK (tax_type IN ('pan', 'vat'));

@@ -7,7 +7,7 @@ import { Plus, Minus, Trash2, ShoppingCart, Search, Receipt, CheckCircle, Printe
 import { printInvoicePDF } from '@/lib/utils/invoiceGenerator';
 
 type Product = { id: string; name: string; price: number; stock_quantity: number; unit: string; };
-type Customer = { id: string; name: string; pan_number: string | null; };
+type Customer = { id: string; name: string; pan_number: string | null; tax_type?: 'pan' | 'vat'; };
 type Organization = { name: string; pan_vat: string | null; address: string | null; phone: string | null; } | null;
 
 export default function POSClient({ products, customers, organization }: { products: Product[]; customers: Customer[]; organization: Organization; }) {
@@ -102,6 +102,7 @@ export default function POSClient({ products, customers, organization }: { produ
                 date_bs: result.invoice.date_bs || '',
                 customer_name: customerMode === 'registered' ? selectedCustomer?.name : manualCustomerName,
                 customer_pan: customerMode === 'registered' ? selectedCustomer?.pan_number || undefined : manualCustomerPan || undefined,
+                customer_tax_type: customerMode === 'registered' ? selectedCustomer?.tax_type : (manualCustomerPan ? (invoiceType as 'pan' | 'vat') : undefined),
                 subtotal,
                 tax_amount: tax,
                 total_amount: total,
@@ -256,14 +257,24 @@ export default function POSClient({ products, customers, organization }: { produ
                                                 style={{ display: 'block', width: '100%', padding: '8px 12px', textAlign: 'left', border: 'none', background: 'transparent', color: 'var(--text-primary)', fontSize: '0.8125rem', cursor: 'pointer', borderRadius: 6 }}
                                                 className="hover:bg-white/10"
                                             >
-                                                {c.name} {c.pan_number ? `(${c.pan_number})` : ''}
+                                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                                    <span>{c.name}</span>
+                                                    {c.pan_number && <span className={`badge ${c.tax_type === 'vat' ? 'badge-success' : 'badge-info'}`} style={{ fontSize: '0.625rem' }}>{c.tax_type?.toUpperCase() || 'PAN'}: {c.pan_number}</span>}
+                                                </div>
                                             </button>
                                         ))}
                                     </div>
                                 )}
                                 {selectedCustomer && (
                                     <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(79,142,247,0.1)', borderRadius: 8, border: '1px solid rgba(79,142,247,0.2)' }}>
-                                        <span style={{ fontSize: '0.8125rem', fontWeight: 600 }}>{selectedCustomer.name}</span>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span style={{ fontSize: '0.8125rem', fontWeight: 600 }}>{selectedCustomer.name}</span>
+                                            {selectedCustomer.pan_number && (
+                                                <span style={{ fontSize: '0.6875rem', opacity: 0.7 }}>
+                                                    {selectedCustomer.tax_type?.toUpperCase() || 'PAN'}: {selectedCustomer.pan_number}
+                                                </span>
+                                            )}
+                                        </div>
                                         <button onClick={() => setCustomerId('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand-danger)' }}><Trash2 size={12} /></button>
                                     </div>
                                 )}

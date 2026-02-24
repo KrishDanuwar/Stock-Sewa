@@ -48,6 +48,7 @@ export default function InvoicesClient({ invoices, organization }: { invoices: a
             date_bs: inv.date_bs || '',
             customer_name: inv.customers?.name || inv.customer_name_manual,
             customer_pan: inv.customers?.pan_number || inv.customer_pan_manual || undefined,
+            customer_tax_type: inv.customers?.tax_type as 'pan' | 'vat' | undefined,
             subtotal: inv.total_amount - (inv.vat_amount || 0),
             tax_amount: inv.vat_amount || 0,
             total_amount: inv.total_amount,

@@ -15,6 +15,7 @@ export interface InvoiceData {
     date_bs: string;
     customer_name?: string;
     customer_pan?: string;
+    customer_tax_type?: 'pan' | 'vat';
     subtotal: number;
     tax_amount: number;
     total_amount: number;
@@ -81,7 +82,8 @@ function prepareInvoiceDoc(data: InvoiceData): jsPDF {
     // Customer Info
     doc.text(`Customer Name: ${data.customer_name || '-'}`, 15, 72);
     if (data.customer_pan) {
-        doc.text(`Customer PAN: ${data.customer_pan}`, 15, 77);
+        const panLabel = data.customer_tax_type === 'vat' ? 'Customer VAT' : 'Customer PAN';
+        doc.text(`${panLabel}: ${data.customer_pan}`, 15, 77);
     }
 
     // Table

@@ -25,6 +25,7 @@ export async function addCustomer(formData: FormData) {
         phone: formData.get('phone') as string,
         email: formData.get('email') as string,
         pan_number: formData.get('pan_number') as string,
+        tax_type: formData.get('tax_type') as string || 'pan',
         address: formData.get('address') as string,
     });
     if (error) return { error: error.message };

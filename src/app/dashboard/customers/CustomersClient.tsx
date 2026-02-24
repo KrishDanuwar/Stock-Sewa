@@ -5,7 +5,7 @@ import { addCustomer, deleteCustomer } from '@/lib/actions/customers';
 import { toast } from 'sonner';
 import { Plus, Trash2, Users, X, Phone, Mail } from 'lucide-react';
 
-type Customer = { id: string; name: string; phone: string | null; email: string | null; pan_number: string | null; address: string | null; };
+type Customer = { id: string; name: string; phone: string | null; email: string | null; pan_number: string | null; address: string | null; tax_type?: 'pan' | 'vat'; };
 
 export default function CustomersClient({ customers }: { customers: Customer[] }) {
     const [showModal, setShowModal] = useState(false);
@@ -55,14 +55,19 @@ export default function CustomersClient({ customers }: { customers: Customer[] }
                         <tbody>
                             {customers.map(c => (
                                 <tr key={c.id}>
-                                    <td style={{ fontWeight: 500 }}>{c.name}</td>
+                                    <td>
+                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                            <span style={{ fontWeight: 500 }}>{c.name}</span>
+                                            <span style={{ fontSize: '0.6875rem', opacity: 0.6, textTransform: 'uppercase' }}>{c.tax_type || 'pan'} registered</span>
+                                        </div>
+                                    </td>
                                     <td>
                                         {c.phone ? <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)' }}><Phone size={13} />{c.phone}</span> : '—'}
                                     </td>
                                     <td>
                                         {c.email ? <span style={{ display: 'flex', alignItems: 'center', gap: 6, color: 'var(--text-secondary)' }}><Mail size={13} />{c.email}</span> : '—'}
                                     </td>
-                                    <td>{c.pan_number ? <span className="badge badge-info">{c.pan_number}</span> : '—'}</td>
+                                    <td>{c.pan_number ? <span className={`badge ${c.tax_type === 'vat' ? 'badge-success' : 'badge-info'}`}>{c.pan_number}</span> : '—'}</td>
                                     <td style={{ color: 'var(--text-secondary)' }}>{c.address || '—'}</td>
                                     <td>
                                         <button onClick={() => handleDelete(c.id, c.name)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand-danger)', padding: 6, borderRadius: 6 }}>
@@ -89,7 +94,20 @@ export default function CustomersClient({ customers }: { customers: Customer[] }
                                 <input name="phone" className="glass-input" placeholder="Phone (9xxxxxxxxx)" />
                                 <input name="email" type="email" className="glass-input" placeholder="Email" />
                             </div>
-                            <input name="pan_number" className="glass-input" placeholder="PAN Number (for VAT/PAN invoices)" />
+
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Tax Registration Type</label>
+                                <div style={{ display: 'flex', gap: 16 }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.875rem', cursor: 'pointer' }}>
+                                        <input type="radio" name="tax_type" value="pan" defaultChecked /> PAN Registered
+                                    </label>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.875rem', cursor: 'pointer' }}>
+                                        <input type="radio" name="tax_type" value="vat" /> VAT Registered
+                                    </label>
+                                </div>
+                            </div>
+
+                            <input name="pan_number" className="glass-input" placeholder="PAN/VAT Number *" required />
                             <input name="address" className="glass-input" placeholder="Address" />
                             <button type="submit" disabled={loading} className="glass-button glass-button-primary" style={{ justifyContent: 'center', marginTop: 8 }}>
                                 {loading ? 'Adding...' : 'Add Customer'}
