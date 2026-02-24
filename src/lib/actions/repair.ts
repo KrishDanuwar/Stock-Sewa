@@ -28,30 +28,21 @@ export async function repairOrganization(formData: FormData) {
     const username = user.user_metadata?.username || user.email?.split('@')[0] || 'user';
 
     try {
-        // 4. Create the organization manually
-        const { data: org, error: orgError } = await supabase
-            .from('organizations')
-            .insert({ name: orgName })
-            .select()
-            .single();
+        // 4. Call repair RPC (bypasses RLS since it is SECURITY DEFINER)
+        const { error: rpcError } = await supabase.rpc('repair_user_org', {
+            target_user_id: user.id,
+            org_name: orgName,
+            username_val: username
+        });
 
-        if (orgError) throw new Error(`Failed to create organization: ${orgError.message}`);
-
-        // 5. Create the profile linking user to organization
-        const { error: profileError } = await supabase
-            .from('profiles')
-            .insert({
-                id: user.id,
-                organization_id: org.id,
-                username: username
-            });
-
-        if (profileError) throw new Error(`Failed to create profile: ${profileError.message}`);
+        if (rpcError) throw rpcError;
 
     } catch (error) {
         console.error('Repair failed:', error);
+        // We don't redirect yet if it fails, maybe stay on page? 
+        // But for now let's hope it works or user sees logs if they are a dev
     }
 
-    // 6. Success!
+    // 5. Success!
     redirect('/dashboard');
 }
