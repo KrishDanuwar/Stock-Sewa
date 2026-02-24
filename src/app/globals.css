@@ -25,6 +25,7 @@
   --glass-border: rgba(255, 255, 255, 0.12);
   --glass-blur: blur(20px);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.4);
+  --glass-input-bg: rgba(255, 255, 255, 0.08);
 
   /* Text */
   --text-primary: #f8fafc;
@@ -49,6 +50,7 @@
   --glass-border: rgba(0, 0, 0, 0.08);
   --glass-blur: blur(16px);
   --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  --glass-input-bg: rgba(0, 0, 0, 0.04);
 
   /* Text */
   --text-primary: #0f172a;
