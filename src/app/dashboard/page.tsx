@@ -24,11 +24,21 @@ export default async function DashboardPage() {
         .order('created_at', { ascending: false })
         .limit(5);
 
+    // Today's revenue calculation
+    const todayAd = new Date().toISOString().split('T')[0];
+    const { data: todayInvoices } = await supabase
+        .from('invoices')
+        .select('total_amount')
+        .eq('organization_id', organizationId)
+        .eq('date_ad', todayAd);
+
+    const dailyRevenue = todayInvoices?.reduce((sum, inv) => sum + Number(inv.total_amount), 0) || 0;
+
     const stats = [
         { label: 'Total Products', labelNp: 'उत्पादन', value: productCount ?? 0, icon: Package, color: 'var(--brand-primary)' },
         { label: 'Customers', labelNp: 'ग्राहक', value: customerCount ?? 0, icon: Users, color: 'var(--brand-secondary)' },
         { label: 'Invoices', labelNp: 'बीजक', value: invoiceCount ?? 0, icon: FileText, color: 'var(--brand-accent)' },
-        { label: 'Revenue', labelNp: 'आम्दानी', value: 'NPR —', icon: TrendingUp, color: 'var(--brand-success)' },
+        { label: 'Revenue', labelNp: 'आम्दानी', value: `Rs. ${dailyRevenue.toLocaleString()}`, icon: TrendingUp, color: 'var(--brand-success)' },
     ];
 
     const invoiceTypeBadge = (type: string) => {
