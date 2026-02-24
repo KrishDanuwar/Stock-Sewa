@@ -10,7 +10,6 @@ interface LabelProps {
     barcode: string;
     mfg?: string;
     batch?: string;
-    shopName?: string;
 }
 
 export default function BarcodeLabel({ name, price, barcode, mfg }: LabelProps) {
@@ -20,15 +19,19 @@ export default function BarcodeLabel({ name, price, barcode, mfg }: LabelProps) 
 
     useEffect(() => {
         setMounted(true);
-        if (canvasRef.current && barcode) {
+    }, []);
+
+    // Separated generator to ensure it runs AFTER mount and whenever barcode changes
+    useEffect(() => {
+        if (mounted && canvasRef.current && barcode) {
             try {
-                // High-resolution rendering for thermal printers
+                // High-resolution rendering but scaled for 50x25mm
                 JsBarcode(canvasRef.current, barcode, {
                     format: "CODE128",
-                    width: 3,
-                    height: 80,
+                    width: 2,
+                    height: 50,
                     displayValue: true,
-                    fontSize: 18,
+                    fontSize: 16,
                     margin: 0,
                     background: "#ffffff"
                 });
@@ -37,23 +40,29 @@ export default function BarcodeLabel({ name, price, barcode, mfg }: LabelProps) 
                 console.error("Barcode generation failed:", err);
             }
         }
-    }, [barcode]);
+    }, [mounted, barcode]);
 
     if (!mounted) return null;
 
-    // Render into body root for maximum isolation
     return createPortal(
         <div className="print-portal-root">
             <div className="label-container">
                 <canvas ref={canvasRef} style={{ display: 'none' }} />
+
                 <div className="label-content">
                     <div className="mfg-text">MFG: {mfg || 'N/A'}</div>
-                    {imgData ? (
-                        <img src={imgData} className="barcode-img" alt="barcode" />
-                    ) : (
-                        <div className="barcode-placeholder">Generating...</div>
-                    )}
-                    <div className="mrp-text">MRP: रु {price.toLocaleString()}</div>
+
+                    <div className="barcode-zone">
+                        {imgData ? (
+                            <img src={imgData} className="barcode-img" alt="barcode" />
+                        ) : (
+                            <div className="barcode-placeholder">Generating Barcode...</div>
+                        )}
+                    </div>
+
+                    <div className="mrp-text">
+                        MRP: Rs {price.toLocaleString()}
+                    </div>
                 </div>
             </div>
 
@@ -65,35 +74,48 @@ export default function BarcodeLabel({ name, price, barcode, mfg }: LabelProps) 
                     color: black;
                     overflow: hidden;
                     box-sizing: border-box;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
                 }
                 .label-content {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    justify-content: center;
-                    height: 100%;
-                    width: 100%;
-                    padding: 1mm 1.5mm;
+                    justify-content: space-between;
+                    height: 23mm;
+                    width: 48mm;
+                    padding: 0.5mm;
                     box-sizing: border-box;
                 }
                 .mfg-text {
-                    font-size: 7pt;
+                    font-size: 6pt;
                     font-weight: 600;
-                    margin-bottom: 0.5mm;
-                    text-align: center;
                     color: #000;
+                    margin: 0;
+                    text-transform: uppercase;
                 }
-                .barcode-img {
+                .barcode-zone {
                     width: 46mm;
                     height: 14mm;
-                    object-fit: contain;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .barcode-img {
+                    max-width: 46mm;
+                    max-height: 14mm;
+                    image-rendering: pixelated;
+                }
+                .barcode-placeholder {
+                    font-size: 6pt;
+                    color: #666;
                 }
                 .mrp-text {
-                    font-size: 11pt;
+                    font-size: 10pt;
                     font-weight: 900;
-                    margin-top: 0.5mm;
-                    text-align: center;
                     color: #000;
+                    margin: 0;
                 }
             `}</style>
 
@@ -103,15 +125,9 @@ export default function BarcodeLabel({ name, price, barcode, mfg }: LabelProps) 
                     margin: 0 !important;
                 }
                 @media print {
-                    /* PRE-CONDITION: Hide EVERY direct child of body except our Portal */
+                    /* Nuclear isolation at the root */
                     body > *:not(.print-portal-root) {
                         display: none !important;
-                    }
-
-                    /* Suppress layout artifacts (sidebars, markers, mini-circles) */
-                    *::before, *::after {
-                        display: none !important;
-                        content: none !important;
                     }
 
                     html, body {
@@ -120,7 +136,6 @@ export default function BarcodeLabel({ name, price, barcode, mfg }: LabelProps) 
                         padding: 0 !important;
                         height: 25mm !important;
                         width: 50mm !important;
-                        overflow: hidden !important;
                     }
 
                     .print-portal-root {
@@ -132,24 +147,17 @@ export default function BarcodeLabel({ name, price, barcode, mfg }: LabelProps) 
                         height: 25mm !important;
                         background: white !important;
                         z-index: 2147483647 !important;
+                        overflow: hidden !important;
                     }
 
                     .label-container {
                         width: 50mm !important;
                         height: 25mm !important;
-                        display: flex !important;
-                    }
-                    
-                    .label-content * {
-                        display: block !important;
-                        color: #000 !important;
                     }
 
-                    .barcode-img {
-                        display: block !important;
-                        width: 46mm !important;
-                        height: 14mm !important;
-                        image-rendering: pixelated;
+                    *::before, *::after {
+                        display: none !important;
+                        content: none !important;
                     }
                 }
             `}</style>
