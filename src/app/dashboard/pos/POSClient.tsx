@@ -4,7 +4,6 @@ import { useState } from 'react';
 import { createInvoice, type CartItem } from '@/lib/actions/invoices';
 import { toast } from 'sonner';
 import { Plus, Minus, Trash2, ShoppingCart, Search, Receipt, CheckCircle } from 'lucide-react';
-import { generateInvoicePDF } from '@/lib/utils/invoiceGenerator';
 
 type Product = { id: string; name: string; price: number; stock_quantity: number; unit: string; };
 type Customer = { id: string; name: string; pan_number: string | null; };
@@ -17,8 +16,7 @@ export default function POSClient({ products, customers, organization }: { produ
     const [customerId, setCustomerId] = useState('');
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(false);
-    const [autoPrint, setAutoPrint] = useState(true);
-    const [lastInvoice, setLastInvoice] = useState<{ number: string; total: number; data?: any } | null>(null);
+    const [lastInvoice, setLastInvoice] = useState<{ number: string; total: number } | null>(null);
     const [customerMode, setCustomerMode] = useState<'walkin' | 'registered'>('walkin');
     const [customerSearch, setCustomerSearch] = useState('');
     const [amountPaid, setAmountPaid] = useState<number>(0);
@@ -80,32 +78,12 @@ export default function POSClient({ products, customers, organization }: { produ
             amount_paid: amountPaid,
             items: cart,
         });
-        if (result?.error) { toast.error(result.error); }
-        else {
+
+        if (result?.error) {
+            toast.error(result.error);
+        } else {
             toast.success('Invoice created!');
-            const invData = {
-                organization: organization || { name: 'Stock Sewa', pan_vat: null, address: null, phone: null },
-                invoice_number: result.invoice.invoice_number,
-                invoice_type: invoiceType,
-                date_ad: new Date().toISOString().split('T')[0],
-                date_bs: result.invoice.date_bs || '',
-                customer_name: selectedCustomer?.name,
-                customer_pan: selectedCustomer?.pan_number || undefined,
-                subtotal,
-                tax_amount: tax,
-                total_amount: total,
-                items: cart.map(i => ({
-                    product_name: i.product_name,
-                    quantity: i.quantity,
-                    unit_price: i.unit_price
-                }))
-            };
-
-            setLastInvoice({ number: result.invoice.invoice_number, total, data: invData });
-
-            if (autoPrint) {
-                generateInvoicePDF(invData);
-            }
+            setLastInvoice({ number: result.invoice.invoice_number, total });
 
             setCart([]);
             setCustomerId('');
@@ -152,21 +130,12 @@ export default function POSClient({ products, customers, organization }: { produ
                 </div>
 
                 {lastInvoice && (
-                    <div style={{ padding: 12, borderRadius: 10, background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', display: 'flex', flexDirection: 'column', gap: 10 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                            <CheckCircle size={18} color="var(--brand-success)" />
-                            <div>
-                                <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--brand-success)' }}>{lastInvoice.number}</div>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>NPR {lastInvoice.total.toLocaleString()} collected</div>
-                            </div>
+                    <div style={{ padding: 12, borderRadius: 10, background: 'rgba(16,185,129,0.1)', border: '1px solid rgba(16,185,129,0.25)', display: 'flex', alignItems: 'center', gap: 10 }}>
+                        <CheckCircle size={18} color="var(--brand-success)" />
+                        <div>
+                            <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--brand-success)' }}>{lastInvoice.number} created</div>
+                            <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>NPR {lastInvoice.total.toLocaleString()} collected</div>
                         </div>
-                        <button
-                            onClick={() => lastInvoice.data && generateInvoicePDF(lastInvoice.data)}
-                            className="glass-button"
-                            style={{ padding: '6px 10px', fontSize: '0.75rem', justifyContent: 'center', width: '100%' }}
-                        >
-                            <Receipt size={14} /> Re-print Bill
-                        </button>
                     </div>
                 )}
 
@@ -312,11 +281,6 @@ export default function POSClient({ products, customers, organization }: { produ
                     <button onClick={handleCheckout} disabled={loading || cart.length === 0} className="glass-button glass-button-primary" style={{ justifyContent: 'center', padding: 14, fontSize: '1rem' }}>
                         {loading ? 'Processing...' : <><Receipt size={18} /> Complete Sale</>}
                     </button>
-
-                    <label style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: '0.75rem', color: 'var(--text-secondary)', cursor: 'pointer', alignSelf: 'center' }}>
-                        <input type="checkbox" checked={autoPrint} onChange={e => setAutoPrint(e.target.checked)} />
-                        Auto-generate PDF Bill
-                    </label>
                 </div>
             </div>
         </div>
