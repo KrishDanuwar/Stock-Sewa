@@ -18,6 +18,7 @@ export interface InvoiceData {
     subtotal: number;
     tax_amount: number;
     total_amount: number;
+    payment_mode: string;
     items: {
         product_name: string;
         quantity: number;
@@ -32,49 +33,56 @@ function prepareInvoiceDoc(data: InvoiceData): jsPDF {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
 
-    // Header
+    // Header - Center Name
     doc.setFontSize(18);
     doc.setFont('helvetica', 'bold');
     doc.text(data.organization.name, pageWidth / 2, 20, { align: 'center' });
 
+    // Header Details - Left Aligned below Name
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    if (data.organization.address) doc.text(data.organization.address, pageWidth / 2, 26, { align: 'center' });
-    if (data.organization.phone) doc.text(`Phone: ${data.organization.phone}`, pageWidth / 2, 31, { align: 'center' });
+    let detailY = 26;
+    if (data.organization.address) {
+        doc.text(`Address: ${data.organization.address}`, 15, detailY);
+        detailY += 5;
+    }
     if (data.organization.pan_vat) {
-        doc.setFont('helvetica', 'bold');
-        doc.text(`PAN/VAT No: ${data.organization.pan_vat}`, pageWidth / 2, 37, { align: 'center' });
+        doc.text(`${data.invoice_type === 'vat' ? 'VAT' : 'PAN'} No: ${data.organization.pan_vat}`, 15, detailY);
+        detailY += 5;
+    }
+    if (data.organization.phone) {
+        doc.text(`Phone: ${data.organization.phone}`, 15, detailY);
+        detailY += 5;
     }
 
     // Title
     doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
     const title = data.invoice_type === 'vat' ? 'TAX INVOICE' :
-        data.invoice_type === 'pan' ? 'PAN INVOICE' : 'ABBREVIATED TAX INVOICE (SALES BILL)';
-    doc.text(title, pageWidth / 2, 48, { align: 'center' });
-    doc.line(20, 50, pageWidth - 20, 50);
+        data.invoice_type === 'pan' ? 'BILL (PAN Registered)' : 'BILL';
+    doc.text(title, 15, 48);
+    doc.line(15, 52, pageWidth - 15, 52);
 
     // Invoice Meta
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
     doc.text(`Invoice No: ${data.invoice_number}`, 15, 60);
-    doc.text(`Date (AD): ${data.date_ad}`, pageWidth - 15, 60, { align: 'right' });
-    doc.text(`Date (BS): ${data.date_bs}`, pageWidth - 15, 65, { align: 'right' });
+    doc.text(`Date: ${data.date_bs}`, 15, 65); // Standardized to BS as per samples
 
     // Customer Info
-    doc.setFont('helvetica', 'bold');
-    doc.text('Bill To:', 15, 75);
-    doc.setFont('helvetica', 'normal');
-    doc.text(data.customer_name || 'Walk-in Customer', 30, 75);
-    if (data.customer_pan) doc.text(`Buyer's PAN: ${data.customer_pan}`, 30, 80);
+    doc.text(`Customer Name: ${data.customer_name || '-'}`, 15, 72);
+    if (data.customer_pan) {
+        doc.text(`Customer PAN: ${data.customer_pan}`, 15, 77);
+    }
 
     // Table
-    const tableHeaders = [['S.N.', 'Particulars', 'Qty', 'Rate', 'Amount']];
+    const tableHeaders = [['S.N', 'Description', 'Qty', 'Rate', 'Amount']];
     const tableData = data.items.map((item, index) => [
         index + 1,
         item.product_name,
         item.quantity,
-        `रु ${item.unit_price.toLocaleString()}`,
-        `रु ${(item.quantity * item.unit_price).toLocaleString()}`
+        item.unit_price.toLocaleString(),
+        (item.quantity * item.unit_price).toLocaleString()
     ]);
 
     autoTable(doc, {
@@ -82,42 +90,48 @@ function prepareInvoiceDoc(data: InvoiceData): jsPDF {
         body: tableData,
         startY: 85,
         theme: 'grid',
-        headStyles: { fillColor: [79, 142, 247], textColor: 255 },
-        styles: { fontSize: 9, cellPadding: 3 },
+        headStyles: { fillColor: [220, 220, 220], textColor: [0, 0, 0], fontStyle: 'bold' },
+        styles: { fontSize: 9, cellPadding: 3, textColor: [0, 0, 0] },
         columnStyles: {
-            0: { cellWidth: 10 },
+            0: { cellWidth: 15 },
             2: { cellWidth: 20, halign: 'center' },
             3: { cellWidth: 30, halign: 'right' },
             4: { cellWidth: 35, halign: 'right' }
         }
     });
 
-    const finalY = (doc as any).lastAutoTable.finalY + 10;
+    let finalY = (doc as any).lastAutoTable.finalY + 10;
 
     // Totals
-    const leftPad = pageWidth - 60;
-    doc.text('Subtotal:', leftPad, finalY);
-    doc.text(`रु ${data.subtotal.toLocaleString()}`, pageWidth - 15, finalY, { align: 'right' });
-
-    if (data.tax_amount > 0) {
-        doc.text('VAT (13%):', leftPad, finalY + 6);
-        doc.text(`रु ${data.tax_amount.toLocaleString()}`, pageWidth - 15, finalY + 6, { align: 'right' });
+    doc.setFont('helvetica', 'bold');
+    if (data.invoice_type === 'vat') {
+        doc.text(`Subtotal: Rs. ${data.subtotal.toLocaleString()}`, 15, finalY);
+        finalY += 6;
+        doc.text(`VAT (13%): Rs. ${data.tax_amount.toLocaleString()}`, 15, finalY);
+        finalY += 1;
+    } else if (data.invoice_type === 'pan') {
+        doc.text(`Total: Rs. ${data.total_amount.toLocaleString()}`, 15, finalY);
+        finalY += 1;
+    } else {
+        doc.text(`Subtotal: Rs. ${data.subtotal.toLocaleString()}`, 15, finalY);
+        finalY += 6;
     }
 
-    doc.setFont('helvetica', 'bold');
-    doc.text('Total Amount:', leftPad, finalY + (data.tax_amount > 0 ? 12 : 6));
-    doc.text(`रु ${data.total_amount.toLocaleString()}`, pageWidth - 15, finalY + (data.tax_amount > 0 ? 12 : 6), { align: 'right' });
+    doc.setFontSize(11);
+    doc.text(`Grand Total: Rs. ${data.total_amount.toLocaleString()}`, 15, finalY + 5);
+    finalY += 15;
 
-    // Amount in Words
-    const wordsY = finalY + 25;
-    doc.text('Amount in words:', 15, wordsY);
+    // notes
+    doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    doc.text(numberToWords(data.total_amount), 15, wordsY + 6);
+    doc.text(`Payment Mode: ${data.payment_mode}`, 15, finalY);
+    finalY += 6;
 
-    // Footer
-    doc.setFontSize(8);
-    doc.text('This is a computer generated invoice.', pageWidth / 2, doc.internal.pageSize.getHeight() - 15, { align: 'center' });
-    doc.text('Thank you for your business!', pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
+    if (data.invoice_type === 'vat') {
+        doc.text('Note: VAT Charged as per Nepal IRD Rules.', 15, finalY);
+    } else if (data.invoice_type === 'pan') {
+        doc.text('Note: VAT Not Applicable (Business is PAN registered only).', 15, finalY);
+    }
 
     return doc;
 }

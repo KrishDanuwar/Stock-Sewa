@@ -51,6 +51,7 @@ export default function InvoicesClient({ invoices, organization }: { invoices: a
             subtotal: inv.total_amount - (inv.vat_amount || 0),
             tax_amount: inv.vat_amount || 0,
             total_amount: inv.total_amount,
+            payment_mode: (inv.payment_method || 'Cash').charAt(0).toUpperCase() + (inv.payment_method || 'Cash').slice(1),
             items: inv.invoice_items?.map((item: any) => ({
                 product_name: item.product_name || item.products?.name,
                 quantity: item.quantity,
