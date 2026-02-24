@@ -218,7 +218,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                                 <div className="form-group">
-                                    <label className="form-label">Selling Price रु *</label>
+                                    <label className="form-label">MRP रु *</label>
                                     <input name="price" type="number" min="0" step="0.01" required className="glass-input" placeholder="0.00" />
                                 </div>
                                 <div className="form-group">
@@ -301,7 +301,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                                 <div className="form-group">
-                                    <label className="form-label">Update Selling Price रु</label>
+                                    <label className="form-label">Update MRP रु</label>
                                     <input
                                         className="glass-input"
                                         type="number"

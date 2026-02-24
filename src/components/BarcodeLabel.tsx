@@ -75,45 +75,53 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batch, shopNam
                     margin: 0 !important;
                 }
                 @media print {
-                    /* Surgically hide UI elements that overlap */
-                    .glass-sidebar, .sidebar, aside, nav, footer, 
-                    .page-header, .glass-card, .glass-input, .sidebar-wrapper,
-                    .form-group, .action-button, table {
-                        display: none !important;
+                    /* Hide EVERYTHING by default */
+                    body * {
                         visibility: hidden !important;
-                        opacity: 0 !important;
+                        display: none !important;
                     }
 
-                    /* Reset container hierarchy */
-                    html, body, .page-wrapper, .main-content {
+                    /* Atomically show ONLY the print container and its contents */
+                    html, body {
+                        visibility: hidden !important;
                         margin: 0 !important;
                         padding: 0 !important;
-                        height: 25mm !important;
-                        width: 50mm !important;
                         background: white !important;
-                        overflow: hidden !important;
-                        border: none !important;
                     }
 
-                    /* Force ONLY the barcode to the surface */
-                    .print-only, .label-container {
-                        display: flex !important;
+                    .print-only, .print-only *,
+                    .label-container, .label-container * {
                         visibility: visible !important;
-                        opacity: 1 !important;
-                        position: fixed !important;
+                        display: flex !important;
+                    }
+
+                    .print-only {
+                        display: block !important;
+                        position: absolute !important;
                         left: 0 !important;
                         top: 0 !important;
                         width: 50mm !important;
                         height: 25mm !important;
                         z-index: 9999999 !important;
-                        margin: 0 !important;
-                        padding: 1mm 1.5mm !important;
                         background: white !important;
-                        box-sizing: border-box !important;
                     }
 
-                    .label-container * {
-                        visibility: visible !important;
+                    .label-container {
+                        position: fixed !important;
+                        left: 0 !important;
+                        top: 0 !important;
+                        width: 50mm !important;
+                        height: 25mm !important;
+                        margin: 0 !important;
+                        padding: 1mm 1.5mm !important;
+                        flex-direction: column !important;
+                        align-items: center !important;
+                        justify-content: center !important;
+                        box-sizing: border-box !important;
+                    }
+                    
+                    /* Reset SVG display */
+                    svg {
                         display: block !important;
                     }
                 }
