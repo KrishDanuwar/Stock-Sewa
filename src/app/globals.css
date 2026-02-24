@@ -207,7 +207,6 @@ select.glass-input {
 .glass-input::placeholder {
   color: var(--text-muted);
 }
-}
 
 .glass-input:focus {
   border-color: var(--brand-primary);

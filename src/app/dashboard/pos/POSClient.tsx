@@ -236,7 +236,7 @@ export default function POSClient({
                 {/* Invoice Options */}
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10, borderTop: '1px solid var(--glass-border)', paddingTop: 14 }}>
                     <div>
-                        <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>
+                        <label className="glass-label">
                             {organization?.preferred_language === 'np' ? 'बीजक प्रकार' : 'Invoice Type'}
                         </label>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
@@ -331,7 +331,7 @@ export default function POSClient({
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 10 }}>
                         <div>
-                            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>
+                            <label className="glass-label">
                                 {organization?.preferred_language === 'np' ? 'भुक्तानी विधि' : 'Payment Method'}
                             </label>
                             <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className="glass-input" style={{ cursor: 'pointer' }}>
@@ -344,7 +344,7 @@ export default function POSClient({
                             </select>
                         </div>
                         <div>
-                            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>
+                            <label className="glass-label">
                                 {organization?.preferred_language === 'np' ? 'भुक्तान गरिएको रु' : 'Amount Paid Rs.'}
                             </label>
                             <input

@@ -395,11 +395,6 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                     flex-direction: column;
                     gap: 6px;
                 }
-                .form-label {
-                    font-size: 0.75rem;
-                    font-weight: 600;
-                    color: var(--text-secondary);
-                }
                 .action-button {
                     background: rgba(255,255,255,0.05);
                     border: 1px solid rgba(255,255,255,0.1);
