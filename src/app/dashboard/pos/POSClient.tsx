@@ -58,77 +58,81 @@ export default function POSClient({ products, customers, organization }: { produ
     };
 
     const handleCheckout = async () => {
-        if (cart.length === 0) { toast.error('Cart is empty'); return; }
-
-        const effectiveCustomerId = customerMode === 'registered' ? customerId : undefined;
-
-        // Validation for non-normal invoices without customers
-        if ((invoiceType === 'pan' || invoiceType === 'vat')) {
-            if (customerMode === 'registered' && !effectiveCustomerId) {
-                toast.error('Please select a customer for PAN/VAT invoice'); return;
-            }
-        }
-
-        // Validation for credit/unpaid sales without customers
-        if (getPaymentStatus() !== 'paid' && !effectiveCustomerId) {
-            toast.error('Customer is required for credit/unpaid sales'); return;
-        }
-
-        setLoading(true);
-        const result = await createInvoice({
-            customer_id: effectiveCustomerId,
-            invoice_type: invoiceType,
-            payment_method: paymentMethod,
-            payment_status: getPaymentStatus(),
-            amount_paid: amountPaid,
-            customer_name_manual: customerMode === 'walkin' ? manualCustomerName : undefined,
-            customer_pan_manual: customerMode === 'walkin' ? manualCustomerPan : undefined,
-            items: cart,
-        });
-
-        if (result?.error || !result?.invoice) {
-            toast.error(result?.error || 'Could not complete sale');
-            setLoading(false);
-            return;
-        }
-
-        toast.success('Invoice created!');
-
         try {
-            const invData = {
-                organization: organization || { name: 'Stock Sewa', pan_vat: null, address: null, phone: null, preferred_language: 'en' },
-                invoice_number: result.invoice.invoice_number,
+            if (cart.length === 0) { toast.error('Cart is empty'); return; }
+
+            const effectiveCustomerId = customerMode === 'registered' ? customerId : undefined;
+
+            if ((invoiceType === 'pan' || invoiceType === 'vat')) {
+                if (customerMode === 'registered' && !effectiveCustomerId) {
+                    toast.error('Please select a customer for PAN/VAT invoice'); return;
+                }
+            }
+
+            if (getPaymentStatus() !== 'paid' && !effectiveCustomerId) {
+                toast.error('Customer is required for credit/unpaid sales'); return;
+            }
+
+            setLoading(true);
+            const result = await createInvoice({
+                customer_id: effectiveCustomerId,
                 invoice_type: invoiceType,
-                date_ad: new Date().toISOString().split('T')[0],
-                date_bs: result.invoice.date_bs || '',
-                customer_name: customerMode === 'registered' ? selectedCustomer?.name : (manualCustomerName || 'Walk-in Customer'),
-                customer_pan: customerMode === 'registered' ? selectedCustomer?.pan_number || undefined : manualCustomerPan || undefined,
-                customer_tax_type: customerMode === 'registered' ? selectedCustomer?.tax_type as any : (manualCustomerPan ? (invoiceType as any) : undefined),
-                subtotal,
-                tax_amount: tax,
-                total_amount: total,
-                payment_mode: paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1),
-                items: cart.map(i => ({
-                    product_name: i.product_name,
-                    quantity: i.quantity,
-                    unit_price: i.unit_price
-                }))
-            };
+                payment_method: paymentMethod,
+                payment_status: getPaymentStatus(),
+                amount_paid: amountPaid,
+                customer_name_manual: customerMode === 'walkin' ? manualCustomerName : undefined,
+                customer_pan_manual: customerMode === 'walkin' ? manualCustomerPan : undefined,
+                items: cart,
+            });
 
-            setLastInvoice({ number: result.invoice.invoice_number, total, data: invData });
-            printInvoicePDF(invData);
-        } catch (err) {
-            console.error('Error generating/printing invoice:', err);
-            toast.error('Sale completed, but invoice preview failed');
+            if (result?.error || !result?.invoice) {
+                toast.error(result?.error || 'Could not complete sale');
+                setLoading(false);
+                return;
+            }
+
+            toast.success('Invoice created!');
+
+            try {
+                const invData = {
+                    organization: organization || { name: 'Stock Sewa', pan_vat: null, address: null, phone: null, preferred_language: 'en' },
+                    invoice_number: result.invoice.invoice_number,
+                    invoice_type: invoiceType,
+                    date_ad: new Date().toISOString().split('T')[0],
+                    date_bs: result.invoice.date_bs || '',
+                    customer_name: customerMode === 'registered' ? selectedCustomer?.name : (manualCustomerName || 'Walk-in Customer'),
+                    customer_pan: customerMode === 'registered' ? selectedCustomer?.pan_number || undefined : manualCustomerPan || undefined,
+                    customer_tax_type: customerMode === 'registered' ? selectedCustomer?.tax_type as any : (manualCustomerPan ? (invoiceType as any) : undefined),
+                    subtotal,
+                    tax_amount: tax,
+                    total_amount: total,
+                    payment_mode: paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1),
+                    items: cart.map(i => ({
+                        product_name: i.product_name,
+                        quantity: i.quantity,
+                        unit_price: i.unit_price
+                    }))
+                };
+
+                setLastInvoice({ number: result.invoice.invoice_number, total, data: invData });
+                printInvoicePDF(invData);
+            } catch (err) {
+                console.error('Error generating/printing invoice:', err);
+                toast.error('Sale completed, but invoice preview failed');
+            }
+
+            setCart([]);
+            setCustomerId('');
+            setCustomerMode('walkin');
+            setAmountPaid(0);
+            setManualCustomerName('');
+            setManualCustomerPan('');
+        } catch (error) {
+            console.error('POS Checkout Critical Error:', error);
+            toast.error('A critical error occurred. Please refresh the page.');
+        } finally {
+            setLoading(false);
         }
-
-        setCart([]);
-        setCustomerId('');
-        setCustomerMode('walkin');
-        setAmountPaid(0);
-        setManualCustomerName('');
-        setManualCustomerPan('');
-        setLoading(false);
     };
 
     return (

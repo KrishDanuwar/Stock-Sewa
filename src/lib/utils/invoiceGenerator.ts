@@ -168,23 +168,34 @@ export function downloadInvoicePDF(data: InvoiceData) {
  * Triggers the system print dialog without saving a file
  */
 export function printInvoicePDF(data: InvoiceData) {
-    const doc = prepareInvoiceDoc(data);
-    doc.autoPrint();
-    const hiddFrame = document.createElement('iframe');
-    hiddFrame.style.position = 'fixed';
-    hiddFrame.style.width = '1px';
-    hiddFrame.style.height = '1px';
-    hiddFrame.style.opacity = '0.01';
-    const blob = doc.output('bloburl');
-    hiddFrame.src = blob as unknown as string;
-    document.body.appendChild(hiddFrame);
+    try {
+        const doc = prepareInvoiceDoc(data);
+        doc.autoPrint();
 
-    // Cleanup frame after some time to allow printing to trigger
-    setTimeout(() => {
-        // We don't remove it immediately because browsers need the frame to stay alive for the print dialog
-        // But for blobURLs, we should revoke them eventually
-        // URL.revokeObjectURL(blob); 
-    }, 60000);
+        const blob = doc.output('blob');
+        const url = URL.createObjectURL(blob);
+
+        const hiddFrame = document.createElement('iframe');
+        hiddFrame.style.position = 'fixed';
+        hiddFrame.style.visibility = 'hidden';
+        hiddFrame.style.width = '0';
+        hiddFrame.style.height = '0';
+        hiddFrame.src = url;
+
+        document.body.appendChild(hiddFrame);
+
+        // Cleanup
+        setTimeout(() => {
+            if (document.body.contains(hiddFrame)) {
+                document.body.removeChild(hiddFrame);
+            }
+            URL.revokeObjectURL(url);
+        }, 10000);
+    } catch (err) {
+        console.error('Print trigger failed:', err);
+        // Fallback to download if print fails
+        downloadInvoicePDF(data);
+    }
 }
 
 // Deprecated alias to maintain compatibility if referenced elsewhere

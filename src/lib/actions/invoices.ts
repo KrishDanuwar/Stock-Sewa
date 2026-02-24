@@ -105,7 +105,16 @@ export async function createInvoice(payload: CreateInvoicePayload) {
     revalidatePath('/dashboard/invoices');
     revalidatePath('/dashboard/products');
 
-    return { success: true, invoice };
+    return {
+        success: true,
+        invoice: {
+            id: invoice.id,
+            invoice_number: invoice.invoice_number,
+            date_bs: invoice.date_bs,
+            date_ad: invoice.date_ad,
+            total_amount: invoice.total_amount
+        }
+    };
 }
 
 export async function getInvoices() {
