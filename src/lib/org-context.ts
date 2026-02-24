@@ -1,44 +1,45 @@
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
+import { redirect } from 'next/navigation';
 
-// AUTH REMOVED: Returns org context by querying the first organization directly.
-// When re-adding auth, restore the original getUser() + profile query logic.
-export async function getOrgContext() {
-    try {
-        const supabase = createClient();
+export interface OrgContext {
+    userId: string;
+    organizationId: string;
+    organizationName: string;
+}
 
-        // Fetch the first available organization from the database
-        const { data: org, error } = await supabase
-            .from('organizations')
-            .select('id, name, subscription_status')
-            .limit(1)
-            .single();
+/**
+ * The gatekeeper for multi-tenancy.
+ * Call this at the top of every server action and protected server component.
+ * Throws a redirect to /login if the user is not authenticated.
+ */
+export async function getOrgContext(): Promise<OrgContext> {
+    const supabase = await createClient();
 
-        if (error || !org) {
-            console.warn('getOrgContext: No organization found in database.', error?.message);
-            return {
-                userId: 'no-auth',
-                userEmail: 'user@stocksewa.local',
-                organizationId: null,
-                organizationName: 'Stock Sewa',
-                subscriptionStatus: 'active',
-            };
-        }
+    const {
+        data: { user },
+        error: authError,
+    } = await supabase.auth.getUser();
 
-        return {
-            userId: 'no-auth',
-            userEmail: 'user@stocksewa.local',
-            organizationId: org.id,
-            organizationName: org.name || 'Stock Sewa',
-            subscriptionStatus: org.subscription_status || 'active',
-        };
-    } catch (err) {
-        console.error('getOrgContext: Critical error', err);
-        return {
-            userId: 'no-auth',
-            userEmail: 'user@stocksewa.local',
-            organizationId: null,
-            organizationName: 'Stock Sewa',
-            subscriptionStatus: 'active',
-        };
+    if (authError || !user) {
+        redirect('/login');
     }
+
+    const { data: profile, error: profileError } = await supabase
+        .from('profiles')
+        .select('organization_id, organizations(name)')
+        .eq('id', user.id)
+        .single();
+
+    if (profileError || !profile) {
+        redirect('/setup');
+    }
+
+    const orgName =
+        (profile.organizations as unknown as { name: string } | null)?.name ?? 'My Organization';
+
+    return {
+        userId: user.id,
+        organizationId: profile.organization_id,
+        organizationName: orgName,
+    };
 }

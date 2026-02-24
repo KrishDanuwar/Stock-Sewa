@@ -1,38 +1,32 @@
+import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
-import './globals.css';
-import { Sidebar } from '@/components/Sidebar';
-import { getOrgContext } from '@/lib/org-context';
 import { Toaster } from 'sonner';
+import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata = {
-    title: 'Stock Sewa — Your Trusted Inventory Partner',
-    description: 'Precision stock management for modern businesses',
+export const metadata: Metadata = {
+  title: 'Stock Sewa – Inventory & POS for Nepal',
+  description: 'Multi-tenant inventory management and point-of-sale system designed for Nepali shopkeepers.',
 };
 
-export default async function RootLayout({
-    children,
-}: {
-    children: React.ReactNode;
-}) {
-    const ctx = await getOrgContext();
-
-    return (
-        <html lang="en">
-            <body className={inter.className}>
-                {ctx ? (
-                    <div className="flex">
-                        <Sidebar userEmail={ctx.userEmail} organizationName={ctx.organizationName} />
-                        <main className="flex-grow min-h-screen lg:ml-64 bg-surface-50">
-                            {children}
-                        </main>
-                    </div>
-                ) : (
-                    <>{children}</>
-                )}
-                <Toaster position="top-right" richColors />
-            </body>
-        </html>
-    );
+export default function RootLayout({ children }: { children: React.ReactNode }) {
+  return (
+    <html lang="ne">
+      <body className={inter.className}>
+        {children}
+        <Toaster
+          position="top-right"
+          toastOptions={{
+            style: {
+              background: 'rgba(15, 22, 41, 0.95)',
+              border: '1px solid rgba(255,255,255,0.12)',
+              color: '#f1f5f9',
+              backdropFilter: 'blur(20px)',
+            },
+          }}
+        />
+      </body>
+    </html>
+  );
 }

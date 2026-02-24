@@ -1,122 +1,82 @@
 'use server';
 
-import { createClient } from '@/utils/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { getOrgContext } from '@/lib/org-context';
 import { revalidatePath } from 'next/cache';
 
-function generateBarcode() {
-    return Math.floor(1000000000000 + Math.random() * 9000000000000).toString();
-}
-
-export async function getProducts(search?: string) {
-    const ctx = await getOrgContext();
-    if (!ctx) return [];
-
-    const supabase = createClient();
-    let query = supabase
-        .from('products')
-        .select('*')
-        .eq('organization_id', ctx.organizationId)
-        .order('created_at', { ascending: false });
-
-    if (search) {
-        query = query.or(`name.ilike.%${search}%,barcode.ilike.%${search}%`);
-    }
-
-    const { data, error } = await query;
-    if (error) throw new Error(error.message);
-    return data;
-}
-
-export async function getProduct(id: string) {
-    const ctx = await getOrgContext();
-    if (!ctx) throw new Error('Unauthorized');
-
-    const supabase = createClient();
+export async function getProducts() {
+    const { organizationId } = await getOrgContext();
+    const supabase = await createClient();
     const { data, error } = await supabase
         .from('products')
         .select('*')
-        .eq('id', id)
-        .eq('organization_id', ctx.organizationId)
-        .single();
+        .eq('organization_id', organizationId)
+        .order('created_at', { ascending: false });
 
     if (error) throw new Error(error.message);
-    return data;
+    return data ?? [];
 }
 
-export async function createProduct(formData: FormData) {
-    const ctx = await getOrgContext();
-    if (!ctx) return { error: 'Unauthorized' };
+export async function addProduct(formData: FormData) {
+    const { organizationId } = await getOrgContext();
+    const supabase = await createClient();
 
-    const supabase = createClient();
     const name = formData.get('name') as string;
-    const description = formData.get('description') as string;
     const price = parseFloat(formData.get('price') as string);
+    const cost_price = parseFloat((formData.get('cost_price') as string) || '0');
     const stock_quantity = parseInt(formData.get('stock_quantity') as string);
-    const barcode = (formData.get('barcode') as string) || generateBarcode();
+    const unit = formData.get('unit') as string;
+    const category = formData.get('category') as string;
+    const barcode = formData.get('barcode') as string;
 
-    try {
-        const { error } = await supabase.from('products').insert({
-            organization_id: ctx.organizationId,
-            name,
-            description,
-            price,
-            stock_quantity,
-            barcode,
-        });
+    const { error } = await supabase.from('products').insert({
+        organization_id: organizationId,
+        name, price, cost_price, stock_quantity, unit, category, barcode,
+    });
 
-        if (error) return { error: error.message };
-        return { success: true };
-    } catch (err: any) {
-        return { error: err.message || 'Creation failed' };
-    }
+    if (error) return { error: error.message };
+
+    revalidatePath('/dashboard/products');
+    revalidatePath('/dashboard');
+    return { success: true };
 }
 
 export async function updateProduct(id: string, formData: FormData) {
-    const ctx = await getOrgContext();
-    if (!ctx) return { error: 'Unauthorized' };
+    const { organizationId } = await getOrgContext();
+    const supabase = await createClient();
 
-    const supabase = createClient();
-    const name = formData.get('name') as string;
-    const description = formData.get('description') as string;
-    const price = parseFloat(formData.get('price') as string);
-    const stock_quantity = parseInt(formData.get('stock_quantity') as string);
-    const barcode = formData.get('barcode') as string;
+    const { error } = await supabase
+        .from('products')
+        .update({
+            name: formData.get('name') as string,
+            price: parseFloat(formData.get('price') as string),
+            cost_price: parseFloat((formData.get('cost_price') as string) || '0'),
+            stock_quantity: parseInt(formData.get('stock_quantity') as string),
+            unit: formData.get('unit') as string,
+            category: formData.get('category') as string,
+        })
+        .eq('id', id)
+        .eq('organization_id', organizationId);
 
-    try {
-        const { error } = await supabase
-            .from('products')
-            .update({
-                name,
-                description,
-                price,
-                stock_quantity,
-                barcode: barcode || undefined,
-            })
-            .eq('id', id)
-            .eq('organization_id', ctx.organizationId);
+    if (error) return { error: error.message };
 
-        if (error) return { error: error.message };
-        return { success: true };
-    } catch (err: any) {
-        return { error: err.message || 'Update failed' };
-    }
+    revalidatePath('/dashboard/products');
+    return { success: true };
 }
 
 export async function deleteProduct(id: string) {
-    const ctx = await getOrgContext();
-    if (!ctx) return { error: 'Unauthorized' };
+    const { organizationId } = await getOrgContext();
+    const supabase = await createClient();
 
-    const supabase = createClient();
-    try {
-        const { error } = await supabase
-            .from('products')
-            .delete()
-            .eq('id', id)
-            .eq('organization_id', ctx.organizationId);
-        if (error) return { error: error.message };
-        return { success: true };
-    } catch (err: any) {
-        return { error: err.message || 'Deletion failed' };
-    }
+    const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id)
+        .eq('organization_id', organizationId);
+
+    if (error) return { error: error.message };
+
+    revalidatePath('/dashboard/products');
+    revalidatePath('/dashboard');
+    return { success: true };
 }

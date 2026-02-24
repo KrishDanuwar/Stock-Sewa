@@ -1,156 +1,114 @@
-'use client';
-
+import { signOut } from '@/lib/actions/auth';
+import { getOrgContext } from '@/lib/org-context';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
-import { useState, useEffect } from 'react';
 import {
     LayoutDashboard,
     Package,
     Users,
     FileText,
-    CreditCard,
-    History,
-    Settings,
-    Menu,
-    X,
-    Plus,
-    Building2
+    ShoppingCart,
+    BarChart2,
+    LogOut,
+    Package2,
 } from 'lucide-react';
-import Image from 'next/image';
 
-const NAV_ITEMS = [
-    { name: 'Dashboard', href: '/', icon: LayoutDashboard },
-    { name: 'Products', href: '/products', icon: Package },
-    { name: 'Customers', href: '/customers', icon: Users },
-    { name: 'Invoices', href: '/invoices', icon: FileText },
-    { name: 'Payments', href: '/payments', icon: CreditCard },
-    { name: 'Stock Movements', href: '/stock', icon: History },
-    { name: 'Billing', href: '/billing', icon: Settings },
+const navItems = [
+    { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', labelNp: 'ड्यासबोर्ड' },
+    { href: '/dashboard/products', icon: Package, label: 'Products', labelNp: 'उत्पादन' },
+    { href: '/dashboard/customers', icon: Users, label: 'Customers', labelNp: 'ग्राहक' },
+    { href: '/dashboard/pos', icon: ShoppingCart, label: 'POS', labelNp: 'बिक्री' },
+    { href: '/dashboard/invoices', icon: FileText, label: 'Invoices', labelNp: 'बीजक' },
+    { href: '/dashboard/reports', icon: BarChart2, label: 'Reports', labelNp: 'रिपोर्ट' },
 ];
 
-export function Sidebar({
-    userEmail,
-    organizationName
-}: {
-    userEmail?: string;
-    organizationName?: string;
-}) {
-    const pathname = usePathname();
-    const [isOpen, setIsOpen] = useState(false);
-
-    // Close sidebar on navigation (mobile)
-    useEffect(() => {
-        setIsOpen(false);
-    }, [pathname]);
+export default async function Sidebar() {
+    const { organizationName } = await getOrgContext();
 
     return (
-        <>
-            {/* Mobile Toggle */}
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className="fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md lg:hidden"
-            >
-                {isOpen ? <X size={20} /> : <Menu size={20} />}
-            </button>
-
-            {/* Backdrop */}
-            {isOpen && (
-                <div
-                    className="fixed inset-0 bg-surface-900/20 backdrop-blur-sm z-40 lg:hidden"
-                    onClick={() => setIsOpen(false)}
-                />
-            )}
-
-            {/* Sidebar Container */}
-            <aside
-                className={`fixed top-0 left-0 h-screen bg-white border-r border-brand-border z-40 transition-all duration-300 ease-in-out w-64 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'
-                    }`}
-            >
-                <div className="flex flex-col h-full">
-                    {/* Brand */}
-                    <div className="p-8 border-b border-brand-border">
-                        <Link href="/" className="flex items-center gap-4 group">
-                            <div className="w-12 h-12 bg-gray-50 rounded-2xl flex items-center justify-center shadow-inner p-1 group-hover:scale-105 transition-all duration-300 relative overflow-hidden ring-1 ring-gray-100">
-                                <Image
-                                    src="/logo.png"
-                                    alt="Stock Sewa Logo"
-                                    width={40}
-                                    height={40}
-                                    className="object-contain"
-                                    priority
-                                />
-                            </div>
-                            <div className="flex flex-col">
-                                <span className="font-poppins font-black text-surface-primary text-xl tracking-tighter leading-none group-hover:text-brand-primary transition-colors">Stock Sewa</span>
-                                <span className="text-[10px] text-brand-primary font-black uppercase tracking-[0.2em] mt-1.5">Enterprise</span>
-                            </div>
-                        </Link>
+        <aside
+            className="glass-sidebar"
+            style={{
+                width: 'var(--sidebar-width)',
+                position: 'fixed',
+                top: 0,
+                left: 0,
+                height: '100vh',
+                display: 'flex',
+                flexDirection: 'column',
+                zIndex: 50,
+            }}
+        >
+            {/* Brand */}
+            <div style={{ padding: '24px 20px', borderBottom: '1px solid var(--glass-border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
+                        <Package2 size={18} color="white" />
                     </div>
-
-                    {/* Org Info */}
-                    <div className="px-5 py-5 border-b border-brand-border bg-gray-50/50">
-                        <div className="flex items-center gap-3 px-4 py-3 rounded-2xl bg-white border border-brand-border shadow-sm">
-                            <div className="w-9 h-9 rounded-xl bg-brand-primary/10 text-brand-primary flex items-center justify-center border border-brand-primary/10">
-                                <Building2 size={18} />
-                            </div>
-                            <div className="flex flex-col min-w-0">
-                                <span className="text-xs font-black text-surface-primary truncate">
-                                    {organizationName || 'My Organization'}
-                                </span>
-                                <span className="text-[9px] text-surface-muted truncate uppercase font-bold tracking-wider">
-                                    Verified Account
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Quick Action */}
-                    <div className="px-5 py-6">
-                        <Link
-                            href="/invoices/new"
-                            className="btn-primary w-full text-[11px] font-black uppercase tracking-widest active:scale-95 shadow-xl shadow-brand-primary/10 py-3.5"
-                        >
-                            <Plus size={16} strokeWidth={3} />
-                            New Invoice
-                        </Link>
-                    </div>
-
-                    {/* Navigation */}
-                    <nav className="flex-grow overflow-y-auto px-4 py-2 space-y-1.5 custom-scrollbar">
-                        {NAV_ITEMS.map((item) => {
-                            const isActive = pathname === item.href;
-                            const Icon = item.icon;
-                            return (
-                                <Link
-                                    key={item.name}
-                                    href={item.href}
-                                    className={`flex items-center gap-4 px-4 py-3 rounded-2xl transition-all duration-300 group ${isActive
-                                        ? 'bg-brand-primary text-white font-black shadow-lg shadow-brand-primary/20'
-                                        : 'text-surface-secondary hover:bg-gray-100 hover:text-surface-primary'
-                                        }`}
-                                >
-                                    <Icon
-                                        size={20}
-                                        strokeWidth={isActive ? 3 : 2}
-                                        className={isActive ? 'text-white' : 'text-surface-muted group-hover:text-surface-primary transition-colors'}
-                                    />
-                                    <span className={`text-xs ${isActive ? 'tracking-wide' : 'font-medium'}`}>{item.name}</span>
-                                </Link>
-                            );
-                        })}
-                    </nav>
-
-                    {/* Bottom Info */}
-                    <div className="p-6 border-t border-brand-border bg-gray-50">
-                        <div className="flex items-center justify-center gap-3">
-                            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-                            <span className="text-[10px] text-surface-muted font-black uppercase tracking-[0.2em]">
-                                System Operational
-                            </span>
+                    <div>
+                        <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Stock Sewa</div>
+                        <div style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 150 }}>
+                            {organizationName}
                         </div>
                     </div>
                 </div>
-            </aside>
-        </>
+            </div>
+
+            {/* Navigation */}
+            <nav style={{ flex: 1, padding: '16px 12px', overflowY: 'auto' }}>
+                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
+                    {navItems.map(({ href, icon: Icon, label, labelNp }) => (
+                        <li key={href}>
+                            <Link
+                                href={href}
+                                style={{
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: 12,
+                                    padding: '10px 12px',
+                                    borderRadius: 10,
+                                    color: 'var(--text-secondary)',
+                                    textDecoration: 'none',
+                                    fontSize: '0.875rem',
+                                    fontWeight: 500,
+                                    transition: 'all 0.2s ease',
+                                }}
+                                className="nav-link"
+                            >
+                                <Icon size={18} />
+                                <span>{label}</span>
+                                <span style={{ marginLeft: 'auto', fontSize: '0.6875rem', color: 'var(--text-muted)' }}>{labelNp}</span>
+                            </Link>
+                        </li>
+                    ))}
+                </ul>
+            </nav>
+
+            {/* Sign Out */}
+            <div style={{ padding: '16px 12px', borderTop: '1px solid var(--glass-border)' }}>
+                <form action={signOut}>
+                    <button
+                        type="submit"
+                        style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 12,
+                            width: '100%',
+                            padding: '10px 12px',
+                            borderRadius: 10,
+                            background: 'transparent',
+                            border: 'none',
+                            color: 'var(--text-secondary)',
+                            cursor: 'pointer',
+                            fontSize: '0.875rem',
+                            fontWeight: 500,
+                            transition: 'all 0.2s ease',
+                        }}
+                    >
+                        <LogOut size={18} />
+                        Sign Out
+                    </button>
+                </form>
+            </div>
+        </aside>
     );
 }

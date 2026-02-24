@@ -1,0 +1,13 @@
+-- Append this to schema.sql -- run in Supabase SQL Editor
+
+-- ======================================================
+-- 10. HELPER FUNCTION: Decrement stock safely
+-- ======================================================
+CREATE OR REPLACE FUNCTION decrement_stock(p_product_id UUID, p_quantity INTEGER)
+RETURNS VOID AS $$
+BEGIN
+    UPDATE products
+    SET stock_quantity = GREATEST(0, stock_quantity - p_quantity)
+    WHERE id = p_product_id;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
