@@ -4,7 +4,7 @@ import { Package, Users, FileText, TrendingUp } from 'lucide-react';
 import { getTodayBs } from '@/utils/date-utils';
 
 export default async function DashboardPage() {
-    const { organizationId, organizationName } = await getOrgContext();
+    const { organizationId, organizationName, language } = await getOrgContext();
     const supabase = await createClient();
     const today = getTodayBs();
 
@@ -43,10 +43,10 @@ export default async function DashboardPage() {
         .order('stock_quantity', { ascending: true });
 
     const stats = [
-        { label: 'Total Products', labelNp: 'उत्पादन', value: productCount ?? 0, icon: Package, color: 'var(--brand-primary)' },
-        { label: 'Customers', labelNp: 'ग्राहक', value: customerCount ?? 0, icon: Users, color: 'var(--brand-secondary)' },
-        { label: 'Invoices', labelNp: 'बीजक', value: invoiceCount ?? 0, icon: FileText, color: 'var(--brand-accent)' },
-        { label: 'Revenue', labelNp: 'आम्दानी', value: `Rs. ${dailyRevenue.toLocaleString()}`, icon: TrendingUp, color: 'var(--brand-success)' },
+        { label: 'Total Products', labelNp: 'कुल उत्पादन', value: productCount ?? 0, icon: Package, color: 'var(--brand-primary)' },
+        { label: 'Customers', labelNp: 'ग्राहकहरू', value: customerCount ?? 0, icon: Users, color: 'var(--brand-secondary)' },
+        { label: 'Invoices', labelNp: 'बीजकहरू', value: invoiceCount ?? 0, icon: FileText, color: 'var(--brand-accent)' },
+        { label: 'Revenue', labelNp: 'आजको आम्दानी', value: `Rs. ${dailyRevenue.toLocaleString()}`, icon: TrendingUp, color: 'var(--brand-success)' },
     ];
 
     const invoiceTypeBadge = (type: string) => {
@@ -60,7 +60,7 @@ export default async function DashboardPage() {
             <div className="page-header">
                 <h1 className="page-title">{organizationName}</h1>
                 <p className="page-subtitle">
-                    Today: {today.formattedEn} &nbsp;|&nbsp; <span style={{ fontFamily: 'serif' }}>{today.formatted}</span>
+                    {language === 'np' ? 'आज:' : 'Today:'} {today.formattedEn} &nbsp;|&nbsp; <span style={{ fontFamily: 'serif' }}>{today.formatted}</span>
                 </p>
             </div>
 
@@ -70,8 +70,12 @@ export default async function DashboardPage() {
                     <div key={label} className="glass-card" style={{ padding: 20 }}>
                         <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
                             <div>
-                                <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: 4 }}>{label}</div>
-                                <div style={{ fontSize: '0.625rem', color: 'var(--text-muted)' }}>{labelNp}</div>
+                                <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
+                                    {language === 'np' ? labelNp : label}
+                                </div>
+                                {language === 'np' && (
+                                    <div style={{ fontSize: '0.625rem', color: 'var(--text-muted)' }}>{label}</div>
+                                )}
                             </div>
                             <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: `${color}22`, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                                 <Icon size={18} color={color} />
@@ -85,15 +89,17 @@ export default async function DashboardPage() {
             <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 24, marginTop: 24 }}>
                 {/* Recent Invoices */}
                 <div className="glass-card" style={{ padding: 24 }}>
-                    <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 20 }}>Recent Invoices — हालका बीजक</h2>
+                    <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 20 }}>
+                        {language === 'np' ? 'हालका बीजकहरू — Recent Invoices' : 'Recent Invoices'}
+                    </h2>
                     {recentInvoices && recentInvoices.length > 0 ? (
                         <table className="glass-table">
                             <thead>
                                 <tr>
-                                    <th>Invoice #</th>
-                                    <th>Type</th>
-                                    <th>Date (B.S.)</th>
-                                    <th style={{ textAlign: 'right' }}>Total</th>
+                                    <th>{language === 'np' ? 'बीजक #' : 'Invoice #'}</th>
+                                    <th>{language === 'np' ? 'प्रकार' : 'Type'}</th>
+                                    <th>{language === 'np' ? 'मिति (B.S.)' : 'Date (B.S.)'}</th>
+                                    <th style={{ textAlign: 'right' }}>{language === 'np' ? 'कुल' : 'Total'}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -110,7 +116,7 @@ export default async function DashboardPage() {
                     ) : (
                         <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-muted)' }}>
                             <FileText size={40} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
-                            <p>No invoices yet. Start selling from the POS!</p>
+                            <p>{language === 'np' ? 'कुनै बीजक छैन। POS बाट बिक्री सुरु गर्नुहोस्!' : 'No invoices yet. Start selling from the POS!'}</p>
                         </div>
                     )}
                 </div>
@@ -119,7 +125,7 @@ export default async function DashboardPage() {
                 <div className="glass-card" style={{ padding: 24, border: '1px solid rgba(239, 68, 68, 0.2)' }}>
                     <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 20, color: '#ef4444', display: 'flex', alignItems: 'center', gap: 8 }}>
                         <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#ef4444', display: 'inline-block' }}></span>
-                        Low Stock Alerts — कम स्टक
+                        {language === 'np' ? 'न्यून स्टक सतर्कता — Low Stock Alerts' : 'Low Stock Alerts'}
                     </h2>
                     {lowStockProducts && lowStockProducts.length > 0 ? (
                         <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
@@ -128,7 +134,7 @@ export default async function DashboardPage() {
                                     <div style={{ fontSize: '0.875rem', fontWeight: 500 }}>{p.name}</div>
                                     <div style={{ textAlign: 'right' }}>
                                         <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#ef4444' }}>{p.stock_quantity} {p.unit}</div>
-                                        <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>Remaining</div>
+                                        <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>{language === 'np' ? 'बाँकी' : 'Remaining'}</div>
                                     </div>
                                 </div>
                             ))}
@@ -136,7 +142,7 @@ export default async function DashboardPage() {
                     ) : (
                         <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
                             <Package size={32} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
-                            <p style={{ fontSize: '0.8125rem' }}>All products are well stocked!</p>
+                            <p style={{ fontSize: '0.8125rem' }}>{language === 'np' ? 'सबै सामान प्रशस्त स्टक मा छन्!' : 'All products are well stocked!'}</p>
                         </div>
                     )}
                 </div>

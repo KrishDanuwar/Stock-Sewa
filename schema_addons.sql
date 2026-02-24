@@ -16,6 +16,8 @@ ALTER TABLE invoices ADD COLUMN IF NOT EXISTS customer_pan_manual TEXT;
 
 ALTER TABLE customers ADD COLUMN IF NOT EXISTS tax_type TEXT DEFAULT 'pan' CHECK (tax_type IN ('pan', 'vat'));
 
+ALTER TABLE organizations ADD COLUMN IF NOT EXISTS preferred_language TEXT DEFAULT 'en' CHECK (preferred_language IN ('en', 'np'));
+
 -- ======================================================
 -- 11. STORAGE BUCKET (MANUAL STEP)
 -- ======================================================

@@ -25,7 +25,7 @@ const navItems = [
 ];
 
 export default async function Sidebar() {
-    const { organizationName, organizationId } = await getOrgContext();
+    const { organizationName, organizationId, language } = await getOrgContext();
     const supabase = await createClient();
 
     // Fetch logo
@@ -90,8 +90,10 @@ export default async function Sidebar() {
                                 className="nav-link"
                             >
                                 <Icon size={18} />
-                                <span>{label}</span>
-                                <span style={{ marginLeft: 'auto', fontSize: '0.6875rem', color: 'var(--text-muted)' }}>{labelNp}</span>
+                                <span>{language === 'np' ? labelNp : label}</span>
+                                {language === 'np' && (
+                                    <span style={{ marginLeft: 'auto', fontSize: '0.625rem', color: 'var(--text-muted)' }}>{label}</span>
+                                )}
                             </Link>
                         </li>
                     ))}
@@ -120,7 +122,7 @@ export default async function Sidebar() {
                         }}
                     >
                         <LogOut size={18} />
-                        Sign Out
+                        {language === 'np' ? 'बाहिर निस्कनुहोस् (Sign Out)' : 'Sign Out'}
                     </button>
                 </form>
             </div>

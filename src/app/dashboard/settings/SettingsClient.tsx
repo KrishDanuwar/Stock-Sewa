@@ -13,6 +13,7 @@ type Organization = {
     pan_vat: string | null;
     address: string | null;
     phone: string | null;
+    preferred_language: string | null;
 };
 
 export default function SettingsClient({ organization }: { organization: Organization | null }) {
@@ -25,6 +26,7 @@ export default function SettingsClient({ organization }: { organization: Organiz
     const [panVat, setPanVat] = useState(organization?.pan_vat || '');
     const [address, setAddress] = useState(organization?.address || '');
     const [phone, setPhone] = useState(organization?.phone || '');
+    const [language, setLanguage] = useState(organization?.preferred_language || 'en');
 
     const compressImage = (file: File, maxWidth: number, maxHeight: number, quality: number): Promise<Blob> => {
         return new Promise((resolve, reject) => {
@@ -126,6 +128,7 @@ export default function SettingsClient({ organization }: { organization: Organiz
         formData.append('pan_vat', panVat);
         formData.append('address', address);
         formData.append('phone', phone);
+        formData.append('preferred_language', language);
 
         const result = await updateOrganizationDetails(formData);
         if (result.success) {
@@ -211,6 +214,13 @@ export default function SettingsClient({ organization }: { organization: Organiz
                         <div className="form-group">
                             <label className="glass-label">Phone</label>
                             <input className="glass-input" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone Number" />
+                        </div>
+                        <div className="form-group">
+                            <label className="glass-label">Preferred Language</label>
+                            <select className="glass-input" value={language} onChange={(e) => setLanguage(e.target.value)} style={{ cursor: 'pointer' }}>
+                                <option value="en">English (default)</option>
+                                <option value="np">नेपाली (Nepali)</option>
+                            </select>
                         </div>
                     </div>
 

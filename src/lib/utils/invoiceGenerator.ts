@@ -8,6 +8,7 @@ export interface InvoiceData {
         pan_vat: string | null;
         address: string | null;
         phone: string | null;
+        preferred_language: string | null;
     };
     invoice_number: string;
     invoice_type: 'normal' | 'pan' | 'vat';
@@ -138,10 +139,12 @@ function prepareInvoiceDoc(data: InvoiceData): jsPDF {
     doc.text(`Payment Mode: ${data.payment_mode}`, 15, finalY);
     finalY += 6;
 
+    const isNp = data.organization.preferred_language === 'np';
+
     if (data.invoice_type === 'vat') {
-        doc.text('Note: VAT Charged as per Nepal IRD Rules.', 15, finalY);
+        doc.text(isNp ? 'द्रष्टव्य: नेपाल IRD नियमहरू अनुसार VAT लगाइएको छ।' : 'Note: VAT Charged as per Nepal IRD Rules.', 15, finalY);
     } else if (data.invoice_type === 'pan') {
-        doc.text('Note: VAT Not Applicable (Business is PAN registered only).', 15, finalY);
+        doc.text(isNp ? 'द्रष्टव्य: भ्याट लागू हुँदैन (व्यवसाय केवल प्यान दर्ता गरिएको छ)।' : 'Note: VAT Not Applicable (Business is PAN registered only).', 15, finalY);
     }
 
     return doc;

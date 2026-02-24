@@ -69,6 +69,7 @@ export async function updateOrganizationDetails(formData: FormData) {
     const pan_vat = formData.get('pan_vat') as string;
     const address = formData.get('address') as string;
     const phone = formData.get('phone') as string;
+    const preferred_language = formData.get('preferred_language') as string;
 
     const { error } = await supabase
         .from('organizations')
@@ -77,6 +78,7 @@ export async function updateOrganizationDetails(formData: FormData) {
             pan_vat,
             address,
             phone,
+            preferred_language,
         })
         .eq('id', org.id);
 

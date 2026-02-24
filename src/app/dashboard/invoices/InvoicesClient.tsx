@@ -13,7 +13,7 @@ type Invoice = {
     customers: { name: string } | null;
 };
 
-type Organization = { name: string; pan_vat: string | null; address: string | null; phone: string | null; } | null;
+type Organization = { name: string; pan_vat: string | null; address: string | null; phone: string | null; preferred_language: string | null; } | null;
 
 export default function InvoicesClient({ invoices, organization }: { invoices: any[]; organization: Organization; }) {
     const typeBadge = (type: string) => {
@@ -41,7 +41,7 @@ export default function InvoicesClient({ invoices, organization }: { invoices: a
 
     const handlePrint = (inv: any) => {
         const invData = {
-            organization: organization || { name: 'Stock Sewa', pan_vat: null, address: null, phone: null },
+            organization: organization || { name: 'Stock Sewa', pan_vat: null, address: null, phone: null, preferred_language: 'en' },
             invoice_number: inv.invoice_number,
             invoice_type: inv.invoice_type,
             date_ad: new Date(inv.created_at).toISOString().split('T')[0],

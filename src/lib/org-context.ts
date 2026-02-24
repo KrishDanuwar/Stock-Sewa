@@ -5,6 +5,7 @@ export interface OrgContext {
     userId: string;
     organizationId: string;
     organizationName: string;
+    language: 'en' | 'np';
 }
 
 /**
@@ -26,7 +27,7 @@ export async function getOrgContext(): Promise<OrgContext> {
 
     const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('organization_id, organizations(name)')
+        .select('organization_id, organizations(name, preferred_language)')
         .eq('id', user.id)
         .single();
 
@@ -38,9 +39,12 @@ export async function getOrgContext(): Promise<OrgContext> {
     const orgName =
         (profile.organizations as unknown as { name: string } | null)?.name ?? 'My Organization';
 
+    const language = (profile.organizations as any)?.preferred_language || 'en';
+
     return {
         userId: user.id,
         organizationId: profile.organization_id,
         organizationName: orgName,
+        language: language as 'en' | 'np',
     };
 }
