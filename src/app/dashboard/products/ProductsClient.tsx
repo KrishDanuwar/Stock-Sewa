@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { addProduct, deleteProduct } from '@/lib/actions/products';
+import { addProduct, deleteProduct, restockProduct } from '@/lib/actions/products';
 import { toast } from 'sonner';
-import { Printer, Trash2, Package, X, Search, Plus } from 'lucide-react';
+import { Printer, Trash2, Package, X, Search, Plus, RefreshCw } from 'lucide-react';
 import BarcodeLabel from '@/components/BarcodeLabel';
 
 type Product = {
@@ -18,6 +18,9 @@ export default function ProductsClient({ products }: { products: Product[] }) {
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
     const [printProduct, setPrintProduct] = useState<Product | null>(null);
+    const [restockItem, setRestockItem] = useState<Product | null>(null);
+    const [restockQty, setRestockQty] = useState('');
+    const [restocking, setRestocking] = useState(false);
 
     const filtered = products.filter(p =>
         p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -43,6 +46,24 @@ export default function ProductsClient({ products }: { products: Product[] }) {
         const result = await deleteProduct(id);
         if (result?.error) toast.error(result.error);
         else toast.success('Product deleted');
+    }
+
+    async function handleRestock(e: React.FormEvent) {
+        e.preventDefault();
+        if (!restockItem) return;
+        const qty = parseInt(restockQty);
+        if (isNaN(qty) || qty <= 0) return toast.error('Enter valid quantity');
+
+        setRestocking(true);
+        const result = await restockProduct(restockItem.id, qty);
+        if (result?.success) {
+            toast.success(`Restocked ${qty} ${restockItem.unit} of ${restockItem.name}`);
+            setRestockItem(null);
+            setRestockQty('');
+        } else {
+            toast.error(result?.error || 'Failed to restock');
+        }
+        setRestocking(false);
     }
 
     const handlePrint = (product: Product) => {
@@ -135,6 +156,9 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                     </td>
                                     <td>
                                         <div style={{ display: 'flex', gap: 4 }}>
+                                            <button onClick={() => { setRestockItem(p); setRestockQty(''); }} className="action-button action-success" title="Restock Product">
+                                                <RefreshCw size={15} />
+                                            </button>
                                             <button onClick={() => handlePrint(p)} className="action-button action-info" title="Print Barcode Label">
                                                 <Printer size={15} />
                                             </button>
@@ -216,6 +240,39 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                 </div>
             )}
 
+            {/* Restock Modal */}
+            {restockItem && (
+                <div className="glass-modal">
+                    <div className="glass-card animate-fade-in-up" style={{ width: '100%', maxWidth: 400, padding: 28, position: 'relative' }}>
+                        <button onClick={() => setRestockItem(null)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+                            <X size={20} />
+                        </button>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 8 }}>Restock Product</h2>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: 20 }}>
+                            Add more stock for <strong>{restockItem.name}</strong>
+                        </p>
+
+                        <form onSubmit={handleRestock} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                            <div className="form-group">
+                                <label className="form-label">Current Stock: {restockItem.stock_quantity} {restockItem.unit}</label>
+                                <input
+                                    className="glass-input"
+                                    type="number"
+                                    autoFocus
+                                    placeholder="Enter quantity to add"
+                                    value={restockQty}
+                                    onChange={e => setRestockQty(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <button type="submit" disabled={restocking} className="glass-button glass-button-primary" style={{ justifyContent: 'center', marginTop: 10, padding: 14 }}>
+                                {restocking ? 'Restocking...' : 'Add to Stock'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
+
             <style jsx>{`
                 .glass-modal {
                     position: fixed;
@@ -253,6 +310,11 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                     background: rgba(59, 130, 246, 0.2);
                     border-color: rgba(59, 130, 246, 0.4);
                     color: #60a5fa;
+                }
+                .action-success:hover {
+                    background: rgba(16, 185, 129, 0.2);
+                    border-color: rgba(16, 185, 129, 0.4);
+                    color: #34d399;
                 }
                 .action-danger:hover {
                     background: rgba(239, 68, 68, 0.2);

@@ -92,3 +92,36 @@ export async function deleteProduct(id: string) {
     revalidatePath('/dashboard');
     return { success: true };
 }
+
+export async function restockProduct(id: string, quantity: number) {
+    const { organizationId } = await getOrgContext();
+    const supabase = await createClient();
+
+    if (quantity <= 0) return { error: 'Quantity must be greater than zero' };
+
+    // Fetch current stock
+    const { data: product, error: fetchError } = await supabase
+        .from('products')
+        .select('stock_quantity')
+        .eq('id', id)
+        .eq('organization_id', organizationId)
+        .single();
+
+    if (fetchError || !product) {
+        return { error: 'Product not found' };
+    }
+
+    const { error: updateError } = await supabase
+        .from('products')
+        .update({
+            stock_quantity: product.stock_quantity + quantity
+        })
+        .eq('id', id)
+        .eq('organization_id', organizationId);
+
+    if (updateError) return { error: updateError.message };
+
+    revalidatePath('/dashboard/products');
+    revalidatePath('/dashboard');
+    return { success: true };
+}
