@@ -37,10 +37,12 @@ export async function getOrgContext(): Promise<OrgContext> {
         redirect('/setup');
     }
 
-    const orgName =
-        (profile.organizations as unknown as { name: string } | null)?.name ?? 'My Organization';
+    const orgData = Array.isArray(profile.organizations)
+        ? profile.organizations[0]
+        : (profile.organizations as any);
 
-    const language = (profile.organizations as any)?.preferred_language || 'en';
+    const orgName = orgData?.name ?? 'My Organization';
+    const language = orgData?.preferred_language || 'en';
 
     return {
         userId: user.id,
