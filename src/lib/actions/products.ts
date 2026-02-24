@@ -113,17 +113,19 @@ export async function restockProduct(
     quantity: number,
     newPrice?: number,
     newCostPrice?: number,
-    newMfgDate?: string
+    newMfgDate?: string,
+    newExpiryDate?: string,
+    newBatchNumber?: string
 ) {
     const { organizationId } = await getOrgContext();
     const supabase = await createClient();
 
     if (quantity <= 0) return { error: 'Quantity must be greater than zero' };
 
-    // Fetch current stock
+    // Fetch current stock and metadata
     const { data: product, error: fetchError } = await supabase
         .from('products')
-        .select('stock_quantity, price, cost_price, mfg_date')
+        .select('stock_quantity, price, cost_price, mfg_date, expiry_date, batch_number')
         .eq('id', id)
         .eq('organization_id', organizationId)
         .single();
@@ -133,12 +135,14 @@ export async function restockProduct(
     }
 
     const updates: any = {
-        stock_quantity: product.stock_quantity + quantity
+        stock_quantity: (Number(product.stock_quantity) || 0) + quantity
     };
 
     if (newPrice !== undefined && !isNaN(newPrice)) updates.price = newPrice;
     if (newCostPrice !== undefined && !isNaN(newCostPrice)) updates.cost_price = newCostPrice;
     if (newMfgDate !== undefined) updates.mfg_date = newMfgDate;
+    if (newExpiryDate !== undefined) updates.expiry_date = newExpiryDate;
+    if (newBatchNumber !== undefined) updates.batch_number = newBatchNumber;
 
     const { error: updateError } = await supabase
         .from('products')
