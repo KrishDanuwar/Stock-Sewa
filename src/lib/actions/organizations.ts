@@ -24,3 +24,38 @@ export async function getOrganization() {
 
     return org;
 }
+
+export async function updateOrganizationLogo(formData: FormData) {
+    const supabase = await createClient();
+    const file = formData.get('logo') as File;
+    if (!file) return { error: 'No file provided' };
+
+    const org = await getOrganization();
+    if (!org) return { error: 'Organization not found' };
+
+    // 1. Upload to Supabase Storage
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${org.id}-${Math.random()}.${fileExt}`;
+    const filePath = `${fileName}`;
+
+    const { error: uploadError } = await supabase.storage
+        .from('logos')
+        .upload(filePath, file);
+
+    if (uploadError) return { error: uploadError.message };
+
+    // 2. Get Public URL
+    const { data: { publicUrl } } = supabase.storage
+        .from('logos')
+        .getPublicUrl(filePath);
+
+    // 3. Update Organization Table
+    const { error: updateError } = await supabase
+        .from('organizations')
+        .update({ logo_url: publicUrl })
+        .eq('id', org.id);
+
+    if (updateError) return { error: updateError.message };
+
+    return { success: true, logoUrl: publicUrl };
+}

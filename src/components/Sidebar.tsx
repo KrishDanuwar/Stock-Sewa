@@ -1,5 +1,6 @@
 import { signOut } from '@/lib/actions/auth';
 import { getOrgContext } from '@/lib/org-context';
+import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import {
     LayoutDashboard,
@@ -10,6 +11,7 @@ import {
     BarChart2,
     LogOut,
     Package2,
+    Settings,
 } from 'lucide-react';
 
 const navItems = [
@@ -19,10 +21,19 @@ const navItems = [
     { href: '/dashboard/pos', icon: ShoppingCart, label: 'POS', labelNp: 'बिक्री' },
     { href: '/dashboard/invoices', icon: FileText, label: 'Invoices', labelNp: 'बीजक' },
     { href: '/dashboard/reports', icon: BarChart2, label: 'Reports', labelNp: 'रिपोर्ट' },
+    { href: '/dashboard/settings', icon: Settings, label: 'Settings', labelNp: 'सेटिङ' },
 ];
 
 export default async function Sidebar() {
-    const { organizationName } = await getOrgContext();
+    const { organizationName, organizationId } = await getOrgContext();
+    const supabase = await createClient();
+
+    // Fetch logo
+    const { data: org } = await supabase
+        .from('organizations')
+        .select('logo_url')
+        .eq('id', organizationId)
+        .single();
 
     return (
         <aside
@@ -41,8 +52,12 @@ export default async function Sidebar() {
             {/* Brand */}
             <div style={{ padding: '24px 20px', borderBottom: '1px solid var(--glass-border)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
-                        <Package2 size={18} color="white" />
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                        {org?.logo_url ? (
+                            <img src={org.logo_url} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        ) : (
+                            <Package2 size={18} color="white" />
+                        )}
                     </div>
                     <div>
                         <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Stock Sewa</div>
