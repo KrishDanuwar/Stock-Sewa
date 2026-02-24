@@ -75,6 +75,8 @@ CREATE TABLE IF NOT EXISTS invoices (
     tax_amount      DECIMAL(12, 2) NOT NULL DEFAULT 0,
     total_amount    DECIMAL(12, 2) NOT NULL DEFAULT 0,
     payment_method  TEXT DEFAULT 'cash',
+    payment_status  TEXT NOT NULL DEFAULT 'paid' CHECK (payment_status IN ('paid', 'unpaid', 'partial')),
+    amount_paid     DECIMAL(12, 2) NOT NULL DEFAULT 0,
     notes           TEXT,
     date_ad         DATE DEFAULT CURRENT_DATE,
     date_bs         TEXT NOT NULL,

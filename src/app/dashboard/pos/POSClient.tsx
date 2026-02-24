@@ -16,6 +16,7 @@ export default function POSClient({ products, customers }: { products: Product[]
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(false);
     const [lastInvoice, setLastInvoice] = useState<{ number: string; total: number } | null>(null);
+    const [amountPaid, setAmountPaid] = useState<number>(0);
 
     const filtered = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
 
@@ -37,16 +38,33 @@ export default function POSClient({ products, customers }: { products: Product[]
     const tax = invoiceType === 'vat' ? subtotal * 0.13 : 0;
     const total = subtotal + tax;
 
+    // Derived payment status
+    const getPaymentStatus = (): 'paid' | 'unpaid' | 'partial' => {
+        if (amountPaid >= total) return 'paid';
+        if (amountPaid <= 0) return 'unpaid';
+        return 'partial';
+    };
+
     const handleCheckout = async () => {
         if (cart.length === 0) { toast.error('Cart is empty'); return; }
+
+        // Validation for non-normal invoices without customers
         if ((invoiceType === 'pan' || invoiceType === 'vat') && !customerId) {
             toast.error('Please select a customer for PAN/VAT invoice'); return;
         }
+
+        // Validation for credit/unpaid sales without customers
+        if (getPaymentStatus() !== 'paid' && !customerId) {
+            toast.error('Customer is required for credit/unpaid sales'); return;
+        }
+
         setLoading(true);
         const result = await createInvoice({
             customer_id: customerId || undefined,
             invoice_type: invoiceType,
             payment_method: paymentMethod,
+            payment_status: getPaymentStatus(),
+            amount_paid: amountPaid,
             items: cart,
         });
         if (result?.error) { toast.error(result.error); }
@@ -55,6 +73,7 @@ export default function POSClient({ products, customers }: { products: Product[]
             setLastInvoice({ number: result.invoice.invoice_number, total });
             setCart([]);
             setCustomerId('');
+            setAmountPaid(0);
         }
         setLoading(false);
     };
@@ -148,39 +167,63 @@ export default function POSClient({ products, customers }: { products: Product[]
                     </div>
 
                     <div>
-                        <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>Payment</label>
-                        <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className="glass-input" style={{ cursor: 'pointer' }}>
-                            <option value="cash">Cash</option>
-                            <option value="esewa">eSewa</option>
-                            <option value="khalti">Khalti</option>
-                            <option value="ime_pay">IME Pay</option>
-                            <option value="bank_transfer">Bank Transfer</option>
-                            <option value="credit">Credit</option>
+                        <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>
+                            Customer {getPaymentStatus() !== 'paid' ? '*' : '(Walk-in)'}
+                        </label>
+                        <select value={customerId} onChange={e => setCustomerId(e.target.value)} className="glass-input" style={{ cursor: 'pointer' }}>
+                            <option value="">Walk-in Customer</option>
+                            {customers.map(c => <option key={c.id} value={c.id}>{c.name}{c.pan_number ? ` (${c.pan_number})` : ''}</option>)}
                         </select>
                     </div>
 
-                    {(invoiceType === 'pan' || invoiceType === 'vat') && (
+                    <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 10 }}>
                         <div>
-                            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>Customer</label>
-                            <select value={customerId} onChange={e => setCustomerId(e.target.value)} className="glass-input" style={{ cursor: 'pointer' }}>
-                                <option value="">Select customer...</option>
-                                {customers.map(c => <option key={c.id} value={c.id}>{c.name}{c.pan_number ? ` (${c.pan_number})` : ''}</option>)}
+                            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>Payment Method</label>
+                            <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className="glass-input" style={{ cursor: 'pointer' }}>
+                                <option value="cash">Cash</option>
+                                <option value="esewa">eSewa</option>
+                                <option value="khalti">Khalti</option>
+                                <option value="ime_pay">IME Pay</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="credit">Credit / Unpaid</option>
                             </select>
                         </div>
-                    )}
+                        <div>
+                            <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>Amount Paid रु</label>
+                            <input
+                                type="number"
+                                min="0"
+                                className="glass-input"
+                                value={amountPaid}
+                                onChange={e => setAmountPaid(parseFloat(e.target.value) || 0)}
+                                onFocus={(e) => { if (amountPaid === 0) setAmountPaid(total); }}
+                            />
+                        </div>
+                    </div>
 
-                    {/* Totals */}
+                    {/* Totals & Status */}
                     <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                            <span>Subtotal</span><span>NPR {subtotal.toLocaleString()}</span>
+                            <span>Total Amount</span><span>NPR {total.toLocaleString()}</span>
                         </div>
-                        {invoiceType === 'vat' && (
-                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--brand-warning)' }}>
-                                <span>VAT (13%)</span><span>NPR {tax.toFixed(2)}</span>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
+                            <span style={{ color: 'var(--text-secondary)' }}>Status</span>
+                            <span className={`badge ${getPaymentStatus() === 'paid' ? 'badge-success' :
+                                getPaymentStatus() === 'partial' ? 'badge-warning' : 'badge-danger'
+                                }`}>
+                                {getPaymentStatus().toUpperCase()}
+                            </span>
+                        </div>
+
+                        {getPaymentStatus() !== 'paid' && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--brand-danger)', fontWeight: 600 }}>
+                                <span>Due Amount</span><span>NPR {(total - amountPaid).toLocaleString()}</span>
                             </div>
                         )}
-                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.125rem', fontWeight: 700, marginTop: 4 }}>
-                            <span>Total</span><span style={{ color: 'var(--brand-primary)' }}>NPR {total.toFixed(2)}</span>
+
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.125rem', fontWeight: 700, marginTop: 4, color: 'var(--brand-primary)' }}>
+                            <span>Paid</span><span>NPR {amountPaid.toLocaleString()}</span>
                         </div>
                     </div>
 

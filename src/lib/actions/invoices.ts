@@ -16,6 +16,8 @@ export interface CreateInvoicePayload {
     customer_id?: string;
     invoice_type: 'normal' | 'pan' | 'vat';
     payment_method: string;
+    payment_status: 'paid' | 'unpaid' | 'partial';
+    amount_paid: number;
     notes?: string;
     items: CartItem[];
 }
@@ -54,6 +56,8 @@ export async function createInvoice(payload: CreateInvoicePayload) {
             tax_amount,
             total_amount,
             payment_method: payload.payment_method,
+            payment_status: payload.payment_status,
+            amount_paid: payload.amount_paid,
             notes: payload.notes || null,
             date_ad: new Date().toISOString().split('T')[0],
             date_bs: today.formattedEn,
