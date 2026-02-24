@@ -1,3 +1,5 @@
+'use client';
+
 import { useState } from 'react';
 import { signUp } from '@/lib/actions/auth';
 import { toast } from 'sonner';
