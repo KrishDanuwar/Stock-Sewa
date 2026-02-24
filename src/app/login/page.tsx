@@ -29,13 +29,13 @@ export default function LoginPage() {
                 <div style={{ position: 'absolute', bottom: '-15%', right: '-5%', width: '700px', height: '700px', background: 'radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%)', borderRadius: '50%' }} />
             </div>
 
-            <div className="glass-card animate-fade-in-up w-full max-w-md p-10 relative z-10" style={{ boxShadow: 'var(--glass-shadow)' }}>
+            <div className="glass-card animate-fade-in-up w-full max-w-[480px] p-12 relative z-10" style={{ boxShadow: 'var(--glass-shadow)' }}>
                 {/* Brand Identity */}
                 <div className="flex flex-col items-center mb-10">
                     <div style={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: 18,
+                        width: 56,
+                        height: 56,
+                        borderRadius: 16,
                         background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))',
                         display: 'flex',
                         alignItems: 'center',
@@ -43,52 +43,52 @@ export default function LoginPage() {
                         marginBottom: 16,
                         boxShadow: '0 8px 20px rgba(79, 142, 247, 0.3)'
                     }}>
-                        <Package size={32} color="white" />
+                        <Package size={28} color="white" />
                     </div>
                     <div className="text-center">
-                        <h1 style={{ fontSize: '1.875rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+                        <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
                             Stock Sewa
                         </h1>
-                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 500, marginTop: 4 }}>
+                        <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', fontWeight: 500, marginTop: 4 }}>
                             Sign in to your account
                         </p>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
                     <div className="form-group">
-                        <label style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Email Address</label>
+                        <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Email Address</label>
                         <div style={{ position: 'relative' }}>
-                            <Mail size={18} color="var(--text-muted)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
+                            <Mail size={16} color="var(--text-muted)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
                             <input
                                 name="email"
                                 type="email"
                                 required
                                 className="glass-input"
                                 placeholder="name@company.com"
-                                style={{ paddingLeft: 48 }}
+                                style={{ paddingLeft: 44, fontSize: '0.875rem' }}
                             />
                         </div>
                     </div>
 
                     <div className="form-group">
-                        <label style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Password</label>
+                        <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Password</label>
                         <div style={{ position: 'relative' }}>
-                            <Lock size={18} color="var(--text-muted)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
+                            <Lock size={16} color="var(--text-muted)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
                             <input
                                 name="password"
                                 type={showPw ? 'text' : 'password'}
                                 required
                                 className="glass-input"
                                 placeholder="••••••••"
-                                style={{ paddingLeft: 48, paddingRight: 48 }}
+                                style={{ paddingLeft: 44, paddingRight: 44, fontSize: '0.875rem' }}
                             />
                             <button
                                 type="button"
                                 onClick={() => setShowPw(!showPw)}
                                 style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}
                             >
-                                {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                                {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                         </div>
                     </div>
@@ -100,23 +100,23 @@ export default function LoginPage() {
                         style={{
                             width: '100%',
                             justifyContent: 'center',
-                            padding: '14px 24px',
-                            fontSize: '1rem',
+                            padding: '12px 24px',
+                            fontSize: '0.9375rem',
                             fontWeight: 600,
-                            marginTop: 32,
+                            marginTop: 24,
                             borderRadius: 12
                         }}
                     >
-                        {loading ? 'Entering System...' : <><LogIn size={20} /> Sign In</>}
+                        {loading ? 'Entering System...' : <><LogIn size={18} /> Sign In</>}
                     </button>
                 </form>
 
                 <div style={{ marginTop: 32, textAlign: 'center' }}>
-                    <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                    <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
                         New to Stock Sewa?
                     </span>
                     {' '}
-                    <Link href="/signup" style={{ color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none', paddingLeft: 4 }}>
+                    <Link href="/signup" style={{ color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none', paddingLeft: 4, fontSize: '0.8125rem' }}>
                         Create an account
                     </Link>
                 </div>

@@ -34,13 +34,13 @@ export default function SignupPage() {
                 <div style={{ position: 'absolute', bottom: '-20%', left: '-10%', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(6,182,212,0.12) 0%, transparent 70%)', borderRadius: '50%' }} />
             </div>
 
-            <div className="glass-card animate-fade-in-up w-full max-w-xl p-10 relative z-10" style={{ boxShadow: 'var(--glass-shadow)' }}>
+            <div className="glass-card animate-fade-in-up w-full max-w-[680px] p-12 relative z-10" style={{ boxShadow: 'var(--glass-shadow)' }}>
                 {/* Brand Identity */}
                 <div className="flex flex-col items-center mb-10">
                     <div style={{
-                        width: 64,
-                        height: 64,
-                        borderRadius: 18,
+                        width: 56,
+                        height: 56,
+                        borderRadius: 16,
                         background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))',
                         display: 'flex',
                         alignItems: 'center',
@@ -48,59 +48,59 @@ export default function SignupPage() {
                         marginBottom: 16,
                         boxShadow: '0 8px 20px rgba(79, 142, 247, 0.3)'
                     }}>
-                        <Package size={32} color="white" />
+                        <Package size={28} color="white" />
                     </div>
                     <div className="text-center">
-                        <h1 style={{ fontSize: '1.875rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.03em' }}>
+                        <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
                             Stock Sewa
                         </h1>
-                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', fontWeight: 500, marginTop: 4 }}>
+                        <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', fontWeight: 500, marginTop: 4 }}>
                             Create your shop account
                         </p>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
+                <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 18 }}>
                     <div className="form-group" style={{ gridColumn: 'span 2' }}>
-                        <label style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Shop / Business Name</label>
+                        <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Shop / Business Name</label>
                         <div style={{ position: 'relative' }}>
-                            <Building2 size={18} color="var(--text-muted)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
-                            <input name="org_name" type="text" required className="glass-input" placeholder="e.g. Acme Emporium" style={{ paddingLeft: 48 }} />
+                            <Building2 size={16} color="var(--text-muted)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
+                            <input name="org_name" type="text" required className="glass-input" placeholder="e.g. Acme Emporium" style={{ paddingLeft: 44, fontSize: '0.875rem' }} />
                         </div>
                     </div>
 
                     <div className="form-group">
-                        <label style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Username</label>
+                        <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Username</label>
                         <div style={{ position: 'relative' }}>
-                            <User size={18} color="var(--text-muted)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
-                            <input name="username" type="text" required className="glass-input" placeholder="e.g. acme_user" style={{ paddingLeft: 48 }} />
+                            <User size={16} color="var(--text-muted)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
+                            <input name="username" type="text" required className="glass-input" placeholder="e.g. acme_user" style={{ paddingLeft: 44, fontSize: '0.875rem' }} />
                         </div>
                     </div>
 
                     <div className="form-group">
-                        <label style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Email</label>
+                        <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Email</label>
                         <div style={{ position: 'relative' }}>
-                            <Mail size={18} color="var(--text-muted)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
-                            <input name="email" type="email" required className="glass-input" placeholder="name@company.com" style={{ paddingLeft: 48 }} />
+                            <Mail size={16} color="var(--text-muted)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
+                            <input name="email" type="email" required className="glass-input" placeholder="name@company.com" style={{ paddingLeft: 44, fontSize: '0.875rem' }} />
                         </div>
                     </div>
 
                     <div className="form-group">
-                        <label style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Password</label>
+                        <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Password</label>
                         <div style={{ position: 'relative' }}>
-                            <Lock size={18} color="var(--text-muted)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
-                            <input name="password" type={showPw ? 'text' : 'password'} required minLength={6} className="glass-input" placeholder="Min. 6 characters" style={{ paddingLeft: 48, paddingRight: 48 }} />
+                            <Lock size={16} color="var(--text-muted)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
+                            <input name="password" type={showPw ? 'text' : 'password'} required minLength={6} className="glass-input" placeholder="Min. 6 characters" style={{ paddingLeft: 44, paddingRight: 44, fontSize: '0.875rem' }} />
                             <button type="button" onClick={() => setShowPw(!showPw)} style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}>
-                                {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                                {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
                             </button>
                         </div>
                     </div>
 
                     <div className="form-group">
-                        <label style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Confirm Password</label>
+                        <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Confirm Password</label>
                         <div style={{ position: 'relative' }}>
-                            <Lock size={18} color="var(--text-muted)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
-                            <input name="confirm_password" type="password" required className="glass-input" placeholder="Re-enter password" style={{ paddingLeft: 48 }} />
+                            <Lock size={16} color="var(--text-muted)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
+                            <input name="confirm_password" type="password" required className="glass-input" placeholder="Re-enter password" style={{ paddingLeft: 44, fontSize: '0.875rem' }} />
                         </div>
                     </div>
 
@@ -111,23 +111,23 @@ export default function SignupPage() {
                         style={{
                             gridColumn: 'span 2',
                             justifyContent: 'center',
-                            padding: '14px 24px',
-                            fontSize: '1rem',
+                            padding: '12px 24px',
+                            fontSize: '0.9375rem',
                             fontWeight: 600,
-                            marginTop: 24,
+                            marginTop: 12,
                             borderRadius: 12
                         }}
                     >
-                        {loading ? 'Setting up shop...' : <><UserPlus size={20} /> Create Account</>}
+                        {loading ? 'Setting up shop...' : <><UserPlus size={18} /> Create Account</>}
                     </button>
                 </form>
 
                 <div style={{ marginTop: 32, textAlign: 'center' }}>
-                    <span style={{ fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                    <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
                         Already have an account?
                     </span>
                     {' '}
-                    <Link href="/login" style={{ color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none', paddingLeft: 4 }}>
+                    <Link href="/login" style={{ color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none', paddingLeft: 4, fontSize: '0.8125rem' }}>
                         Sign in
                     </Link>
                 </div>
