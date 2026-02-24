@@ -3,21 +3,30 @@ import autoTable from 'jspdf-autotable';
 
 export function generateInvoicePDF(invoice: any) {
     const doc = new jsPDF();
+    const org = invoice.organizations || {};
+    const customer = invoice.customers || {};
+    const invoiceType = invoice.invoice_type || 'normal';
 
-    // Company Info (Placeholder - could be from organization data)
+    let headerTitle = 'BILL';
+    if (invoiceType === 'vat') headerTitle = 'TAX INVOICE';
+    else if (invoiceType === 'pan') headerTitle = 'BILL (PAN Registered)';
+
+    // Company Info
     doc.setFontSize(20);
     doc.setTextColor(40, 40, 40);
-    doc.text('G.K Paints POS', 14, 22);
+    doc.text(org.name || 'G.K Paints POS', 14, 22);
 
     doc.setFontSize(10);
     doc.setTextColor(100, 100, 100);
-    doc.text('Your Trusted Inventory Partner', 14, 28);
-    doc.text('Email: billing@gkpaints.local', 14, 33);
+    doc.text(org.address || 'Global Enterprise SaaS', 14, 28);
+    if (org.pan_no) doc.text(`PAN: ${org.pan_no}`, 14, 33);
+    if (org.vat_no) doc.text(`VAT: ${org.vat_no}`, 60, 33);
+    if (org.phone) doc.text(`Phone: ${org.phone}`, 14, 38);
 
     // Invoice Details
     doc.setFontSize(12);
     doc.setTextColor(0, 0, 0);
-    doc.text(`INVOICE: ${invoice.invoice_number}`, 140, 22);
+    doc.text(`${headerTitle}: ${invoice.invoice_number}`, 140, 22);
     doc.setFontSize(10);
     doc.text(`Date: ${new Date(invoice.created_at).toLocaleDateString()}`, 140, 28);
     doc.text(`Status: ${invoice.status?.toUpperCase()}`, 140, 33);
@@ -27,9 +36,10 @@ export function generateInvoicePDF(invoice: any) {
     doc.setFont('helvetica', 'bold');
     doc.text('Bill To:', 14, 50);
     doc.setFont('helvetica', 'normal');
-    doc.text(invoice.customers?.name || 'Cash Customer', 14, 56);
-    if (invoice.customers?.phone) doc.text(`Phone: ${invoice.customers.phone}`, 14, 61);
-    if (invoice.customers?.address) doc.text(`Address: ${invoice.customers.address}`, 14, 66);
+    doc.text(customer.name || 'Cash Customer', 14, 56);
+    if (customer.phone) doc.text(`Phone: ${customer.phone}`, 14, 61);
+    if (customer.address) doc.text(`Address: ${customer.address}`, 14, 66);
+    if (invoice.customer_pan) doc.text(`PAN/VAT: ${invoice.customer_pan}`, 14, 71);
 
     // Items Table
     const tableData = invoice.items.map((item: any, index: number) => [
@@ -42,20 +52,25 @@ export function generateInvoicePDF(invoice: any) {
 
     autoTable(doc, {
         startY: 80,
-        head: [['#', 'Description', 'Qty', 'Unit Price', 'Subtotal']],
+        head: [['#', 'Description', 'Qty', 'Rate', 'Total']],
         body: tableData,
         theme: 'striped',
-        headStyles: { fillColor: [79, 70, 229] }, // Indigo-600
+        headStyles: { fillColor: [79, 70, 229] },
     });
 
     // Totals
-    // Totals
     const finalY = (doc as any).lastAutoTable.finalY + 10;
+    const subtotal = Number(invoice.total_amount) - Number(invoice.tax_amount || 0);
+
     doc.setFontSize(10);
-    doc.text(`Subtotal: Rs. ${invoice.total_amount}`, 140, finalY);
-    doc.text(`Paid: Rs. ${invoice.paid_amount}`, 140, finalY + 6);
+    doc.text(`Subtotal: Rs. ${subtotal.toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, 140, finalY);
+    if (invoiceType === 'vat') {
+        doc.text(`VAT (13%): Rs. ${Number(invoice.tax_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, 140, finalY + 6);
+    }
     doc.setFont('helvetica', 'bold');
-    doc.text(`Remaining: Rs. ${invoice.remaining_amount}`, 140, finalY + 12);
+    doc.text(`Grand Total: Rs. ${Number(invoice.total_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, 140, finalY + 12);
+    doc.text(`Paid: Rs. ${Number(invoice.paid_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, 140, finalY + 18);
+    doc.text(`Balance: Rs. ${Number(invoice.remaining_amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`, 140, finalY + 24);
 
     // Save the PDF
     doc.save(`${invoice.invoice_number}.pdf`);

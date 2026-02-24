@@ -12,8 +12,11 @@ interface InvoiceItem {
 
 interface CreateInvoiceData {
     customer_id: string | null;
+    customer_pan?: string | null;
+    invoice_type: 'normal' | 'pan' | 'vat';
     items: InvoiceItem[];
     paid_amount: number;
+    tax_amount: number;
 }
 
 function generateInvoiceNumber(): string {
@@ -56,7 +59,7 @@ export async function getInvoice(id: string) {
     const supabase = createClient();
     const { data: invoice, error: invErr } = await supabase
         .from('invoices')
-        .select('*, customers(name, phone, address)')
+        .select('*, customers(name, phone, address), organizations(*)')
         .eq('id', id)
         .eq('organization_id', ctx.organizationId)
         .single();
@@ -104,15 +107,17 @@ export async function createInvoice(invoiceData: CreateInvoiceData) {
     if (!ctx) return { error: 'Unauthorized' };
 
     const supabase = createClient();
-    const { customer_id, items, paid_amount } = invoiceData;
+    const { customer_id, customer_pan, invoice_type, items, paid_amount, tax_amount } = invoiceData;
 
     try {
         // Calculate totals
-        const total_amount = items.reduce(
+        const subtotal = items.reduce(
             (sum, item) => sum + item.price * item.quantity,
             0
         );
+        const total_amount = subtotal + tax_amount;
         const remaining_amount = total_amount - paid_amount;
+
         let status: string;
         if (remaining_amount <= 0) {
             status = 'paid';
@@ -131,7 +136,10 @@ export async function createInvoice(invoiceData: CreateInvoiceData) {
                 organization_id: ctx.organizationId,
                 invoice_number,
                 customer_id,
+                customer_pan,
+                invoice_type,
                 total_amount,
+                tax_amount,
                 paid_amount,
                 remaining_amount: Math.max(0, remaining_amount),
                 status,

@@ -14,6 +14,10 @@ CREATE TABLE IF NOT EXISTS organizations (
   subscription_status TEXT NOT NULL DEFAULT 'unpaid' CHECK (subscription_status IN ('active', 'past_due', 'canceled', 'unpaid', 'trialing')),
   stripe_customer_id TEXT UNIQUE,
   stripe_subscription_id TEXT UNIQUE,
+  pan_no TEXT,
+  vat_no TEXT,
+  address TEXT,
+  phone TEXT,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -54,7 +58,10 @@ CREATE TABLE IF NOT EXISTS invoices (
   organization_id UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   invoice_number TEXT NOT NULL,
   customer_id UUID REFERENCES customers(id) ON DELETE SET NULL,
+  customer_pan TEXT,
+  invoice_type TEXT NOT NULL DEFAULT 'normal' CHECK (invoice_type IN ('normal', 'pan', 'vat')),
   total_amount NUMERIC(12, 2) NOT NULL DEFAULT 0,
+  tax_amount NUMERIC(12, 2) NOT NULL DEFAULT 0,
   paid_amount NUMERIC(12, 2) NOT NULL DEFAULT 0,
   remaining_amount NUMERIC(12, 2) NOT NULL DEFAULT 0,
   status TEXT NOT NULL DEFAULT 'unpaid' CHECK (status IN ('paid', 'partial', 'unpaid')),

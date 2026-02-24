@@ -64,6 +64,7 @@ export default async function InvoicesPage({ searchParams }: Props) {
                             <tr className="border-b border-surface-200 bg-surface-50">
                                 <th className="text-left px-6 py-3 text-xs font-medium text-surface-500 uppercase tracking-wider">Invoice #</th>
                                 <th className="text-left px-6 py-3 text-xs font-medium text-surface-500 uppercase tracking-wider">Customer</th>
+                                <th className="text-left px-6 py-3 text-xs font-medium text-surface-500 uppercase tracking-wider">Type</th>
                                 <th className="text-left px-6 py-3 text-xs font-medium text-surface-500 uppercase tracking-wider">Total</th>
                                 <th className="text-left px-6 py-3 text-xs font-medium text-surface-500 uppercase tracking-wider">Paid</th>
                                 <th className="text-left px-6 py-3 text-xs font-medium text-surface-500 uppercase tracking-wider">Remaining</th>
@@ -80,6 +81,14 @@ export default async function InvoicesPage({ searchParams }: Props) {
                                         </Link>
                                     </td>
                                     <td className="px-6 py-3 text-sm text-surface-700">{inv.customers?.name || 'Walk-in'}</td>
+                                    <td className="px-6 py-3">
+                                        <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded ${inv.invoice_type === 'vat' ? 'bg-indigo-100 text-indigo-700' :
+                                                inv.invoice_type === 'pan' ? 'bg-amber-100 text-amber-700' :
+                                                    'bg-surface-100 text-surface-600'
+                                            }`}>
+                                            {inv.invoice_type}
+                                        </span>
+                                    </td>
                                     <td className="px-6 py-3 text-sm font-medium text-surface-900">{formatCurrency(inv.total_amount)}</td>
                                     <td className="px-6 py-3 text-sm text-emerald-600 font-medium">{formatCurrency(inv.paid_amount)}</td>
                                     <td className="px-6 py-3 text-sm text-red-600 font-medium">{formatCurrency(inv.remaining_amount)}</td>

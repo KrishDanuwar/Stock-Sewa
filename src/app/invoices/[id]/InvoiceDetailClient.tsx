@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { recordPayment } from '@/lib/actions/payments';
 import { generateInvoicePDF } from '@/utils/pdf-gen';
+import { printInvoice } from '@/utils/print-invoice';
 import {
     ArrowLeft,
     Printer,
@@ -58,6 +59,16 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
         }
     };
 
+    const getInvoiceTypeHeader = () => {
+        switch (invoice.invoice_type) {
+            case 'vat': return 'TAX INVOICE';
+            case 'pan': return 'BILL (PAN Registered)';
+            default: return 'BILL';
+        }
+    };
+
+    const subtotal = Number(invoice.total_amount) - Number(invoice.tax_amount || 0);
+
     return (
         <div className="max-w-4xl mx-auto animate-fade-in space-y-6">
             {/* Header / Actions */}
@@ -88,7 +99,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                         <Download size={18} />
                         PDF
                     </button>
-                    <button onClick={() => window.print()} className="p-2.5 bg-white border border-surface-200 text-surface-500 rounded-xl hover:text-surface-900 transition-all">
+                    <button onClick={() => printInvoice(invoice)} className="p-2.5 bg-white border border-surface-200 text-surface-500 rounded-xl hover:text-surface-900 transition-all">
                         <Printer size={20} />
                     </button>
                 </div>
@@ -148,19 +159,36 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                         <div className="space-y-4 text-left">
                             <div className="flex items-center gap-3">
                                 <div className="w-12 h-12 bg-brand-primary rounded-2xl flex items-center justify-center text-white font-bold shadow-xl">
-                                    GK
+                                    {invoice.organizations?.name?.substring(0, 2).toUpperCase() || 'GK'}
                                 </div>
                                 <div className="text-left">
-                                    <h2 className="text-2xl font-black text-surface-900 tracking-tighter">G.K PAINTS</h2>
+                                    <h2 className="text-2xl font-black text-surface-900 tracking-tighter uppercase">
+                                        {invoice.organizations?.name || 'G.K PAINTS'}
+                                    </h2>
                                     <div className="flex items-center gap-2 text-[10px] text-brand-primary font-bold tracking-[0.2em] uppercase">
                                         <span className="w-1 h-1 bg-brand-primary rounded-full" />
-                                        Inventory Master
+                                        {getInvoiceTypeHeader()}
                                     </div>
                                 </div>
                             </div>
                             <div className="space-y-1 text-sm text-surface-500 text-left">
-                                <div className="flex items-center gap-2"><Building2 size={14} /> G.K Paints Cloud Inventory</div>
-                                <div className="flex items-center gap-2"><MapPin size={14} /> Global Enterprise SaaS</div>
+                                <div className="flex items-center gap-2 font-medium text-surface-900">
+                                    <Building2 size={14} /> {invoice.organizations?.name}
+                                </div>
+                                {invoice.organizations?.address && <div className="flex items-center gap-2"><MapPin size={14} /> {invoice.organizations.address}</div>}
+                                {invoice.organizations?.phone && <div className="flex items-center gap-2"><Phone size={14} /> {invoice.organizations.phone}</div>}
+                                {invoice.organizations?.pan_no && (
+                                    <div className="flex items-center gap-2 font-bold text-brand-primary">
+                                        <span className="text-[10px] bg-brand-primary/10 px-1.5 py-0.5 rounded">PAN No:</span>
+                                        {invoice.organizations.pan_no}
+                                    </div>
+                                )}
+                                {invoice.organizations?.vat_no && (
+                                    <div className="flex items-center gap-2 font-bold text-brand-primary">
+                                        <span className="text-[10px] bg-brand-primary/10 px-1.5 py-0.5 rounded">VAT No:</span>
+                                        {invoice.organizations.vat_no}
+                                    </div>
+                                )}
                             </div>
                         </div>
 
@@ -190,6 +218,12 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                                 <div className="space-y-1 text-sm text-surface-500">
                                     {invoice.customers?.phone && <div className="flex items-center gap-2"><Phone size={14} /> {invoice.customers.phone}</div>}
                                     {invoice.customers?.address && <div className="flex items-center gap-2"><MapPin size={14} /> {invoice.customers.address}</div>}
+                                    {invoice.customer_pan && (
+                                        <div className="flex items-center gap-2 font-bold text-surface-900 mt-2">
+                                            <span className="text-[10px] bg-surface-900 text-white px-2 py-0.5 rounded">PAN / VAT</span>
+                                            {invoice.customer_pan}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>
@@ -203,7 +237,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                                     <tr className="border-b-2 border-surface-900">
                                         <th className="py-4 text-xs font-black text-surface-900 uppercase tracking-widest">Description</th>
                                         <th className="py-4 text-center text-xs font-black text-surface-900 uppercase tracking-widest">Qty</th>
-                                        <th className="py-4 text-right text-xs font-black text-surface-900 uppercase tracking-widest">Price</th>
+                                        <th className="py-4 text-right text-xs font-black text-surface-900 uppercase tracking-widest">Rate</th>
                                         <th className="py-4 text-right text-xs font-black text-surface-900 uppercase tracking-widest">Total</th>
                                     </tr>
                                 </thead>
@@ -225,7 +259,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                     </div>
 
                     {/* Summary & Sign */}
-                    <div className="flex flex-col md:flex-row justify-between items-end gap-12">
+                    <div className="flex flex-col md:flex-row justify-between items-start gap-12">
                         <div className="flex-1 w-full text-left">
                             <h4 className="text-[10px] font-black text-surface-400 uppercase tracking-widest mb-4">Payment Log</h4>
                             <div className="space-y-2">
@@ -242,20 +276,41 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                                     <p className="text-xs text-surface-400 italic">No payments recorded yet.</p>
                                 )}
                             </div>
+
+                            {invoice.invoice_type === 'pan' && (
+                                <p className="mt-8 text-xs font-medium text-surface-500 italic border-l-2 border-brand-primary/20 pl-4 py-1">
+                                    Note: VAT Not Applicable (Business is PAN registered only).
+                                </p>
+                            )}
+                            {invoice.invoice_type === 'vat' && (
+                                <p className="mt-8 text-xs font-medium text-surface-500 italic border-l-2 border-brand-primary/20 pl-4 py-1">
+                                    Note: VAT Charged as per Nepal IRD Rules.
+                                </p>
+                            )}
                         </div>
 
                         <div className="w-full md:w-80 space-y-3 bg-surface-900 p-8 rounded-3xl text-white shadow-xl text-left">
                             <div className="flex justify-between items-center text-surface-400 text-[10px] font-black uppercase tracking-tighter">
-                                <span>Grand Total</span>
-                                <span className="text-white">{formatCurrency(invoice.total_amount)}</span>
+                                <span>Subtotal</span>
+                                <span className="text-white">{formatCurrency(subtotal)}</span>
                             </div>
-                            <div className="flex justify-between items-center text-green-400 text-[10px] font-black uppercase tracking-tighter">
+                            {invoice.invoice_type === 'vat' && (
+                                <div className="flex justify-between items-center text-brand-primary text-[10px] font-black uppercase tracking-tighter">
+                                    <span>VAT (13%)</span>
+                                    <span>{formatCurrency(invoice.tax_amount)}</span>
+                                </div>
+                            )}
+                            <div className="flex justify-between items-center text-white text-[10px] font-black uppercase tracking-tighter pt-2 border-t border-surface-800">
+                                <span className="text-brand-primary">Grand Total</span>
+                                <span className="text-xl">{formatCurrency(invoice.total_amount)}</span>
+                            </div>
+                            <div className="flex justify-between items-center text-green-400 text-[10px] font-black uppercase tracking-tighter pt-2">
                                 <span>Total Paid</span>
                                 <span>{formatCurrency(invoice.paid_amount)}</span>
                             </div>
                             <div className="h-px bg-surface-800 my-2" />
                             <div className="flex justify-between items-center">
-                                <span className="text-brand-primary text-xs font-black uppercase tracking-widest">Balance Due</span>
+                                <span className="text-brand-primary text-xs font-black uppercase tracking-widest">Balance</span>
                                 <span className={`text-2xl font-black ${Number(invoice.remaining_amount) > 0 ? 'text-white' : 'text-green-400'}`}>
                                     {formatCurrency(invoice.remaining_amount)}
                                 </span>
@@ -266,7 +321,7 @@ export default function InvoiceDetailClient({ invoice }: InvoiceDetailClientProp
                     <div className="mt-16 pt-8 border-t border-surface-100 text-center">
                         <div className="flex items-center justify-center gap-2 text-[10px] font-black text-surface-400 uppercase tracking-widest">
                             <CheckCircle2 size={12} className="text-brand-primary" />
-                            Generated Securely via G.K Paints POS
+                            Generated Securely via {invoice.organizations?.name || 'GK Paints'} POS System
                         </div>
                     </div>
                 </div>

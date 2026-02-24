@@ -37,6 +37,8 @@ export default function NewInvoicePage() {
     const [customers, setCustomers] = useState<Customer[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
     const [selectedCustomer, setSelectedCustomer] = useState('');
+    const [customerPan, setCustomerPan] = useState('');
+    const [invoiceType, setInvoiceType] = useState<'normal' | 'pan' | 'vat'>('normal');
     const [items, setItems] = useState<LineItem[]>([]);
     const [paidAmount, setPaidAmount] = useState<number | string>(0);
     const [loading, setLoading] = useState(false);
@@ -45,7 +47,9 @@ export default function NewInvoicePage() {
     const [productSearch, setProductSearch] = useState('');
     const [isWalkIn, setIsWalkIn] = useState(false);
 
-    const total = items.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 0), 0);
+    const subtotal = items.reduce((sum, item) => sum + (Number(item.price) || 0) * (Number(item.quantity) || 0), 0);
+    const taxAmount = invoiceType === 'vat' ? subtotal * 0.13 : 0;
+    const total = subtotal + taxAmount;
 
     useEffect(() => {
         if (isWalkIn) {
@@ -159,12 +163,15 @@ export default function NewInvoicePage() {
         try {
             const result = await createInvoice({
                 customer_id: isWalkIn ? null : selectedCustomer,
+                customer_pan: customerPan || null,
+                invoice_type: invoiceType,
                 items: items.map((i) => ({
                     product_id: i.product_id,
                     quantity: Number(i.quantity),
                     price: Number(i.price),
                 })),
                 paid_amount: Number(paidAmount) || 0,
+                tax_amount: taxAmount,
             });
 
             if (result.success) {
@@ -213,10 +220,10 @@ export default function NewInvoicePage() {
 
             <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
                 <div className="lg:col-span-8 space-y-6">
-                    {/* Customer Selection */}
+                    {/* Invoice Type & Entity */}
                     <div className="card p-8 shadow-sm">
                         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-                            <h2 className="text-xs font-black text-brand-primary uppercase tracking-[0.3em]">Billing Entity</h2>
+                            <h2 className="text-xs font-black text-brand-primary uppercase tracking-[0.3em]">Billing Configuration</h2>
                             <label className="flex items-center gap-3 cursor-pointer group bg-gray-50 px-5 py-2.5 rounded-2xl border border-gray-100 hover:border-brand-primary/30 transition-all shadow-inner">
                                 <input
                                     type="checkbox"
@@ -228,23 +235,54 @@ export default function NewInvoicePage() {
                             </label>
                         </div>
 
-                        {!isWalkIn && (
-                            <select
-                                value={selectedCustomer}
-                                onChange={(e) => setSelectedCustomer(e.target.value)}
-                                className="input-field animate-fade-in bg-white"
-                            >
-                                <option value="">Select a customer...</option>
-                                {customers.map((c) => (
-                                    <option key={c.id} value={c.id}>
-                                        {c.name} {c.phone ? `(${c.phone})` : ''}
-                                    </option>
-                                ))}
-                            </select>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label className="block text-[10px] font-black text-surface-muted uppercase tracking-[0.2em] mb-3">Invoice Type</label>
+                                <select
+                                    value={invoiceType}
+                                    onChange={(e) => setInvoiceType(e.target.value as any)}
+                                    className="input-field bg-white"
+                                >
+                                    <option value="normal">Normal Bill</option>
+                                    <option value="pan">PAN Bill</option>
+                                    <option value="vat">VAT Invoice (13%)</option>
+                                </select>
+                            </div>
+
+                            {!isWalkIn && (
+                                <div>
+                                    <label className="block text-[10px] font-black text-surface-muted uppercase tracking-[0.2em] mb-3">Customer Entity</label>
+                                    <select
+                                        value={selectedCustomer}
+                                        onChange={(e) => setSelectedCustomer(e.target.value)}
+                                        className="input-field bg-white"
+                                    >
+                                        <option value="">Select a customer...</option>
+                                        {customers.map((c) => (
+                                            <option key={c.id} value={c.id}>
+                                                {c.name} {c.phone ? `(${c.phone})` : ''}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
+                            )}
+                        </div>
+
+                        {(invoiceType === 'pan' || invoiceType === 'vat') && (
+                            <div className="mt-6 animate-slide-down">
+                                <label className="block text-[10px] font-black text-surface-muted uppercase tracking-[0.2em] mb-3">Customer PAN/VAT Number</label>
+                                <input
+                                    type="text"
+                                    value={customerPan}
+                                    onChange={(e) => setCustomerPan(e.target.value)}
+                                    placeholder="Enter 9-digit PAN/VAT No."
+                                    className="input-field bg-white"
+                                />
+                            </div>
                         )}
 
                         {isWalkIn && (
-                            <div className="p-5 bg-emerald-50 rounded-2xl border border-emerald-100 animate-fade-in flex items-center gap-4">
+                            <div className="mt-6 p-5 bg-emerald-50 rounded-2xl border border-emerald-100 animate-fade-in flex items-center gap-4">
                                 <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center text-2xl shadow-sm border border-emerald-50">
                                     🛍️
                                 </div>
@@ -332,7 +370,9 @@ export default function NewInvoicePage() {
                                             <tr key={idx} className="animate-fade-in hover:bg-gray-50 transition-colors group">
                                                 <td className="px-8 py-5">
                                                     <div className="text-sm font-black text-surface-primary">{item.product_name}</div>
-                                                    <div className="text-[10px] text-surface-muted font-black tracking-widest mt-1 opacity-70">VAT EXEMPT</div>
+                                                    <div className="text-[10px] text-surface-muted font-black tracking-widest mt-1 opacity-70">
+                                                        {invoiceType === 'vat' ? 'VATABLE @ 13%' : 'VAT EXEMPT'}
+                                                    </div>
                                                 </td>
                                                 <td className="px-8 py-5 text-center">
                                                     <input
@@ -375,7 +415,6 @@ export default function NewInvoicePage() {
                             </div>
                         </div>
                     )}
-
                 </div>
 
                 {/* Right Column: Payment & Summary */}
@@ -384,13 +423,25 @@ export default function NewInvoicePage() {
                         <div className="card p-8 sticky top-24 border-brand-primary/20 bg-white shadow-2xl shadow-gray-200/50 ring-1 ring-brand-primary/5">
                             <h2 className="text-xs font-black text-brand-primary uppercase tracking-[0.3em] mb-8">Financial Summary</h2>
 
-                            <div className="space-y-6">
-                                <div className="flex items-center justify-between">
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between text-sm py-2 px-1">
+                                    <span className="font-black text-surface-muted uppercase tracking-widest text-[10px]">Subtotal</span>
+                                    <span className="font-black text-surface-primary">{formatCurrency(subtotal)}</span>
+                                </div>
+
+                                {invoiceType === 'vat' && (
+                                    <div className="flex items-center justify-between text-sm py-2 px-1 bg-brand-primary/5 rounded-xl border border-brand-primary/10">
+                                        <span className="font-black text-brand-primary uppercase tracking-widest text-[10px]">VAT (13%)</span>
+                                        <span className="font-black text-brand-primary">{formatCurrency(taxAmount)}</span>
+                                    </div>
+                                )}
+
+                                <div className="flex items-center justify-between pt-4 pb-8 border-t border-gray-100">
                                     <span className="text-sm font-black text-surface-secondary uppercase tracking-widest text-[10px]">Grand Total</span>
                                     <span className="text-4xl font-poppins font-black text-brand-primary tracking-tighter">{formatCurrency(total)}</span>
                                 </div>
 
-                                <div className="pt-8 border-t border-gray-100">
+                                <div className="pt-4 border-t border-gray-100">
                                     <label className="block text-[10px] font-black text-surface-muted uppercase tracking-[0.3em] mb-5 opacity-70">Settlement Status</label>
                                     <div className="flex flex-col gap-3">
                                         {(['unpaid', 'partial', 'paid'] as const).map((s) => {
@@ -466,7 +517,7 @@ export default function NewInvoicePage() {
                             </button>
 
                             <p className="text-[10px] text-center text-surface-muted font-bold uppercase tracking-widest mt-6">
-                                Secure Checkout System
+                                Integrated Tax Compliance System
                             </p>
                         </div>
                     )}
