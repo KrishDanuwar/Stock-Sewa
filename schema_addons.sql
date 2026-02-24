@@ -11,3 +11,5 @@ BEGIN
     WHERE id = p_product_id;
 END;
 $$ LANGUAGE plpgsql SECURITY DEFINER;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS customer_name_manual TEXT;
+ALTER TABLE invoices ADD COLUMN IF NOT EXISTS customer_pan_manual TEXT;

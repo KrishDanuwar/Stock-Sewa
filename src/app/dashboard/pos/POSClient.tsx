@@ -21,6 +21,8 @@ export default function POSClient({ products, customers, organization }: { produ
     const [customerMode, setCustomerMode] = useState<'walkin' | 'registered'>('walkin');
     const [customerSearch, setCustomerSearch] = useState('');
     const [amountPaid, setAmountPaid] = useState<number>(0);
+    const [manualCustomerName, setManualCustomerName] = useState('');
+    const [manualCustomerPan, setManualCustomerPan] = useState('');
 
     const filteredProducts = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
     const filteredCustomers = customers.filter(c =>
@@ -61,13 +63,18 @@ export default function POSClient({ products, customers, organization }: { produ
         const effectiveCustomerId = customerMode === 'registered' ? customerId : undefined;
 
         // Validation for non-normal invoices without customers
-        if ((invoiceType === 'pan' || invoiceType === 'vat') && !effectiveCustomerId) {
-            toast.error('Please select a customer for PAN/VAT invoice'); return;
+        if ((invoiceType === 'pan' || invoiceType === 'vat')) {
+            if (customerMode === 'registered' && !effectiveCustomerId) {
+                toast.error('Please select a customer for PAN/VAT invoice'); return;
+            }
+            if (customerMode === 'walkin' && !manualCustomerName) {
+                toast.error('Please enter customer name for PAN/VAT invoice'); return;
+            }
         }
 
         // Validation for credit/unpaid sales without customers
-        if (getPaymentStatus() !== 'paid' && !effectiveCustomerId) {
-            toast.error('Customer is required for credit/unpaid sales'); return;
+        if (getPaymentStatus() !== 'paid' && !effectiveCustomerId && !manualCustomerName) {
+            toast.error('Customer name is required for credit/unpaid sales'); return;
         }
 
         setLoading(true);
@@ -77,6 +84,8 @@ export default function POSClient({ products, customers, organization }: { produ
             payment_method: paymentMethod,
             payment_status: getPaymentStatus(),
             amount_paid: amountPaid,
+            customer_name_manual: customerMode === 'walkin' ? manualCustomerName : undefined,
+            customer_pan_manual: customerMode === 'walkin' ? manualCustomerPan : undefined,
             items: cart,
         });
 
@@ -91,8 +100,8 @@ export default function POSClient({ products, customers, organization }: { produ
                 invoice_type: invoiceType,
                 date_ad: new Date().toISOString().split('T')[0],
                 date_bs: result.invoice.date_bs || '',
-                customer_name: selectedCustomer?.name,
-                customer_pan: selectedCustomer?.pan_number || undefined,
+                customer_name: customerMode === 'registered' ? selectedCustomer?.name : manualCustomerName,
+                customer_pan: customerMode === 'registered' ? selectedCustomer?.pan_number || undefined : manualCustomerPan || undefined,
                 subtotal,
                 tax_amount: tax,
                 total_amount: total,
@@ -113,6 +122,8 @@ export default function POSClient({ products, customers, organization }: { produ
             setCustomerId('');
             setCustomerMode('walkin');
             setAmountPaid(0);
+            setManualCustomerName('');
+            setManualCustomerPan('');
         }
         setLoading(false);
     };
@@ -256,6 +267,25 @@ export default function POSClient({ products, customers, organization }: { produ
                                         <button onClick={() => setCustomerId('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand-danger)' }}><Trash2 size={12} /></button>
                                     </div>
                                 )}
+                            </div>
+                        )}
+
+                        {customerMode === 'walkin' && (invoiceType === 'pan' || invoiceType === 'vat') && (
+                            <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                                <input
+                                    className="glass-input"
+                                    style={{ fontSize: '0.8125rem' }}
+                                    placeholder="Customer Name (required)..."
+                                    value={manualCustomerName}
+                                    onChange={e => setManualCustomerName(e.target.value)}
+                                />
+                                <input
+                                    className="glass-input"
+                                    style={{ fontSize: '0.8125rem' }}
+                                    placeholder="Customer PAN/VAT # (optional)..."
+                                    value={manualCustomerPan}
+                                    onChange={e => setManualCustomerPan(e.target.value)}
+                                />
                             </div>
                         )}
                     </div>
