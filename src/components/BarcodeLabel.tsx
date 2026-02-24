@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import JsBarcode from 'jsbarcode';
 
 interface LabelProps {
@@ -12,20 +13,22 @@ interface LabelProps {
     shopName?: string;
 }
 
-export default function BarcodeLabel({ name, price, barcode, mfg, batch, shopName }: LabelProps) {
+export default function BarcodeLabel({ name, price, barcode, mfg }: LabelProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [imgData, setImgData] = useState<string>('');
+    const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
+        setMounted(true);
         if (canvasRef.current && barcode) {
             try {
-                // Generate onto hidden canvas
+                // High-resolution rendering for thermal printers
                 JsBarcode(canvasRef.current, barcode, {
                     format: "CODE128",
-                    width: 2, // Higher density for canvas
-                    height: 60,
+                    width: 3,
+                    height: 80,
                     displayValue: true,
-                    fontSize: 14,
+                    fontSize: 18,
                     margin: 0,
                     background: "#ffffff"
                 });
@@ -36,22 +39,21 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batch, shopNam
         }
     }, [barcode]);
 
-    return (
-        <div className="label-container">
-            {/* Hidden canvas for generation */}
-            <canvas ref={canvasRef} style={{ display: 'none' }} />
+    if (!mounted) return null;
 
-            <div className="label-content">
-                <div className="mfg-text">MFG: {mfg || 'N/A'}</div>
-
-                {imgData ? (
-                    <img src={imgData} className="barcode-img" alt="barcode" />
-                ) : (
-                    <div className="barcode-placeholder">Generating...</div>
-                )}
-
-                <div className="mrp-text">
-                    MRP: रु {price.toLocaleString()}
+    // Render into body root for maximum isolation
+    return createPortal(
+        <div className="print-portal-root">
+            <div className="label-container">
+                <canvas ref={canvasRef} style={{ display: 'none' }} />
+                <div className="label-content">
+                    <div className="mfg-text">MFG: {mfg || 'N/A'}</div>
+                    {imgData ? (
+                        <img src={imgData} className="barcode-img" alt="barcode" />
+                    ) : (
+                        <div className="barcode-placeholder">Generating...</div>
+                    )}
+                    <div className="mrp-text">MRP: रु {price.toLocaleString()}</div>
                 </div>
             </div>
 
@@ -101,12 +103,12 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batch, shopNam
                     margin: 0 !important;
                 }
                 @media print {
-                    /* EXTREME ISOLATION: Hide every single thing in the body */
-                    body > *:not(.print-only) {
+                    /* PRE-CONDITION: Hide EVERY direct child of body except our Portal */
+                    body > *:not(.print-portal-root) {
                         display: none !important;
                     }
 
-                    /* Suppress all layout artifacts (the "semi-circle" elements) */
+                    /* Suppress layout artifacts (sidebars, markers, mini-circles) */
                     *::before, *::after {
                         display: none !important;
                         content: none !important;
@@ -121,7 +123,7 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batch, shopNam
                         overflow: hidden !important;
                     }
 
-                    .print-only {
+                    .print-portal-root {
                         display: block !important;
                         position: fixed !important;
                         left: 0 !important;
@@ -129,29 +131,29 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batch, shopNam
                         width: 50mm !important;
                         height: 25mm !important;
                         background: white !important;
-                        z-index: 99999999 !important;
+                        z-index: 2147483647 !important;
                     }
 
                     .label-container {
                         width: 50mm !important;
                         height: 25mm !important;
                         display: flex !important;
-                        visibility: visible !important;
                     }
                     
                     .label-content * {
-                        visibility: visible !important;
                         display: block !important;
+                        color: #000 !important;
                     }
 
                     .barcode-img {
                         display: block !important;
                         width: 46mm !important;
                         height: 14mm !important;
-                        image-rendering: crisp-edges;
+                        image-rendering: pixelated;
                     }
                 }
             `}</style>
-        </div>
+        </div>,
+        document.body
     );
 }
