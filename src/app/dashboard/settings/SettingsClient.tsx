@@ -1,9 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { updateOrganizationLogo, updateOrganizationDetails } from '@/lib/actions/organizations';
+import { updateOrganizationLogo, updateOrganizationDetails, removeOrganizationLogo } from '@/lib/actions/organizations';
 import { toast } from 'sonner';
-import { Building2, Upload, Camera, Save } from 'lucide-react';
+import { Building2, Upload, Camera, Save, Trash2 } from 'lucide-react';
 import Image from 'next/image';
 
 type Organization = {
@@ -97,6 +97,26 @@ export default function SettingsClient({ organization }: { organization: Organiz
         }
     }
 
+    async function handleRemoveLogo() {
+        if (!confirm('Are you sure you want to remove the logo?')) return;
+
+        setLoading(true);
+        try {
+            const result = await removeOrganizationLogo();
+            if (result.success) {
+                setLogoPreview(null);
+                toast.success('Logo removed successfully');
+            } else {
+                toast.error(result.error || 'Failed to remove logo');
+            }
+        } catch (error) {
+            toast.error('Error removing logo');
+            console.error(error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
     async function handleSaveDetails() {
         if (!orgName) return toast.error('Organization name is required');
 
@@ -158,6 +178,16 @@ export default function SettingsClient({ organization }: { organization: Organiz
                                     <Upload size={14} /> {loading ? 'Uploading...' : 'Upload New Logo'}
                                     <input type="file" accept="image/*" onChange={handleLogoChange} style={{ display: 'none' }} disabled={loading} />
                                 </label>
+                                {logoPreview && (
+                                    <button
+                                        className="glass-button"
+                                        onClick={handleRemoveLogo}
+                                        disabled={loading}
+                                        style={{ color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.2)' }}
+                                    >
+                                        <Trash2 size={14} /> Remove
+                                    </button>
+                                )}
                             </div>
                         </div>
                     </div>

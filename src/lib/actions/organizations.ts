@@ -84,3 +84,34 @@ export async function updateOrganizationDetails(formData: FormData) {
 
     return { success: true };
 }
+
+export async function removeOrganizationLogo() {
+    const supabase = await createClient();
+    const org = await getOrganization();
+    if (!org) return { error: 'Organization not found' };
+
+    // 1. Get current logo path if it exists
+    const currentLogoUrl = org.logo_url;
+    if (currentLogoUrl) {
+        try {
+            const url = new URL(currentLogoUrl);
+            const pathParts = url.pathname.split('/');
+            const fileName = pathParts[pathParts.length - 1];
+
+            // 2. Delete from storage
+            await supabase.storage.from('logos').remove([fileName]);
+        } catch (e) {
+            console.error('Error parsing logo URL for deletion:', e);
+        }
+    }
+
+    // 3. Update database
+    const { error } = await supabase
+        .from('organizations')
+        .update({ logo_url: null })
+        .eq('id', org.id);
+
+    if (error) return { error: error.message };
+
+    return { success: true };
+}
