@@ -75,7 +75,7 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batch, shopNam
                 }
                 @media print {
                     /* Nuclear Hide: Hide all standard layout elements */
-                    .sidebar, aside, nav, footer, .page-header, .glass-card, .glass-input, .sidebar-wrapper {
+                    .glass-sidebar, .sidebar, aside, nav, footer, .page-header, .glass-card, .glass-input, .sidebar-wrapper {
                         display: none !important;
                     }
 
