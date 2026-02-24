@@ -18,13 +18,15 @@ export async function getProducts() {
         id: p.id,
         name: p.name,
         price: Number(p.price) || 0,
+        cost_price: Number(p.cost_price) || 0,
         stock_quantity: Number(p.stock_quantity) || 0,
         unit: p.unit || 'pcs',
-        category: p.category || 'Uncategorized',
+        category: p.category || '',
         barcode: p.barcode || '',
         mfg_date: p.mfg_date || '',
         expiry_date: p.expiry_date || '',
-        batch_number: p.batch_number || ''
+        batch_number: p.batch_number || '',
+        created_at: p.created_at
     }));
 }
 
