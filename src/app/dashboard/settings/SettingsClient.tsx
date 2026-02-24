@@ -2,8 +2,9 @@
 
 import { useState } from 'react';
 import { updateOrganizationLogo, updateOrganizationDetails, removeOrganizationLogo } from '@/lib/actions/organizations';
+import { updatePassword } from '@/lib/actions/auth';
 import { toast } from 'sonner';
-import { Building2, Upload, Camera, Save, Trash2 } from 'lucide-react';
+import { Building2, Upload, Camera, Save, Trash2, ShieldCheck, Mail, Lock } from 'lucide-react';
 import Image from 'next/image';
 
 type Organization = {
@@ -16,9 +17,10 @@ type Organization = {
     preferred_language: string | null;
 };
 
-export default function SettingsClient({ organization }: { organization: Organization | null }) {
+export default function SettingsClient({ organization, userEmail }: { organization: Organization | null, userEmail: string }) {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
+    const [updatingPassword, setUpdatingPassword] = useState(false);
     const [logoPreview, setLogoPreview] = useState<string | null>(organization?.logo_url || null);
 
     // Form State
@@ -27,6 +29,10 @@ export default function SettingsClient({ organization }: { organization: Organiz
     const [address, setAddress] = useState(organization?.address || '');
     const [phone, setPhone] = useState(organization?.phone || '');
     const [language, setLanguage] = useState(organization?.preferred_language || 'en');
+
+    // Password State
+    const [newPassword, setNewPassword] = useState('');
+    const [confirmPassword, setConfirmPassword] = useState('');
 
     const compressImage = (file: File, maxWidth: number, maxHeight: number, quality: number): Promise<Blob> => {
         return new Promise((resolve, reject) => {
@@ -139,6 +145,27 @@ export default function SettingsClient({ organization }: { organization: Organiz
         setSaving(false);
     }
 
+    async function handleUpdatePassword() {
+        if (!newPassword) return toast.error('New password is required');
+        if (newPassword.length < 6) return toast.error('Password must be at least 6 characters');
+        if (newPassword !== confirmPassword) return toast.error('Passwords do not match');
+
+        setUpdatingPassword(true);
+        const formData = new FormData();
+        formData.append('new_password', newPassword);
+        formData.append('confirm_password', confirmPassword);
+
+        const result = await updatePassword(formData);
+        if (result?.success) {
+            toast.success('Password updated successfully!');
+            setNewPassword('');
+            setConfirmPassword('');
+        } else {
+            toast.error(result?.error || 'Failed to update password');
+        }
+        setUpdatingPassword(false);
+    }
+
     return (
         <div className="animate-fade-in-up">
             <div className="page-header">
@@ -232,6 +259,77 @@ export default function SettingsClient({ organization }: { organization: Organiz
                         >
                             <Save size={16} /> {saving ? 'Saving...' : 'Save Changes'}
                         </button>
+                    </div>
+                </div>
+            </div>
+
+            {/* Account & Security Section */}
+            <div className="glass-card" style={{ padding: 32, maxWidth: 800, marginTop: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+                    <ShieldCheck size={24} color="var(--brand-primary)" />
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Account & Security</h2>
+                </div>
+
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 32 }}>
+                    {/* Email Display */}
+                    <div className="form-group" style={{ maxWidth: 400 }}>
+                        <label className="glass-label" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Mail size={14} /> Registered Email
+                        </label>
+                        <div style={{ position: 'relative' }}>
+                            <input
+                                className="glass-input"
+                                value={userEmail}
+                                readOnly
+                                disabled
+                                style={{ background: 'rgba(255,255,255,0.02)', color: 'var(--text-muted)', cursor: 'not-allowed' }}
+                            />
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginTop: 8 }}>
+                                Email address cannot be changed. Contact support if needed.
+                            </p>
+                        </div>
+                    </div>
+
+                    <hr style={{ border: 'none', borderTop: '1px solid var(--glass-border)' }} />
+
+                    {/* Password Change */}
+                    <div>
+                        <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 16, display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <Lock size={16} /> Change Password
+                        </h3>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20, maxWidth: 600 }}>
+                            <div className="form-group">
+                                <label className="glass-label">New Password</label>
+                                <input
+                                    type="password"
+                                    className="glass-input"
+                                    value={newPassword}
+                                    onChange={(e) => setNewPassword(e.target.value)}
+                                    placeholder="Enter new password"
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="glass-label">Confirm New Password</label>
+                                <input
+                                    type="password"
+                                    className="glass-input"
+                                    value={confirmPassword}
+                                    onChange={(e) => setConfirmPassword(e.target.value)}
+                                    placeholder="Confirm new password"
+                                />
+                            </div>
+                        </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 20 }}>
+                            <button
+                                className="glass-button glass-button-primary"
+                                onClick={handleUpdatePassword}
+                                disabled={updatingPassword}
+                            >
+                                <ShieldCheck size={16} /> {updatingPassword ? 'Updating...' : 'Update Password'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>

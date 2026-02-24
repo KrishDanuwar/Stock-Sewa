@@ -19,19 +19,22 @@ ALTER TABLE customers ADD COLUMN IF NOT EXISTS tax_type TEXT DEFAULT 'pan' CHECK
 ALTER TABLE organizations ADD COLUMN IF NOT EXISTS preferred_language TEXT DEFAULT 'en' CHECK (preferred_language IN ('en', 'np'));
 
 -- ======================================================
--- REPAIR FUNCTION: Bypasses RLS to fix broken signups
+-- REPAIR FUNCTION V2: Bypasses RLS to fix broken signups
 -- ======================================================
-CREATE OR REPLACE FUNCTION public.repair_user_org(target_user_id UUID, org_name TEXT, username_val TEXT)
-RETURNS void
+CREATE OR REPLACE FUNCTION public.repair_user_org_v2(target_user_id UUID, org_name TEXT, username_val TEXT)
+RETURNS TEXT
 LANGUAGE plpgsql
 SECURITY DEFINER SET search_path = public
 AS $$
 DECLARE
     new_org_id UUID;
+    existing_org_id UUID;
 BEGIN
-    -- Check if profile already exists
-    IF EXISTS (SELECT 1 FROM public.profiles WHERE id = target_user_id) THEN
-        RETURN;
+    -- Check if valid profile and org already exist
+    SELECT organization_id INTO existing_org_id FROM public.profiles WHERE id = target_user_id;
+
+    IF existing_org_id IS NOT NULL THEN
+        RETURN 'SUCCESS: Profile and Organization already exist.';
     END IF;
 
     -- Create organization
@@ -39,9 +42,16 @@ BEGIN
     VALUES (org_name)
     RETURNING id INTO new_org_id;
 
-    -- Create profile
+    -- Create or Update profile linking user to organization
     INSERT INTO public.profiles (id, organization_id, username)
-    VALUES (target_user_id, new_org_id, username_val);
+    VALUES (target_user_id, new_org_id, username_val)
+    ON CONFLICT (id) DO UPDATE 
+    SET organization_id = EXCLUDED.organization_id, 
+        username = COALESCE(profiles.username, EXCLUDED.username);
+
+    RETURN 'SUCCESS: Repaired Missing Profile/Org.';
+EXCEPTION WHEN OTHERS THEN
+    RETURN 'ERROR: ' || SQLERRM;
 END;
 $$;
 

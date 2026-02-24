@@ -6,6 +6,7 @@ export interface OrgContext {
     organizationId: string;
     organizationName: string;
     language: 'en' | 'np';
+    email: string;
 }
 
 /**
@@ -46,5 +47,6 @@ export async function getOrgContext(): Promise<OrgContext> {
         organizationId: profile.organization_id,
         organizationName: orgName,
         language: language as 'en' | 'np',
+        email: user.email || '',
     };
 }
