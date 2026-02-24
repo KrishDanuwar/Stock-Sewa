@@ -38,17 +38,19 @@ export default function SignupPage() {
                 {/* Brand Identity */}
                 <div className="flex flex-col items-center mb-10">
                     <div style={{
-                        width: 56,
-                        height: 56,
+                        width: 72,
+                        height: 72,
                         borderRadius: 16,
-                        background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))',
+                        background: 'white',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
                         marginBottom: 16,
-                        boxShadow: '0 8px 20px rgba(79, 142, 247, 0.3)'
+                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
+                        overflow: 'hidden',
+                        padding: 12
                     }}>
-                        <Package size={28} color="white" />
+                        <img src="/logo.jpg" alt="Stock Sewa Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                     </div>
                     <div className="text-center">
                         <h1 style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>

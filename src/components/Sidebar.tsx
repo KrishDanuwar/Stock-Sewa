@@ -52,11 +52,11 @@ export default async function Sidebar() {
             {/* Brand */}
             <div style={{ padding: '24px 20px', borderBottom: '1px solid var(--glass-border)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'linear-gradient(135deg, var(--brand-primary), var(--brand-secondary))', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden' }}>
+                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden', padding: 4 }}>
                         {org?.logo_url ? (
                             <img src={org.logo_url} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
-                            <Package2 size={18} color="white" />
+                            <img src="/logo.jpg" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         )}
                     </div>
                     <div>
