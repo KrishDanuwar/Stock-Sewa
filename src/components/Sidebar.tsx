@@ -60,7 +60,7 @@ export default async function Sidebar() {
                         )}
                     </div>
                     <div>
-                        <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Stock Sewa</div>
+                        <div translate="no" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Stock Sewa</div>
                         <div style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 150 }}>
                             {organizationName}
                         </div>
