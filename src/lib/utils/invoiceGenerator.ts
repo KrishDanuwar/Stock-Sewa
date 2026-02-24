@@ -25,7 +25,10 @@ export interface InvoiceData {
     }[];
 }
 
-export function generateInvoicePDF(data: InvoiceData) {
+/**
+ * Internal helper to create the jsPDF instance with IRD-compliant content
+ */
+function prepareInvoiceDoc(data: InvoiceData): jsPDF {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
 
@@ -116,6 +119,40 @@ export function generateInvoicePDF(data: InvoiceData) {
     doc.text('This is a computer generated invoice.', pageWidth / 2, doc.internal.pageSize.getHeight() - 15, { align: 'center' });
     doc.text('Thank you for your business!', pageWidth / 2, doc.internal.pageSize.getHeight() - 10, { align: 'center' });
 
+    return doc;
+}
+
+/**
+ * Generates and triggers a file download
+ */
+export function downloadInvoicePDF(data: InvoiceData) {
+    const doc = prepareInvoiceDoc(data);
     const safeName = (data.customer_name || 'Walk-in').replace(/[^a-z0-9]/gi, '_').toLowerCase();
     doc.save(`Invoice_${data.invoice_number}_${safeName}.pdf`);
 }
+
+/**
+ * Triggers the system print dialog without saving a file
+ */
+export function printInvoicePDF(data: InvoiceData) {
+    const doc = prepareInvoiceDoc(data);
+    doc.autoPrint();
+    const hiddFrame = document.createElement('iframe');
+    hiddFrame.style.position = 'fixed';
+    hiddFrame.style.width = '1px';
+    hiddFrame.style.height = '1px';
+    hiddFrame.style.opacity = '0.01';
+    const blob = doc.output('bloburl');
+    hiddFrame.src = blob as unknown as string;
+    document.body.appendChild(hiddFrame);
+
+    // Cleanup frame after some time to allow printing to trigger
+    setTimeout(() => {
+        // We don't remove it immediately because browsers need the frame to stay alive for the print dialog
+        // But for blobURLs, we should revoke them eventually
+        // URL.revokeObjectURL(blob); 
+    }, 60000);
+}
+
+// Deprecated alias to maintain compatibility if referenced elsewhere
+export const generateInvoicePDF = downloadInvoicePDF;
