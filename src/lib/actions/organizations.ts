@@ -59,3 +59,28 @@ export async function updateOrganizationLogo(formData: FormData) {
 
     return { success: true, logoUrl: publicUrl };
 }
+
+export async function updateOrganizationDetails(formData: FormData) {
+    const supabase = await createClient();
+    const org = await getOrganization();
+    if (!org) return { error: 'Organization not found' };
+
+    const name = formData.get('name') as string;
+    const pan_vat = formData.get('pan_vat') as string;
+    const address = formData.get('address') as string;
+    const phone = formData.get('phone') as string;
+
+    const { error } = await supabase
+        .from('organizations')
+        .update({
+            name,
+            pan_vat,
+            address,
+            phone,
+        })
+        .eq('id', org.id);
+
+    if (error) return { error: error.message };
+
+    return { success: true };
+}

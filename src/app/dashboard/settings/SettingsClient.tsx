@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { updateOrganizationLogo } from '@/lib/actions/organizations';
+import { updateOrganizationLogo, updateOrganizationDetails } from '@/lib/actions/organizations';
 import { toast } from 'sonner';
 import { Building2, Upload, Camera, Save } from 'lucide-react';
 import Image from 'next/image';
@@ -17,7 +17,14 @@ type Organization = {
 
 export default function SettingsClient({ organization }: { organization: Organization | null }) {
     const [loading, setLoading] = useState(false);
+    const [saving, setSaving] = useState(false);
     const [logoPreview, setLogoPreview] = useState<string | null>(organization?.logo_url || null);
+
+    // Form State
+    const [orgName, setOrgName] = useState(organization?.name || '');
+    const [panVat, setPanVat] = useState(organization?.pan_vat || '');
+    const [address, setAddress] = useState(organization?.address || '');
+    const [phone, setPhone] = useState(organization?.phone || '');
 
     const compressImage = (file: File, maxWidth: number, maxHeight: number, quality: number): Promise<Blob> => {
         return new Promise((resolve, reject) => {
@@ -90,6 +97,25 @@ export default function SettingsClient({ organization }: { organization: Organiz
         }
     }
 
+    async function handleSaveDetails() {
+        if (!orgName) return toast.error('Organization name is required');
+
+        setSaving(true);
+        const formData = new FormData();
+        formData.append('name', orgName);
+        formData.append('pan_vat', panVat);
+        formData.append('address', address);
+        formData.append('phone', phone);
+
+        const result = await updateOrganizationDetails(formData);
+        if (result.success) {
+            toast.success('Organization details updated!');
+        } else {
+            toast.error(result.error || 'Failed to update details');
+        }
+        setSaving(false);
+    }
+
     return (
         <div className="animate-fade-in-up">
             <div className="page-header">
@@ -142,26 +168,29 @@ export default function SettingsClient({ organization }: { organization: Organiz
                     <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 20 }}>
                         <div className="form-group">
                             <label className="glass-label">Organization Name</label>
-                            <input className="glass-input" value={organization?.name || ''} readOnly style={{ opacity: 0.7, cursor: 'not-allowed' }} />
-                            <p style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', marginTop: 4 }}>Contact admin to change shop name.</p>
+                            <input className="glass-input" value={orgName} onChange={(e) => setOrgName(e.target.value)} />
                         </div>
                         <div className="form-group">
                             <label className="glass-label">PAN/VAT Number</label>
-                            <input className="glass-input" value={organization?.pan_vat || 'Not set'} readOnly style={{ opacity: 0.7, cursor: 'not-allowed' }} />
+                            <input className="glass-input" value={panVat} onChange={(e) => setPanVat(e.target.value)} placeholder="Enter PAN or VAT" />
                         </div>
                         <div className="form-group">
                             <label className="glass-label">Address</label>
-                            <input className="glass-input" value={organization?.address || 'Not set'} readOnly style={{ opacity: 0.7, cursor: 'not-allowed' }} />
+                            <input className="glass-input" value={address} onChange={(e) => setAddress(e.target.value)} placeholder="Shop Address" />
                         </div>
                         <div className="form-group">
                             <label className="glass-label">Phone</label>
-                            <input className="glass-input" value={organization?.phone || 'Not set'} readOnly style={{ opacity: 0.7, cursor: 'not-allowed' }} />
+                            <input className="glass-input" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="Phone Number" />
                         </div>
                     </div>
 
                     <div style={{ display: 'flex', justifyContent: 'flex-end', marginTop: 12 }}>
-                        <button className="glass-button glass-button-primary" disabled style={{ opacity: 0.5 }}>
-                            <Save size={16} /> Save Changes
+                        <button
+                            className="glass-button glass-button-primary"
+                            onClick={handleSaveDetails}
+                            disabled={saving}
+                        >
+                            <Save size={16} /> {saving ? 'Saving...' : 'Save Changes'}
                         </button>
                     </div>
                 </div>
