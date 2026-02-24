@@ -42,6 +42,19 @@ export default async function DashboardPage() {
         .lte('stock_quantity', 5)
         .order('stock_quantity', { ascending: true });
 
+    // Expiring products (within 30 days)
+    const thirtyDaysFromNow = new Date();
+    thirtyDaysFromNow.setDate(thirtyDaysFromNow.getDate() + 30);
+    const thirtyDaysFromNowStr = thirtyDaysFromNow.toISOString().split('T')[0];
+
+    const { data: expiringSoon } = await supabase
+        .from('products')
+        .select('id, name, expiry_date, unit')
+        .eq('organization_id', organizationId)
+        .lte('expiry_date', thirtyDaysFromNowStr)
+        .gte('expiry_date', todayAd)
+        .order('expiry_date', { ascending: true });
+
     const stats = [
         { label: 'Total Products', labelNp: 'कुल उत्पादन', value: productCount ?? 0, icon: Package, color: 'var(--brand-primary)' },
         { label: 'Customers', labelNp: 'ग्राहकहरू', value: customerCount ?? 0, icon: Users, color: 'var(--brand-secondary)' },
@@ -86,7 +99,9 @@ export default async function DashboardPage() {
                 ))}
             </div>
 
-            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 24, marginTop: 24 }}>
+
+
+            <div style={{ display: 'grid', gridTemplateColumns: 'minmax(0, 1.2fr) minmax(0, 1fr)', gap: 24, marginTop: 24 }}>
                 {/* Recent Invoices */}
                 <div className="glass-card" style={{ padding: 24 }}>
                     <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 20 }}>
@@ -121,32 +136,64 @@ export default async function DashboardPage() {
                     )}
                 </div>
 
-                {/* Low Stock Alerts */}
-                <div className="glass-card" style={{ padding: 24, border: '1px solid rgba(239, 68, 68, 0.2)' }}>
-                    <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 20, color: '#ef4444', display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#ef4444', display: 'inline-block' }}></span>
-                        {language === 'np' ? 'न्यून स्टक सतर्कता — Low Stock Alerts' : 'Low Stock Alerts'}
-                    </h2>
-                    {lowStockProducts && lowStockProducts.length > 0 ? (
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                            {lowStockProducts.map(p => (
-                                <div key={p.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
-                                    <div style={{ fontSize: '0.875rem', fontWeight: 500 }}>{p.name}</div>
-                                    <div style={{ textAlign: 'right' }}>
-                                        <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#ef4444' }}>{p.stock_quantity} {p.unit}</div>
-                                        <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>{language === 'np' ? 'बाँकी' : 'Remaining'}</div>
+                {/* Alerts Column */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                    {/* Low Stock Alerts */}
+                    <div className="glass-card" style={{ padding: 24, border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                        <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 20, color: '#ef4444', display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#ef4444', display: 'inline-block' }}></span>
+                            {language === 'np' ? 'न्यून स्टक सतर्कता — Low Stock Alerts' : 'Low Stock Alerts'}
+                        </h2>
+                        {lowStockProducts && lowStockProducts.length > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                {lowStockProducts.map(p => (
+                                    <div key={p.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
+                                        <div style={{ fontSize: '0.875rem', fontWeight: 500 }}>{p.name}</div>
+                                        <div style={{ textAlign: 'right' }}>
+                                            <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#ef4444' }}>{p.stock_quantity} {p.unit}</div>
+                                            <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>{language === 'np' ? 'बाँकी' : 'Remaining'}</div>
+                                        </div>
                                     </div>
-                                </div>
-                            ))}
-                        </div>
-                    ) : (
-                        <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
-                            <Package size={32} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
-                            <p style={{ fontSize: '0.8125rem' }}>{language === 'np' ? 'सबै सामान प्रशस्त स्टक मा छन्!' : 'All products are well stocked!'}</p>
-                        </div>
-                    )}
+                                ))}
+                            </div>
+                        ) : (
+                            <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+                                <Package size={32} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
+                                <p style={{ fontSize: '0.8125rem' }}>{language === 'np' ? 'सबै सामान प्रशस्त स्टक मा छन्!' : 'All products are well stocked!'}</p>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Expiring Soon Alerts */}
+                    <div className="glass-card" style={{ padding: 24, border: '1px solid rgba(245, 158, 11, 0.2)' }}>
+                        <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 20, color: '#f59e0b', display: 'flex', alignItems: 'center', gap: 8 }}>
+                            <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#f59e0b', display: 'inline-block' }}></span>
+                            {language === 'np' ? 'चाँडै समाप्त हुने — Expiring Soon' : 'Expiring Soon'}
+                        </h2>
+                        {expiringSoon && expiringSoon.length > 0 ? (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                {expiringSoon.map(p => {
+                                    const days = p.expiry_date ? Math.ceil((new Date(p.expiry_date).getTime() - new Date().getTime()) / (1000 * 60 * 60 * 24)) : 0;
+                                    return (
+                                        <div key={p.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', borderRadius: '12px', background: 'rgba(245, 158, 11, 0.05)', border: '1px solid rgba(245, 158, 11, 0.1)' }}>
+                                            <div style={{ fontSize: '0.875rem', fontWeight: 500 }}>{p.name}</div>
+                                            <div style={{ textAlign: 'right' }}>
+                                                <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#f59e0b' }}>{days} {language === 'np' ? 'दिन' : 'days'}</div>
+                                                <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>{p.expiry_date}</div>
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                        ) : (
+                            <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+                                <TrendingUp size={32} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
+                                <p style={{ fontSize: '0.8125rem' }}>{language === 'np' ? 'चाँडै समाप्त हुने कुनै सामान छैन!' : 'No items expiring soon!'}</p>
+                            </div>
+                        )}
+                    </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }
