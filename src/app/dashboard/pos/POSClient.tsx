@@ -16,9 +16,17 @@ export default function POSClient({ products, customers }: { products: Product[]
     const [search, setSearch] = useState('');
     const [loading, setLoading] = useState(false);
     const [lastInvoice, setLastInvoice] = useState<{ number: string; total: number } | null>(null);
+    const [customerMode, setCustomerMode] = useState<'walkin' | 'registered'>('walkin');
+    const [customerSearch, setCustomerSearch] = useState('');
     const [amountPaid, setAmountPaid] = useState<number>(0);
 
-    const filtered = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+    const filteredProducts = products.filter(p => p.name.toLowerCase().includes(search.toLowerCase()));
+    const filteredCustomers = customers.filter(c =>
+        c.name.toLowerCase().includes(customerSearch.toLowerCase()) ||
+        (c.pan_number ?? '').includes(customerSearch)
+    );
+
+    const selectedCustomer = customers.find(c => c.id === customerId);
 
     const addToCart = (p: Product) => {
         setCart(prev => {
@@ -48,19 +56,21 @@ export default function POSClient({ products, customers }: { products: Product[]
     const handleCheckout = async () => {
         if (cart.length === 0) { toast.error('Cart is empty'); return; }
 
+        const effectiveCustomerId = customerMode === 'registered' ? customerId : undefined;
+
         // Validation for non-normal invoices without customers
-        if ((invoiceType === 'pan' || invoiceType === 'vat') && !customerId) {
+        if ((invoiceType === 'pan' || invoiceType === 'vat') && !effectiveCustomerId) {
             toast.error('Please select a customer for PAN/VAT invoice'); return;
         }
 
         // Validation for credit/unpaid sales without customers
-        if (getPaymentStatus() !== 'paid' && !customerId) {
+        if (getPaymentStatus() !== 'paid' && !effectiveCustomerId) {
             toast.error('Customer is required for credit/unpaid sales'); return;
         }
 
         setLoading(true);
         const result = await createInvoice({
-            customer_id: customerId || undefined,
+            customer_id: effectiveCustomerId,
             invoice_type: invoiceType,
             payment_method: paymentMethod,
             payment_status: getPaymentStatus(),
@@ -73,6 +83,7 @@ export default function POSClient({ products, customers }: { products: Product[]
             setLastInvoice({ number: result.invoice.invoice_number, total });
             setCart([]);
             setCustomerId('');
+            setCustomerMode('walkin');
             setAmountPaid(0);
         }
         setLoading(false);
@@ -92,12 +103,12 @@ export default function POSClient({ products, customers }: { products: Product[]
                     <input className="glass-input" style={{ paddingLeft: 36 }} placeholder="Search products..." value={search} onChange={e => setSearch(e.target.value)} />
                 </div>
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(175px, 1fr))', gap: 12, overflowY: 'auto', paddingBottom: 8 }}>
-                    {filtered.map(p => (
+                    {filteredProducts.map(p => (
                         <button key={p.id} onClick={() => addToCart(p)} disabled={p.stock_quantity === 0}
                             className="glass-card"
                             style={{ padding: 16, textAlign: 'left', cursor: p.stock_quantity === 0 ? 'not-allowed' : 'pointer', border: 'none', opacity: p.stock_quantity === 0 ? 0.5 : 1, transition: 'all 0.2s' }}>
                             <div style={{ fontSize: '0.9375rem', fontWeight: 600, marginBottom: 6 }}>{p.name}</div>
-                            <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--brand-primary)', marginBottom: 4 }}>NPR {p.price.toLocaleString()}</div>
+                            <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--brand-primary)', marginBottom: 4 }}>रु {p.price.toLocaleString()}</div>
                             <div style={{ fontSize: '0.75rem', color: p.stock_quantity <= 5 ? 'var(--brand-warning)' : 'var(--text-secondary)' }}>
                                 Stock: {p.stock_quantity} {p.unit}
                             </div>
@@ -140,7 +151,7 @@ export default function POSClient({ products, customers }: { products: Product[]
                                     <span style={{ fontSize: '0.875rem', minWidth: 24, textAlign: 'center' }}>{item.quantity}</span>
                                     <button onClick={() => updateQty(item.product_id, 1)} style={{ width: 26, height: 26, borderRadius: 6, background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)' }}><Plus size={12} /></button>
                                 </div>
-                                <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>NPR {(item.unit_price * item.quantity).toLocaleString()}</span>
+                                <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>रु {(item.unit_price * item.quantity).toLocaleString()}</span>
                                 <button onClick={() => removeFromCart(item.product_id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand-danger)', padding: 4 }}><Trash2 size={14} /></button>
                             </div>
                         </div>
@@ -166,14 +177,50 @@ export default function POSClient({ products, customers }: { products: Product[]
                         </div>
                     </div>
 
-                    <div>
-                        <label style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', display: 'block', marginBottom: 6 }}>
-                            Customer {getPaymentStatus() !== 'paid' ? '*' : '(Walk-in)'}
-                        </label>
-                        <select value={customerId} onChange={e => setCustomerId(e.target.value)} className="glass-input" style={{ cursor: 'pointer' }}>
-                            <option value="">Walk-in Customer</option>
-                            {customers.map(c => <option key={c.id} value={c.id}>{c.name}{c.pan_number ? ` (${c.pan_number})` : ''}</option>)}
-                        </select>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                        <div style={{ display: 'flex', gap: 12, fontSize: '0.8125rem' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                                <input type="radio" checked={customerMode === 'walkin'} onChange={() => { setCustomerMode('walkin'); setCustomerId(''); }} />
+                                Walk-in
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
+                                <input type="radio" checked={customerMode === 'registered'} onChange={() => setCustomerMode('registered')} />
+                                Existing Customer
+                            </label>
+                        </div>
+
+                        {customerMode === 'registered' && (
+                            <div style={{ position: 'relative' }}>
+                                <Search size={14} style={{ position: 'absolute', left: 10, top: '50%', transform: 'translateY(-50%)', opacity: 0.5 }} />
+                                <input
+                                    className="glass-input"
+                                    style={{ paddingLeft: 30, fontSize: '0.8125rem' }}
+                                    placeholder="Search customer by name/PAN..."
+                                    value={customerSearch}
+                                    onChange={e => setCustomerSearch(e.target.value)}
+                                />
+                                {customerSearch && !selectedCustomer && (
+                                    <div className="glass-card shadow-xl" style={{ position: 'absolute', bottom: '100%', left: 0, right: 0, zIndex: 50, maxHeight: 200, overflowY: 'auto', marginBottom: 8, padding: 4 }}>
+                                        {filteredCustomers.length === 0 ? (
+                                            <div style={{ padding: '8px 12px', fontSize: '0.75rem', opacity: 0.5 }}>No customers found</div>
+                                        ) : filteredCustomers.map(c => (
+                                            <button key={c.id} onClick={() => { setCustomerId(c.id); setCustomerSearch(''); }}
+                                                style={{ display: 'block', width: '100%', padding: '8px 12px', textAlign: 'left', border: 'none', background: 'transparent', color: 'var(--text-primary)', fontSize: '0.8125rem', cursor: 'pointer', borderRadius: 6 }}
+                                                className="hover:bg-white/10"
+                                            >
+                                                {c.name} {c.pan_number ? `(${c.pan_number})` : ''}
+                                            </button>
+                                        ))}
+                                    </div>
+                                )}
+                                {selectedCustomer && (
+                                    <div style={{ marginTop: 6, display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '6px 10px', background: 'rgba(79,142,247,0.1)', borderRadius: 8, border: '1px solid rgba(79,142,247,0.2)' }}>
+                                        <span style={{ fontSize: '0.8125rem', fontWeight: 600 }}>{selectedCustomer.name}</span>
+                                        <button onClick={() => setCustomerId('')} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand-danger)' }}><Trash2 size={12} /></button>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 10 }}>
@@ -204,7 +251,7 @@ export default function POSClient({ products, customers }: { products: Product[]
                     {/* Totals & Status */}
                     <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                            <span>Total Amount</span><span>NPR {total.toLocaleString()}</span>
+                            <span>Total Amount</span><span>रु {total.toLocaleString()}</span>
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
@@ -218,12 +265,12 @@ export default function POSClient({ products, customers }: { products: Product[]
 
                         {getPaymentStatus() !== 'paid' && (
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--brand-danger)', fontWeight: 600 }}>
-                                <span>Due Amount</span><span>NPR {(total - amountPaid).toLocaleString()}</span>
+                                <span>Due Amount</span><span>रु {(total - amountPaid).toLocaleString()}</span>
                             </div>
                         )}
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.125rem', fontWeight: 700, marginTop: 4, color: 'var(--brand-primary)' }}>
-                            <span>Paid</span><span>NPR {amountPaid.toLocaleString()}</span>
+                            <span>Paid</span><span>रु {amountPaid.toLocaleString()}</span>
                         </div>
                     </div>
 
