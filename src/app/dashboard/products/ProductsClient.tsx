@@ -80,7 +80,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
         setTimeout(() => {
             window.print();
             setPrintProduct(null);
-        }, 1500);
+        }, 2000);
     };
 
     const stockBadge = (qty: number) => {
@@ -103,17 +103,15 @@ export default function ProductsClient({ products }: { products: Product[] }) {
 
     return (
         <div className="animate-fade-in-up">
-            {/* Print Container (Hidden usually) */}
+            {/* Print Portal Item */}
             {printProduct && (
-                <div className="print-only">
-                    <BarcodeLabel
-                        name={printProduct.name}
-                        price={printProduct.price}
-                        barcode={printProduct.barcode || ''}
-                        mfg={printProduct.mfg_date || 'N/A'}
-                        batch={printProduct.batch_number || 'N/A'}
-                    />
-                </div>
+                <BarcodeLabel
+                    name={printProduct.name}
+                    price={printProduct.price}
+                    barcode={printProduct.barcode || ''}
+                    mfg={printProduct.mfg_date || 'N/A'}
+                    batch={printProduct.batch_number || 'N/A'}
+                />
             )}
 
             <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
