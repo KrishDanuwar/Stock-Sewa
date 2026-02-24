@@ -14,7 +14,7 @@
   --brand-warning: #f59e0b;
   --brand-danger: #ef4444;
 
-  /* Background */
+  /* Dark Mode (Default) */
   --bg-base: #0a0f1e;
   --bg-secondary: #0f1629;
   --bg-card: rgba(255, 255, 255, 0.05);
@@ -36,10 +36,32 @@
   --sidebar-bg: rgba(10, 15, 30, 0.9);
 }
 
+.light-mode {
+  --bg-base: #f8fafc;
+  --bg-secondary: #ffffff;
+  --bg-card: rgba(255, 255, 255, 0.8);
+  --bg-card-hover: rgba(255, 255, 255, 0.95);
+
+  /* Glass */
+  --glass-bg: rgba(255, 255, 255, 0.7);
+  --glass-border: rgba(0, 0, 0, 0.08);
+  --glass-blur: blur(16px);
+  --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+
+  /* Text */
+  --text-primary: #0f172a;
+  --text-secondary: #475569;
+  --text-muted: #94a3b8;
+
+  /* Sidebar */
+  --sidebar-bg: rgba(255, 255, 255, 0.9);
+}
+
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 html {
@@ -160,10 +182,29 @@ body {
   border-radius: 100px;
 }
 
-.badge-success { background: rgba(16, 185, 129, 0.15); color: var(--brand-success); border: 1px solid rgba(16,185,129,0.25); }
-.badge-warning { background: rgba(245, 158, 11, 0.15); color: var(--brand-warning); border: 1px solid rgba(245,158,11,0.25); }
-.badge-danger  { background: rgba(239, 68, 68, 0.15);  color: var(--brand-danger);  border: 1px solid rgba(239,68,68,0.25); }
-.badge-info    { background: rgba(79, 142, 247, 0.15); color: var(--brand-primary); border: 1px solid rgba(79,142,247,0.25); }
+.badge-success {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--brand-success);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+}
+
+.badge-warning {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--brand-warning);
+  border: 1px solid rgba(245, 158, 11, 0.25);
+}
+
+.badge-danger {
+  background: rgba(239, 68, 68, 0.15);
+  color: var(--brand-danger);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+}
+
+.badge-info {
+  background: rgba(79, 142, 247, 0.15);
+  color: var(--brand-primary);
+  border: 1px solid rgba(79, 142, 247, 0.25);
+}
 
 /* ============================================
    TABLE
@@ -188,35 +229,59 @@ body {
 .glass-table td {
   padding: 14px 16px;
   font-size: 0.875rem;
-  border-bottom: 1px solid rgba(255,255,255,0.04);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   color: var(--text-primary);
 }
 
 .glass-table tr:hover td {
-  background: rgba(255,255,255,0.03);
+  background: rgba(255, 255, 255, 0.03);
 }
 
 /* ============================================
    SCROLLBAR
    ============================================ */
 
-::-webkit-scrollbar { width: 6px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
-::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
 
 /* ============================================
    ANIMATIONS
    ============================================ */
 
 @keyframes fadeInUp {
-  from { opacity: 0; transform: translateY(16px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes shimmer {
-  0%   { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .animate-fade-in-up {

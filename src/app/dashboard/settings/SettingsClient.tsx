@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { updateOrganizationLogo, updateOrganizationDetails, removeOrganizationLogo } from '@/lib/actions/organizations';
 import { updatePassword } from '@/lib/actions/auth';
 import { toast } from 'sonner';
-import { Building2, Upload, Camera, Save, Trash2, ShieldCheck, Mail, Lock } from 'lucide-react';
+import { Building2, Upload, Camera, Save, Trash2, ShieldCheck, Mail, Lock, Sun, Moon, Palette } from 'lucide-react';
 import Image from 'next/image';
+import { useTheme } from '@/components/ThemeProvider';
 
 type Organization = {
     id: string;
@@ -22,6 +23,7 @@ export default function SettingsClient({ organization, userEmail }: { organizati
     const [saving, setSaving] = useState(false);
     const [updatingPassword, setUpdatingPassword] = useState(false);
     const [logoPreview, setLogoPreview] = useState<string | null>(organization?.logo_url || null);
+    const { theme, toggleTheme } = useTheme();
 
     // Form State
     const [orgName, setOrgName] = useState(organization?.name || '');
@@ -260,6 +262,44 @@ export default function SettingsClient({ organization, userEmail }: { organizati
                             <Save size={16} /> {saving ? 'Saving...' : 'Save Changes'}
                         </button>
                     </div>
+                </div>
+            </div>
+
+            {/* Appearance Section */}
+            <div className="glass-card" style={{ padding: 32, maxWidth: 800, marginTop: 24 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+                    <Palette size={24} color="var(--brand-primary)" />
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Appearance</h2>
+                </div>
+
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div>
+                        <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 4 }}>System Theme</h3>
+                        <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+                            Switch between dark and light modes for your dashboard.
+                        </p>
+                    </div>
+
+                    <button
+                        onClick={toggleTheme}
+                        className="glass-button"
+                        style={{
+                            padding: '12px 24px',
+                            fontSize: '1rem',
+                            background: theme === 'light' ? 'rgba(79, 142, 247, 0.1)' : 'rgba(255, 255, 255, 0.05)',
+                            borderColor: theme === 'light' ? 'var(--brand-primary)' : 'var(--glass-border)'
+                        }}
+                    >
+                        {theme === 'dark' ? (
+                            <>
+                                <Sun size={18} color="#fbbf24" /> <span>Switch to Light Mode</span>
+                            </>
+                        ) : (
+                            <>
+                                <Moon size={18} color="var(--brand-primary)" /> <span>Switch to Dark Mode</span>
+                            </>
+                        )}
+                    </button>
                 </div>
             </div>
 

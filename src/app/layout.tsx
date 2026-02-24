@@ -11,22 +11,26 @@ export const metadata: Metadata = {
   description: 'Multi-tenant inventory management and point-of-sale system designed for Nepali shopkeepers.',
 };
 
+import { ThemeProvider } from '@/components/ThemeProvider';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ne">
       <body className={inter.className}>
-        {children}
-        <Toaster
-          position="top-right"
-          toastOptions={{
-            style: {
-              background: 'rgba(15, 22, 41, 0.95)',
-              border: '1px solid rgba(255,255,255,0.12)',
-              color: '#f1f5f9',
-              backdropFilter: 'blur(20px)',
-            },
-          }}
-        />
+        <ThemeProvider>
+          {children}
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: 'rgba(15, 22, 41, 0.95)',
+                border: '1px solid rgba(255,255,255,0.12)',
+                color: '#f1f5f9',
+                backdropFilter: 'blur(20px)',
+              },
+            }}
+          />
+        </ThemeProvider>
       </body>
     </html>
   );
