@@ -386,7 +386,6 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                 }
                 @media print {
                     .print-only { display: block !important; }
-                    body > *:not(.print-only) { display: none !important; }
                 }
                 .print-only { display: none; }
             `}</style>
