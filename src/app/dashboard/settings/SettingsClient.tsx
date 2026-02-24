@@ -373,6 +373,27 @@ export default function SettingsClient({ organization, userEmail }: { organizati
                     </div>
                 </div>
             </div>
+
+            {/* Customer Support Section */}
+            <div className="glass-card" style={{ padding: 32, maxWidth: 800, marginTop: 24, border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                    <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <Mail size={20} color="var(--brand-success)" />
+                    </div>
+                    <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Customer Support</h2>
+                </div>
+                <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: 24 }}>
+                    Having trouble or need a new feature? Our support team is here to help you get the most out of Stock Sewa.
+                </p>
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16 }}>
+                    <a href="https://wa.me/9779703360369" target="_blank" rel="noopener noreferrer" className="glass-button" style={{ justifyContent: 'center', color: 'var(--brand-success)', borderColor: 'rgba(16, 185, 129, 0.2)' }}>
+                        Chat on WhatsApp
+                    </a>
+                    <a href="mailto:junsangsingh@gmail.com" className="glass-button" style={{ justifyContent: 'center' }}>
+                        Email Support
+                    </a>
+                </div>
+            </div>
         </div>
     );
 }

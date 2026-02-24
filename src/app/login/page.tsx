@@ -122,6 +122,18 @@ export default function LoginPage() {
                         Create an account
                     </Link>
                 </div>
+
+                <div style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid var(--glass-border)', textAlign: 'center' }}>
+                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 12 }}>Need help? Contact support:</p>
+                    <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
+                        <a href="https://wa.me/9779703360369" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8125rem', color: 'var(--brand-success)', textDecoration: 'none', fontWeight: 600 }}>
+                            WhatsApp
+                        </a>
+                        <a href="mailto:junsangsingh@gmail.com" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8125rem', color: 'var(--brand-primary)', textDecoration: 'none', fontWeight: 600 }}>
+                            Email
+                        </a>
+                    </div>
+                </div>
             </div>
         </div>
     );
