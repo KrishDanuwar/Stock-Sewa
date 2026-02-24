@@ -13,11 +13,11 @@ interface LabelProps {
 }
 
 export default function BarcodeLabel({ name, price, barcode, mfg, batch, shopName }: LabelProps) {
-    const canvasRef = useRef<HTMLCanvasElement>(null);
+    const svgRef = useRef<SVGSVGElement>(null);
 
     useEffect(() => {
-        if (canvasRef.current && barcode) {
-            JsBarcode(canvasRef.current, barcode, {
+        if (svgRef.current && barcode) {
+            JsBarcode(svgRef.current, barcode, {
                 format: "CODE128",
                 width: 1.2,
                 height: 35,
@@ -57,7 +57,7 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batch, shopNam
                 {name}
             </div>
 
-            <canvas ref={canvasRef} style={{ width: '46mm', height: '14mm' }}></canvas>
+            <svg ref={svgRef} style={{ width: '100%', maxWidth: '46mm', height: 'auto' }}></svg>
 
             <div style={{
                 width: '100%',
