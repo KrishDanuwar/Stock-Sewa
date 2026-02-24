@@ -74,31 +74,43 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batch, shopNam
                     margin: 0 !important;
                 }
                 @media print {
+                    /* Nuclear Hide: Hide all standard layout elements */
+                    .sidebar, aside, nav, footer, .page-header, .glass-card, .glass-input, .sidebar-wrapper {
+                        display: none !important;
+                    }
+
+                    /* Reset body and html for thermal paper */
                     html, body {
                         margin: 0 !important;
                         padding: 0 !important;
                         height: 25mm !important;
                         width: 50mm !important;
+                        background: white !important;
+                        overflow: hidden !important;
                     }
-                    body {
-                        visibility: hidden !important;
-                    }
+
+                    /* Ensure ONLY the label container is shown and fills the page */
                     .label-container {
+                        display: flex !important;
                         visibility: visible !important;
                         position: fixed !important;
                         left: 0 !important;
                         top: 0 !important;
-                        margin: 0 !important;
-                        padding: 1mm 1.5mm !important;
                         width: 50mm !important;
                         height: 25mm !important;
-                        display: flex !important;
-                        flex-direction: column !important;
-                        align-items: center !important;
-                        justify-content: center !important;
+                        z-index: 99999 !important;
+                        margin: 0 !important;
                         background: white !important;
                     }
-                    .label-container * {
+
+                    /* Hide all other siblings in the main content area */
+                    .main-content > *:not(.print-only) {
+                        display: none !important;
+                    }
+                    
+                    /* Force the print-only wrapper to behave */
+                    .print-only {
+                        display: block !important;
                         visibility: visible !important;
                     }
                 }
