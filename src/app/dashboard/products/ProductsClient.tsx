@@ -23,6 +23,8 @@ export default function ProductsClient({ products }: { products: Product[] }) {
     const [restockPrice, setRestockPrice] = useState('');
     const [restockCost, setRestockCost] = useState('');
     const [restockMfg, setRestockMfg] = useState('');
+    const [restockExpiry, setRestockExpiry] = useState('');
+    const [restockBatch, setRestockBatch] = useState('');
     const [restocking, setRestocking] = useState(false);
 
     const filtered = products.filter(p =>
@@ -63,7 +65,9 @@ export default function ProductsClient({ products }: { products: Product[] }) {
             qty,
             parseFloat(restockPrice),
             parseFloat(restockCost),
-            restockMfg
+            restockMfg,
+            restockExpiry,
+            restockBatch
         );
         if (result?.success) {
             toast.success(`Restocked ${qty} ${restockItem.unit} of ${restockItem.name}`);
@@ -72,6 +76,8 @@ export default function ProductsClient({ products }: { products: Product[] }) {
             setRestockPrice('');
             setRestockCost('');
             setRestockMfg('');
+            setRestockExpiry('');
+            setRestockBatch('');
         } else {
             toast.error(result?.error || 'Failed to restock');
         }
@@ -186,6 +192,8 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                                 setRestockPrice(p.price.toString());
                                                 setRestockCost(p.cost_price.toString());
                                                 setRestockMfg(p.mfg_date || '');
+                                                setRestockExpiry(p.expiry_date || '');
+                                                setRestockBatch(p.batch_number || '');
                                             }} className="action-button action-success" title="Restock Product">
                                                 <RefreshCw size={15} />
                                             </button>
@@ -324,13 +332,34 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                 </div>
                             </div>
 
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                                <div className="form-group">
+                                    <label className="form-label">Update Batch Number</label>
+                                    <input
+                                        className="glass-input"
+                                        placeholder="BN-001"
+                                        value={restockBatch}
+                                        onChange={e => setRestockBatch(e.target.value)}
+                                    />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">Update MFG Date</label>
+                                    <input
+                                        className="glass-input"
+                                        placeholder="2024/01/01"
+                                        value={restockMfg}
+                                        onChange={e => setRestockMfg(e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
                             <div className="form-group">
-                                <label className="form-label">Update MFG Date</label>
+                                <label className="form-label">Update Expiry Date</label>
                                 <input
                                     className="glass-input"
-                                    placeholder="2024/01/01"
-                                    value={restockMfg}
-                                    onChange={e => setRestockMfg(e.target.value)}
+                                    type="date"
+                                    value={restockExpiry}
+                                    onChange={e => setRestockExpiry(e.target.value)}
                                 />
                             </div>
 
