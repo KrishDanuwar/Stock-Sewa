@@ -340,7 +340,7 @@ export default function POSClient({
                             </label>
                             <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className="glass-input" style={{ cursor: 'pointer' }}>
                                 <option value="cash">Cash</option>
-                                <option value="esewa">eSewa</option>
+                                <option value="esewa">Esewa</option>
                                 <option value="khalti">Khalti</option>
                                 <option value="ime_pay">IME Pay</option>
                                 <option value="bank_transfer">Bank Transfer</option>
