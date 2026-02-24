@@ -6,48 +6,144 @@ export default async function ReportsPage() {
     const { organizationId } = await getOrgContext();
     const supabase = await createClient();
 
+    // Fetch all invoices with items for deep reporting
     const { data: invoices } = await supabase
         .from('invoices')
-        .select('invoice_type, total_amount, tax_amount, date_ad')
+        .select(`
+            id, 
+            invoice_type, 
+            total_amount, 
+            tax_amount, 
+            subtotal,
+            date_ad,
+            invoice_items (
+                product_id,
+                product_name,
+                quantity,
+                unit_price
+            )
+        `)
         .eq('organization_id', organizationId);
 
+    // Financial calculations
     const totalRevenue = invoices?.reduce((s, i) => s + Number(i.total_amount), 0) ?? 0;
     const totalTax = invoices?.reduce((s, i) => s + Number(i.tax_amount), 0) ?? 0;
-    const vatInvoices = invoices?.filter(i => i.invoice_type === 'vat').length ?? 0;
-    const panInvoices = invoices?.filter(i => i.invoice_type === 'pan').length ?? 0;
-    const normalInvoices = invoices?.filter(i => i.invoice_type === 'normal').length ?? 0;
+    const totalSubtotal = invoices?.reduce((s, i) => s + Number(i.subtotal || 0), 0) ?? 0;
+
+    const vatInvoices = invoices?.filter(i => i.invoice_type === 'vat') ?? [];
+    const panInvoices = invoices?.filter(i => i.invoice_type === 'pan') ?? [];
+    const normalInvoices = invoices?.filter(i => i.invoice_type === 'normal') ?? [];
+
+    // Aggregating Top Selling Products
+    const productSales: Record<string, { name: string, quantity: number, revenue: number }> = {};
+    invoices?.forEach(inv => {
+        inv.invoice_items?.forEach((item: any) => {
+            if (!productSales[item.product_name]) {
+                productSales[item.product_name] = { name: item.product_name, quantity: 0, revenue: 0 };
+            }
+            productSales[item.product_name].quantity += item.quantity;
+            productSales[item.product_name].revenue += item.quantity * Number(item.unit_price);
+        });
+    });
+
+    const topProducts = Object.values(productSales)
+        .sort((a, b) => b.quantity - a.quantity)
+        .slice(0, 5);
 
     const stats = [
-        { label: 'Total Revenue', value: `NPR ${totalRevenue.toLocaleString()}`, sub: 'कुल आम्दानी' },
-        { label: 'Total VAT Collected', value: `NPR ${totalTax.toFixed(2)}`, sub: 'कुल भ्याट' },
-        { label: 'VAT Invoices', value: vatInvoices, sub: 'भ्याट बीजक' },
-        { label: 'PAN Invoices', value: panInvoices, sub: 'प्यान बीजक' },
-        { label: 'Normal Invoices', value: normalInvoices, sub: 'साधारण बीजक' },
-        { label: 'Total Invoices', value: invoices?.length ?? 0, sub: 'जम्मा बीजक' },
+        { label: 'Total Revenue', value: `Rs. ${totalRevenue.toLocaleString()}`, sub: 'कुल आम्दानी', color: 'var(--brand-success)' },
+        { label: 'VAT Collected', value: `Rs. ${totalTax.toLocaleString()}`, sub: 'कुल भ्याट', color: 'var(--brand-primary)' },
+        { label: 'Net Subtotal', value: `Rs. ${totalSubtotal.toLocaleString()}`, sub: 'कुल उप-योग', color: 'var(--brand-secondary)' },
+        { label: 'Total Sales', value: invoices?.length ?? 0, sub: 'जम्मा बिक्री', color: 'var(--brand-accent)' },
     ];
 
     return (
         <div className="animate-fade-in-up">
             <div className="page-header">
-                <h1 className="page-title">Reports</h1>
-                <p className="page-subtitle">रिपोर्ट — Business Overview</p>
+                <div>
+                    <h1 className="page-title">Reports & Analytics</h1>
+                    <p className="page-subtitle">रिपोर्ट र विश्लेषण — Business Intelligence</p>
+                </div>
             </div>
 
-            <div className="grid-stats">
+            {/* Financial Overview */}
+            <div className="grid-stats" style={{ marginBottom: 24 }}>
                 {stats.map(s => (
                     <div key={s.label} className="glass-card" style={{ padding: 20 }}>
                         <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', marginBottom: 4 }}>{s.label}</div>
-                        <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', marginBottom: 12 }}>{s.sub}</div>
-                        <div style={{ fontSize: '1.5rem', fontWeight: 700 }}>{s.value}</div>
+                        <div style={{ fontSize: '0.625rem', color: 'var(--text-muted)', marginBottom: 12 }}>{s.sub}</div>
+                        <div style={{ fontSize: '1.5rem', fontWeight: 700, color: s.color }}>{s.value}</div>
                     </div>
                 ))}
             </div>
 
-            <div className="glass-card" style={{ padding: 40, textAlign: 'center' }}>
-                <BarChart2 size={48} style={{ margin: '0 auto 16px', color: 'var(--brand-primary)', opacity: 0.6 }} />
-                <div style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 8 }}>Detailed Charts Coming Soon</div>
-                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem' }}>
-                    Monthly sales trends, top products, and IRD-ready export features are in development.
+            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 24 }}>
+                {/* Top Selling Products */}
+                <div className="glass-card" style={{ padding: 24 }}>
+                    <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 20 }}>Top Selling Products — सर्वाधिक बिक्री हुने वस्तु</h2>
+                    {topProducts.length > 0 ? (
+                        <table className="glass-table">
+                            <thead>
+                                <tr>
+                                    <th>Product Name</th>
+                                    <th style={{ textAlign: 'center' }}>Qty Sold</th>
+                                    <th style={{ textAlign: 'right' }}>Revenue</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {topProducts.map((p, idx) => (
+                                    <tr key={p.name}>
+                                        <td style={{ fontWeight: 500 }}>
+                                            <span style={{ color: 'var(--text-muted)', marginRight: 8 }}>#{idx + 1}</span>
+                                            {p.name}
+                                        </td>
+                                        <td style={{ textAlign: 'center' }}>{p.quantity}</td>
+                                        <td style={{ textAlign: 'right' }}>Rs. {p.revenue.toLocaleString()}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+                            <p>No sales data available to rank products.</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Invoice Type Breakdown */}
+                <div className="glass-card" style={{ padding: 24 }}>
+                    <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 20 }}>Invoice Breakdown — बीजक विवरण</h2>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                        <div className="breakdown-item">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>VAT Invoices</span>
+                                <span style={{ fontSize: '0.875rem', color: 'var(--brand-success)' }}>{vatInvoices.length}</span>
+                            </div>
+                            <div className="progress-bar-bg"><div className="progress-bar-fill" style={{ width: `${(vatInvoices.length / (invoices?.length || 1)) * 100}%`, backgroundColor: 'var(--brand-success)' }}></div></div>
+                        </div>
+                        <div className="breakdown-item">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>PAN Invoices</span>
+                                <span style={{ fontSize: '0.875rem', color: 'var(--brand-primary)' }}>{panInvoices.length}</span>
+                            </div>
+                            <div className="progress-bar-bg"><div className="progress-bar-fill" style={{ width: `${(panInvoices.length / (invoices?.length || 1)) * 100}%`, backgroundColor: 'var(--brand-primary)' }}></div></div>
+                        </div>
+                        <div className="breakdown-item">
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Normal Receipts</span>
+                                <span style={{ fontSize: '0.875rem', color: 'var(--brand-secondary)' }}>{normalInvoices.length}</span>
+                            </div>
+                            <div className="progress-bar-bg"><div className="progress-bar-fill" style={{ width: `${(normalInvoices.length / (invoices?.length || 1)) * 100}%`, backgroundColor: 'var(--brand-secondary)' }}></div></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div className="glass-card" style={{ padding: 32, textAlign: 'center', marginTop: 24 }}>
+                <BarChart2 size={40} style={{ margin: '0 auto 16px', color: 'var(--brand-primary)', opacity: 0.6 }} />
+                <div style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 8 }}>Advanced Visual Analytics</div>
+                <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', maxWidth: 600, margin: '0 auto' }}>
+                    We are building interactive line charts and monthly trend reports to help you track growth over time. Stay tuned!
                 </p>
             </div>
         </div>

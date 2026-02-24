@@ -34,6 +34,14 @@ export default async function DashboardPage() {
 
     const dailyRevenue = todayInvoices?.reduce((sum, inv) => sum + Number(inv.total_amount), 0) || 0;
 
+    // Low stock alerts
+    const { data: lowStockProducts } = await supabase
+        .from('products')
+        .select('id, name, stock_quantity, unit')
+        .eq('organization_id', organizationId)
+        .lte('stock_quantity', 5)
+        .order('stock_quantity', { ascending: true });
+
     const stats = [
         { label: 'Total Products', labelNp: 'उत्पादन', value: productCount ?? 0, icon: Package, color: 'var(--brand-primary)' },
         { label: 'Customers', labelNp: 'ग्राहक', value: customerCount ?? 0, icon: Users, color: 'var(--brand-secondary)' },
@@ -74,36 +82,64 @@ export default async function DashboardPage() {
                 ))}
             </div>
 
-            {/* Recent Invoices */}
-            <div className="glass-card" style={{ padding: 24 }}>
-                <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 20 }}>Recent Invoices — हालका बीजक</h2>
-                {recentInvoices && recentInvoices.length > 0 ? (
-                    <table className="glass-table">
-                        <thead>
-                            <tr>
-                                <th>Invoice #</th>
-                                <th>Type</th>
-                                <th>Date (B.S.)</th>
-                                <th style={{ textAlign: 'right' }}>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {recentInvoices.map((inv) => (
-                                <tr key={inv.id}>
-                                    <td style={{ fontWeight: 500 }}>{inv.invoice_number}</td>
-                                    <td>{invoiceTypeBadge(inv.invoice_type)}</td>
-                                    <td>{inv.date_bs}</td>
-                                    <td style={{ textAlign: 'right' }}>NPR {Number(inv.total_amount).toLocaleString()}</td>
+            <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: 24, marginTop: 24 }}>
+                {/* Recent Invoices */}
+                <div className="glass-card" style={{ padding: 24 }}>
+                    <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 20 }}>Recent Invoices — हालका बीजक</h2>
+                    {recentInvoices && recentInvoices.length > 0 ? (
+                        <table className="glass-table">
+                            <thead>
+                                <tr>
+                                    <th>Invoice #</th>
+                                    <th>Type</th>
+                                    <th>Date (B.S.)</th>
+                                    <th style={{ textAlign: 'right' }}>Total</th>
                                 </tr>
+                            </thead>
+                            <tbody>
+                                {recentInvoices.map((inv) => (
+                                    <tr key={inv.id}>
+                                        <td style={{ fontWeight: 500 }}>{inv.invoice_number}</td>
+                                        <td>{invoiceTypeBadge(inv.invoice_type)}</td>
+                                        <td>{inv.date_bs}</td>
+                                        <td style={{ textAlign: 'right' }}>Rs. {Number(inv.total_amount).toLocaleString()}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    ) : (
+                        <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-muted)' }}>
+                            <FileText size={40} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
+                            <p>No invoices yet. Start selling from the POS!</p>
+                        </div>
+                    )}
+                </div>
+
+                {/* Low Stock Alerts */}
+                <div className="glass-card" style={{ padding: 24, border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                    <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 20, color: '#ef4444', display: 'flex', alignItems: 'center', gap: 8 }}>
+                        <span style={{ width: 8, height: 8, borderRadius: '50%', backgroundColor: '#ef4444', display: 'inline-block' }}></span>
+                        Low Stock Alerts — कम स्टक
+                    </h2>
+                    {lowStockProducts && lowStockProducts.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                            {lowStockProducts.map(p => (
+                                <div key={p.id} style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '12px', borderRadius: '12px', background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)' }}>
+                                    <div style={{ fontSize: '0.875rem', fontWeight: 500 }}>{p.name}</div>
+                                    <div style={{ textAlign: 'right' }}>
+                                        <div style={{ fontSize: '0.875rem', fontWeight: 700, color: '#ef4444' }}>{p.stock_quantity} {p.unit}</div>
+                                        <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>Remaining</div>
+                                    </div>
+                                </div>
                             ))}
-                        </tbody>
-                    </table>
-                ) : (
-                    <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-muted)' }}>
-                        <FileText size={40} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
-                        <p>No invoices yet. Start selling from the POS!</p>
-                    </div>
-                )}
+                        </div>
+                    ) : (
+                        <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
+                            <Package size={32} style={{ margin: '0 auto 12px', opacity: 0.3 }} />
+                            <p style={{ fontSize: '0.8125rem' }}>All products are well stocked!</p>
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
