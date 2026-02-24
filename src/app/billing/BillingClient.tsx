@@ -127,9 +127,9 @@ export default function BillingClient({
 
                         <div className="space-y-4 relative z-10">
                             {[
-                                { label: 'eSewa ID', value: '98XXXXXXXX', name: 'G.K Paints Official', icon: '💎' },
-                                { label: 'Khalti ID', value: '98XXXXXXXX', name: 'G.K Paints Official', icon: '💜' },
-                                { label: 'Bank Transfer', value: 'XXXX-XXXX-XXXX', name: 'Global IME (G.K Paints)', icon: '🏦' }
+                                { label: 'eSewa ID', value: '0000000000', name: 'Recipient Name', icon: '💎' },
+                                { label: 'Khalti ID', value: '0000000000', name: 'Recipient Name', icon: '💜' },
+                                { label: 'Bank Transfer', value: '0000-0000-0000', name: 'Branch (Bank Name)', icon: '🏦' }
                             ].map((method) => (
                                 <div key={method.label} className="p-6 bg-gray-50/50 backdrop-blur rounded-[1.5rem] border border-gray-100 hover:border-brand-primary/40 transition-all group/method hover:shadow-lg hover:shadow-gray-100/50">
                                     <div className="flex justify-between items-start mb-3">
@@ -148,7 +148,7 @@ export default function BillingClient({
                             </div>
                             <div>
                                 <h4 className="text-[10px] font-black text-surface-muted uppercase tracking-widest mb-1">Human Support</h4>
-                                <p className="text-sm font-black text-surface-primary">+977 98XXXXXXXX</p>
+                                <p className="text-sm font-black text-surface-primary">+977 0000000000</p>
                             </div>
                         </div>
                     </div>

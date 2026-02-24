@@ -8,9 +8,10 @@ interface BarcodePrintProps {
     value: string;
     name: string;
     price: number;
+    onPrint?: () => void;
 }
 
-export default function BarcodePrint({ value, name, price }: BarcodePrintProps) {
+export default function BarcodePrint({ value, name, price, onPrint }: BarcodePrintProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     useEffect(() => {
@@ -39,7 +40,11 @@ export default function BarcodePrint({ value, name, price }: BarcodePrintProps) 
     }, [value]);
 
     const handlePrint = () => {
-        printProductLabel(name, value, price);
+        if (onPrint) {
+            onPrint();
+        } else {
+            printProductLabel(name, value, price);
+        }
     };
 
     return (

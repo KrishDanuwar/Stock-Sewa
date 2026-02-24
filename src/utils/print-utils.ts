@@ -1,10 +1,12 @@
 import JsBarcode from 'jsbarcode';
 
-export function printProductLabel(name: string, barcode: string, price: number) {
+export function printProductLabel(name: string, barcode: string, price: number, mrp?: number, batchNo?: string) {
     if (typeof window === 'undefined') return;
 
     // Create a hidden canvas to generate the barcode image
     const canvas = document.createElement('canvas');
+    const today = new Date();
+    const mfgDate = today.toLocaleDateString('en-GB'); // DD/MM/YYYY
 
     try {
         JsBarcode(canvas, barcode, {
@@ -41,46 +43,80 @@ export function printProductLabel(name: string, barcode: string, price: number) 
                 <title>Print Label - ${name}</title>
                 <style>
                     @page {
-                        size: 50mm 30mm;
+                        size: 50mm 25mm;
                         margin: 0;
                     }
                     body {
                         margin: 0;
+                        padding: 1mm 2mm;
                         display: flex;
                         flex-direction: column;
                         align-items: center;
-                        justify-content: center;
-                        height: 30mm;
+                        height: 25mm;
                         width: 50mm;
-                        font-family: sans-serif;
-                        text-align: center;
+                        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                        box-sizing: border-box;
+                        overflow: hidden;
                     }
-                    .name {
+                    .header {
+                        width: 100%;
                         font-size: 10px;
-                        font-weight: bold;
-                        margin-bottom: 2px;
+                        font-weight: 800;
+                        text-align: center;
                         white-space: nowrap;
                         overflow: hidden;
                         text-overflow: ellipsis;
-                        width: 100%;
-                        padding: 0 2mm;
-                        box-sizing: border-box;
+                        margin-bottom: 2px;
+                        text-transform: uppercase;
                     }
-                    .price {
-                        font-size: 12px;
-                        font-weight: bold;
-                        margin-top: 2px;
+                    .barcode-container {
+                        width: 100%;
+                        height: 12mm;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
                     }
                     img {
-                        max-width: 45mm;
-                        height: auto;
+                        max-width: 100%;
+                        max-height: 100%;
+                        object-fit: contain;
                     }
+                    .details {
+                        width: 100%;
+                        display: grid;
+                        grid-template-columns: 1fr 1fr;
+                        font-size: 7px;
+                        font-weight: 600;
+                        margin-top: 1px;
+                        border-top: 0.2px solid #000;
+                        padding-top: 1px;
+                    }
+                    .mrp-section {
+                        grid-column: span 2;
+                        text-align: center;
+                        font-size: 9px;
+                        font-weight: 900;
+                        margin-top: 1px;
+                    }
+                    .field {
+                        display: flex;
+                        gap: 2px;
+                    }
+                    .label { color: #555; }
                 </style>
             </head>
             <body>
-                <div class="name">${name}</div>
-                <img src="${imgData}" />
-                <div class="price">Rs. ${price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}</div>
+                <div class="header">${name}</div>
+                <div class="barcode-container">
+                    <img src="${imgData}" />
+                </div>
+                <div class="details">
+                    <div class="field"><span class="label">MFG:</span> ${mfgDate}</div>
+                    <div class="field"><span class="label">BATCH:</span> ${batchNo || 'N/A'}</div>
+                </div>
+                <div class="mrp-section">
+                    MRP: Rs. ${mrp ? mrp.toLocaleString('en-IN', { minimumFractionDigits: 2 }) : price.toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </div>
                 <script>
                     window.onload = () => {
                         window.print();

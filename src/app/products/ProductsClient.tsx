@@ -29,6 +29,8 @@ function formatCurrency(amount: number) {
 export default function ProductsClient({ initialProducts }: ProductsClientProps) {
     const [products, setProducts] = useState<Product[]>(initialProducts);
     const [modalOpen, setModalOpen] = useState(false);
+    const [printModalOpen, setPrintModalOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [editProduct, setEditProduct] = useState<Product | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
@@ -72,6 +74,18 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
         }
     };
 
+    const handlePrintSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        if (!selectedProduct) return;
+        const formData = new FormData(e.currentTarget);
+        const mrp = parseFloat(formData.get('mrp') as string);
+        const batchNo = formData.get('batchNo') as string;
+
+        printProductLabel(selectedProduct.name, selectedProduct.barcode, selectedProduct.price, mrp, batchNo);
+        setPrintModalOpen(false);
+        setSelectedProduct(null);
+    };
+
     const handleDelete = async (id: string) => {
         if (!confirm('Are you sure you want to delete this product?')) return;
         try {
@@ -90,6 +104,11 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
     const openAdd = () => {
         setEditProduct(null);
         setModalOpen(true);
+    };
+
+    const openPrint = (product: Product) => {
+        setSelectedProduct(product);
+        setPrintModalOpen(true);
     };
 
     return (
@@ -159,9 +178,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                                     <td className="px-8 py-5 text-right">
                                         <div className="flex items-center justify-end gap-2.5 opacity-0 group-hover:opacity-100 transition-all translate-x-4 group-hover:translate-x-0 duration-500">
                                             <button
-                                                onClick={() => {
-                                                    printProductLabel(product.name, product.barcode, product.price);
-                                                }}
+                                                onClick={() => openPrint(product)}
                                                 className="w-9 h-9 rounded-xl bg-white border border-brand-border text-surface-muted hover:text-brand-primary hover:border-brand-primary transition-all flex items-center justify-center shadow-sm active:scale-90"
                                                 title="Print Label"
                                             >
@@ -187,6 +204,36 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                     </table>
                 </div>
             )}
+
+            {/* Print Settings Modal */}
+            <Modal
+                isOpen={printModalOpen}
+                onClose={() => { setPrintModalOpen(false); setSelectedProduct(null); }}
+                title="Print Label Settings"
+            >
+                <form onSubmit={handlePrintSubmit} className="space-y-6">
+                    <p className="text-sm text-surface-muted font-medium">Configure additional details for <span className="text-surface-primary font-black">{selectedProduct?.name}</span></p>
+                    <div className="grid grid-cols-1 gap-4">
+                        <div>
+                            <label className="block text-xs font-black text-surface-muted uppercase tracking-widest mb-2">MRP (Maximum Retail Price) *</label>
+                            <input name="mrp" type="number" step="0.01" min="0" defaultValue={selectedProduct?.price} required className="input-field font-black text-brand-primary py-3" placeholder="0.00" />
+                        </div>
+                        <div>
+                            <label className="block text-xs font-black text-surface-muted uppercase tracking-widest mb-2">Batch Number *</label>
+                            <input name="batchNo" required className="input-field py-3 font-bold" placeholder="e.g. BATCH-2024-001" />
+                        </div>
+                    </div>
+                    <div className="flex justify-end gap-3 pt-6 border-t border-brand-border mt-8">
+                        <button type="button" onClick={() => { setPrintModalOpen(false); setSelectedProduct(null); }} className="btn-secondary px-6">
+                            Cancel
+                        </button>
+                        <button type="submit" className="btn-primary px-10 flex items-center gap-2 active:scale-95 shadow-xl shadow-brand-primary/20">
+                            <Printer size={18} />
+                            Generate & Print
+                        </button>
+                    </div>
+                </form>
+            </Modal>
 
             {/* Add/Edit Modal */}
             <Modal
@@ -236,7 +283,7 @@ export default function ProductsClient({ initialProducts }: ProductsClientProps)
                             <div className="mt-6 pt-6 border-t border-brand-border">
                                 <label className="block text-[10px] font-black text-surface-muted uppercase tracking-widest mb-4">Print Preview</label>
                                 <div className="bg-white p-4 rounded-2xl flex justify-center shadow-inner">
-                                    <BarcodePrint value={editProduct.barcode} name={editProduct.name} price={editProduct.price} />
+                                    <BarcodePrint value={editProduct.barcode} name={editProduct.name} price={editProduct.price} onPrint={() => openPrint(editProduct)} />
                                 </div>
                             </div>
                         )}
