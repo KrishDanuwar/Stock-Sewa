@@ -26,6 +26,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
     const [restockExpiry, setRestockExpiry] = useState('');
     const [restockBatch, setRestockBatch] = useState('');
     const [restocking, setRestocking] = useState(false);
+    const [includeMfg, setIncludeMfg] = useState(false);
 
     const filtered = products.filter(p =>
         p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -42,6 +43,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
         else {
             toast.success('Product added!');
             setShowModal(false);
+            setIncludeMfg(false);
         }
         setLoading(false);
     }
@@ -222,46 +224,38 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                         <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                             <div className="form-group">
                                 <label className="form-label">Product Name *</label>
-                                <input name="name" required className="glass-input" placeholder="e.g. Berger Silk 10L" />
+                                <input name="name" required className="glass-input" autoComplete="off" />
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                                 <div className="form-group">
-                                    <label className="form-label">MRP रु *</label>
+                                    <label className="form-label">MRP  रु *</label>
                                     <input name="price" type="number" min="0" step="0.01" required className="glass-input" placeholder="0.00" />
                                 </div>
-                                <div className="form-group">
-                                    <label className="form-label">Cost Price रु</label>
-                                    <input name="cost_price" type="number" min="0" step="0.01" className="glass-input" placeholder="0.00" />
-                                </div>
-                            </div>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                                 <div className="form-group">
                                     <label className="form-label">Initial Stock *</label>
                                     <input name="stock_quantity" type="number" min="0" required className="glass-input" placeholder="Qty" />
                                 </div>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                                 <div className="form-group">
                                     <label className="form-label">Unit</label>
                                     <input name="unit" className="glass-input" placeholder="pcs, ltr, kg..." defaultValue="pcs" />
                                 </div>
-                            </div>
-
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                                 <div className="form-group">
                                     <label className="form-label">Category</label>
                                     <input name="category" className="glass-input" placeholder="e.g. Paint" />
                                 </div>
-                                <div className="form-group">
-                                    <label className="form-label">Barcode (Auto-gen if blank)</label>
-                                    <input name="barcode" className="glass-input" placeholder="Scan or leave blank" />
-                                </div>
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                                 <div className="form-group">
-                                    <label className="form-label">MFG Date</label>
-                                    <input name="mfg_date" className="glass-input" placeholder="2024/01/01" />
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }} className="form-label">
+                                        <input type="checkbox" checked={includeMfg} onChange={e => setIncludeMfg(e.target.checked)} />
+                                        Include MFG Date
+                                    </label>
+                                    <input name="mfg_date" disabled={!includeMfg} className="glass-input" placeholder="2024/01/01" style={{ opacity: includeMfg ? 1 : 0.5 }} />
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label">Expiry Date</label>

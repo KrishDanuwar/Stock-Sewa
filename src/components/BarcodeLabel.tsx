@@ -64,7 +64,7 @@ export default function BarcodeLabel({ name, price, barcode, mfg }: LabelProps) 
 
                     <div className="details-row">
                         <span>MRP: Rs {price.toLocaleString()}</span>
-                        <span>MFG: {mfg || 'N/A'}</span>
+                        {mfg && mfg !== 'N/A' && <span>MFG: {mfg}</span>}
                     </div>
                 </div>
             </div>
