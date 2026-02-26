@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { updateOrganizationLogo, updateOrganizationDetails, removeOrganizationLogo } from '@/lib/actions/organizations';
+import { deleteAccount } from '@/lib/actions/user';
 import { toast } from 'sonner';
 import { Building2, Upload, Camera, Save, Trash2, Mail, Sun, Moon, Palette, UserCircle } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
@@ -20,6 +21,10 @@ export default function SettingsClient({ organization, userEmail }: { organizati
     const [saving, setSaving] = useState(false);
     const [logoPreview, setLogoPreview] = useState<string | null>(organization?.logo_url || null);
     const { theme, toggleTheme } = useTheme();
+
+    // Deletion State
+    const [showDeleteModal, setShowDeleteModal] = useState(false);
+    const [deleteConfirmString, setDeleteConfirmString] = useState('');
 
     // Form State
     const [orgName, setOrgName] = useState(organization?.name || '');
@@ -131,6 +136,29 @@ export default function SettingsClient({ organization, userEmail }: { organizati
             toast.error(result.error || 'Failed to update details');
         }
         setSaving(false);
+    }
+
+    async function handleFinalDeletion() {
+        if (deleteConfirmString !== 'DELETE MY DATA') return;
+
+        setLoading(true);
+        try {
+            const result = await deleteAccount(deleteConfirmString);
+            if (result.success) {
+                toast.success('Your account and all data have been permanently deleted.');
+                // Clerk user deletion will automatically invalidate the session
+                window.location.href = '/login';
+            } else {
+                toast.error(result.error || 'Failed to delete account');
+            }
+        } catch (error) {
+            toast.error('A critical error occurred');
+            console.error(error);
+        } finally {
+            setLoading(false);
+            setShowDeleteModal(false);
+            setDeleteConfirmString('');
+        }
     }
 
     return (
@@ -301,7 +329,87 @@ export default function SettingsClient({ organization, userEmail }: { organizati
                         </a>
                     </div>
                 </div>
+
+                {/* Account Deletion - Danger Zone */}
+                <div className="glass-card" style={{ padding: 32, border: '1px solid rgba(239, 68, 68, 0.2)', background: 'rgba(239, 68, 68, 0.02)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                        <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Trash2 size={20} color="var(--brand-danger)" />
+                        </div>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--brand-danger)' }}>Danger Zone</h2>
+                    </div>
+                    <div style={{ backgroundColor: 'rgba(239, 68, 68, 0.05)', border: '1px dashed rgba(239, 68, 68, 0.3)', borderRadius: '16px', padding: '24px' }}>
+                        <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 8, color: 'var(--text-primary)' }}>Delete Organization & Account</h3>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: 20 }}>
+                            This action is **permanent**. Deleting your account will erase:
+                            <br />• All invoices and sales history
+                            <br />• All product and inventory data
+                            <br />• All customer records
+                            <br />• Your business profile and settings
+                        </p>
+                        <button
+                            className="glass-button"
+                            style={{ background: 'var(--brand-danger)', color: 'white', border: 'none', fontWeight: 600, padding: '12px 24px' }}
+                            onClick={() => setShowDeleteModal(true)}
+                        >
+                            <Trash2 size={16} /> Delete All My Data
+                        </button>
+                    </div>
+                </div>
             </div>
+
+            {/* Deletion Confirmation Modal */}
+            {showDeleteModal && (
+                <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                    <div className="glass-card animate-scale-in" style={{ maxWidth: 450, padding: 32, textAlign: 'center' }}>
+                        <div style={{ width: 64, height: 64, background: 'rgba(239, 68, 68, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+                            <Trash2 size={32} color="var(--brand-danger)" />
+                        </div>
+                        <h2 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: 12 }}>Are you absolutely sure?</h2>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.9375rem', marginBottom: 24 }}>
+                            Once you delete your account, there is no going back. All your data will be wiped instantly from our servers.
+                        </p>
+
+                        <div className="form-group text-left" style={{ marginBottom: 24 }}>
+                            <label className="glass-label" style={{ marginBottom: 8, color: 'var(--text-primary)' }}>
+                                Type <span style={{ color: 'var(--brand-danger)', fontWeight: 700 }}>DELETE MY DATA</span> to confirm
+                            </label>
+                            <input
+                                className="glass-input"
+                                placeholder="Type the confirmation text here"
+                                value={deleteConfirmString}
+                                onChange={(e) => setDeleteConfirmString(e.target.value)}
+                                style={{ textAlign: 'center', letterSpacing: '0.1em', fontWeight: 600 }}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: 12 }}>
+                            <button
+                                className="glass-button"
+                                style={{ flex: 1, justifyContent: 'center' }}
+                                onClick={() => { setShowDeleteModal(false); setDeleteConfirmString(''); }}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="glass-button"
+                                disabled={deleteConfirmString !== 'DELETE MY DATA' || loading}
+                                onClick={handleFinalDeletion}
+                                style={{
+                                    flex: 1,
+                                    justifyContent: 'center',
+                                    background: deleteConfirmString === 'DELETE MY DATA' ? 'var(--brand-danger)' : 'rgba(239, 68, 68, 0.1)',
+                                    color: deleteConfirmString === 'DELETE MY DATA' ? 'white' : 'rgba(239, 68, 68, 0.4)',
+                                    border: 'none',
+                                    fontWeight: 700
+                                }}
+                            >
+                                {loading ? 'Deleting...' : 'Permanently Delete'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
