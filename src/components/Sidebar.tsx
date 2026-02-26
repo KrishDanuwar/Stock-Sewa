@@ -71,14 +71,12 @@ export default async function Sidebar() {
                             <img src="/logo.jpg" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         )}
                     </div>
-                    <div style={{ overflow: 'hidden' }}>
+                    <div>
                         <div translate="no" style={{
                             fontSize: '1.125rem',
                             fontWeight: 800,
                             color: 'var(--text-primary)',
-                            whiteSpace: 'nowrap',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis'
+                            lineHeight: 1.2
                         }}>
                             {org?.logo_url ? organizationName : 'Stock Sewa'}
                         </div>
