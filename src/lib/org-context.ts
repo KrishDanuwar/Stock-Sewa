@@ -1,4 +1,4 @@
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { auth, currentUser } from '@clerk/nextjs/server';
 
@@ -21,7 +21,7 @@ export async function getOrgContext(): Promise<OrgContext> {
         redirect('/login');
     }
 
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
 
     // With Clerk, 'id' in profiles table corresponds to Clerk's userId
     const { data: profile, error: profileError } = await supabase

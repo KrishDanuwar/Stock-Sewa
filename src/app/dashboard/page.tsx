@@ -1,11 +1,11 @@
 import { getOrgContext } from '@/lib/org-context';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { Package, Users, FileText, TrendingUp } from 'lucide-react';
 import { getTodayBs } from '@/utils/date-utils';
 
 export default async function DashboardPage() {
     const { organizationId, organizationName } = await getOrgContext();
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const today = getTodayBs();
 
     // Fetch key stats
