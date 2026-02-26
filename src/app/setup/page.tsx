@@ -17,35 +17,35 @@ export default function SetupPage() {
     }, [state]);
 
     return (
-        <div className="flex min-h-screen items-center justify-center p-4">
-            <div className="glass-card max-w-md w-full p-8 text-center animate-fade-in-up">
-                <div className="w-16 h-16 bg-amber-500/20 rounded-2xl flex items-center justify-center mx-auto mb-6">
-                    <RefreshCw size={32} className={`text-amber-500 ${isPending ? 'animate-spin' : 'animate-spin-slow'}`} />
+        <div style={{ display: 'flex', minHeight: '100vh', alignItems: 'center', justifyContent: 'center', padding: 16, background: 'var(--bg-base)' }}>
+            <div className="glass-card animate-fade-in-up" style={{ maxWidth: 448, width: '100%', padding: 32, textAlign: 'center' }}>
+                <div style={{ width: 64, height: 64, background: 'rgba(245, 158, 11, 0.15)', borderRadius: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 24px' }}>
+                    <RefreshCw size={32} style={{ color: 'var(--brand-warning)' }} className={isPending ? 'animate-spin' : ''} />
                 </div>
 
-                <h1 className="text-2xl font-bold mb-4 text-white">Organization Not Found</h1>
-                <p className="text-gray-400 mb-8 font-medium">
+                <h1 style={{ fontSize: '1.5rem', fontWeight: 700, marginBottom: 16, color: 'var(--text-primary)' }}>Organization Not Found</h1>
+                <p style={{ color: 'var(--text-secondary)', marginBottom: 32, fontWeight: 500 }}>
                     It looks like your user account was created, but the organization setup failed.
                     This happens when database triggers aren't ready during registration.
                 </p>
 
-                <div className="flex flex-col gap-4">
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                     {state?.error && (
-                        <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 mb-2 text-left">
-                            <p className="text-sm text-red-500 font-bold mb-1">
+                        <div style={{ background: 'rgba(239, 68, 68, 0.1)', border: '1px solid rgba(239, 68, 68, 0.2)', borderRadius: 12, padding: 16, marginBottom: 8, textAlign: 'left' }}>
+                            <p style={{ fontSize: '0.875rem', color: 'var(--brand-danger)', fontWeight: 700, marginBottom: 4 }}>
                                 Repair Failed:
                             </p>
-                            <p className="text-xs text-red-200/80 leading-relaxed font-mono">
+                            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.6, fontFamily: 'monospace' }}>
                                 {state.error}
                             </p>
                         </div>
                     )}
 
-                    <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-4 mb-2 text-left">
-                        <p className="text-sm text-amber-500 font-bold mb-1">
+                    <div style={{ background: 'rgba(245, 158, 11, 0.1)', border: '1px solid rgba(245, 158, 11, 0.2)', borderRadius: 12, padding: 16, marginBottom: 8, textAlign: 'left' }}>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--brand-warning)', fontWeight: 700, marginBottom: 4 }}>
                             Recommended Action:
                         </p>
-                        <p className="text-xs text-amber-200/80 leading-relaxed italic">
+                        <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)', lineHeight: 1.6, fontStyle: 'italic' }}>
                             Click "Repair Automatically" to manually initialize your organization
                             and profile records.
                         </p>
@@ -55,7 +55,8 @@ export default function SetupPage() {
                         <button
                             type="submit"
                             disabled={isPending}
-                            className="glass-button glass-button-primary w-full justify-center py-4 font-bold shadow-xl shadow-blue-500/25 text-base"
+                            className="glass-button glass-button-primary"
+                            style={{ width: '100%', justifyContent: 'center', padding: '16px 24px', fontWeight: 700, fontSize: '1rem' }}
                         >
                             {isPending ? (
                                 <><RefreshCw size={20} className="animate-spin" /> Repairing and Synchronizing...</>
@@ -66,18 +67,18 @@ export default function SetupPage() {
                     </form>
 
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, margin: '12px 0' }}>
-                        <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
-                        <span style={{ fontSize: '0.625rem', color: 'rgba(255,255,255,0.4)', fontWeight: 600 }}>OR</span>
-                        <div style={{ flex: 1, height: 1, background: 'rgba(255,255,255,0.06)' }} />
+                        <div style={{ flex: 1, height: 1, background: 'var(--glass-border)' }} />
+                        <span style={{ fontSize: '0.625rem', color: 'var(--text-muted)', fontWeight: 600 }}>OR</span>
+                        <div style={{ flex: 1, height: 1, background: 'var(--glass-border)' }} />
                     </div>
 
                     <form action={signOut}>
-                        <button type="submit" className="glass-button w-full justify-center py-3 text-gray-400 border-gray-800/50 hover:bg-white/5">
+                        <button type="submit" className="glass-button" style={{ width: '100%', justifyContent: 'center', padding: '12px 24px', color: 'var(--text-secondary)' }}>
                             <LogOut size={18} /> Sign Out and Try Again
                         </button>
                     </form>
 
-                    <Link href="/dashboard" className="text-blue-500/70 hover:text-blue-400 text-xs mt-2 underline underline-offset-4">
+                    <Link href="/dashboard" style={{ color: 'var(--brand-primary)', fontSize: '0.75rem', marginTop: 8, textDecoration: 'underline', textUnderlineOffset: 4 }}>
                         Refresh and Attempt Dashboard Entry
                     </Link>
                 </div>
@@ -85,3 +86,4 @@ export default function SetupPage() {
         </div>
     );
 }
+

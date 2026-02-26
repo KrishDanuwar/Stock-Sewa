@@ -23,10 +23,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
             position="top-right"
             toastOptions={{
               style: {
-                background: 'rgba(15, 22, 41, 0.95)',
-                border: '1px solid rgba(255,255,255,0.12)',
-                color: '#f1f5f9',
-                backdropFilter: 'blur(20px)',
+                background: 'var(--bg-secondary)',
+                border: '1px solid var(--glass-border)',
+                color: 'var(--text-primary)',
+                backdropFilter: 'var(--glass-blur)',
               },
             }}
           />

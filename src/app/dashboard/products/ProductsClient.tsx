@@ -372,24 +372,6 @@ export default function ProductsClient({ products }: { products: Product[] }) {
             )}
 
             <style jsx>{`
-                .glass-modal {
-                    position: fixed;
-                    inset: 0;
-                    z-index: 100;
-                    display: flex;
-                    align-items: flex-start;
-                    justify-content: center;
-                    background: rgba(0,0,0,0.6);
-                    backdrop-filter: blur(12px);
-                    padding: 20px;
-                    padding-top: 10vh;
-                }
-                .glass-modal-card {
-                    background: rgba(15, 22, 41, 0.98) !important; /* Slightly more solid */
-                    backdrop-filter: blur(32px) !important;
-                    border: 1px solid rgba(255, 255, 255, 0.2) !important; /* Brighter border */
-                    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
-                }
                 .form-group {
                     display: flex;
                     flex-direction: column;
