@@ -1,27 +1,8 @@
 import { SignOutButton } from '@clerk/nextjs';
 import { getOrgContext } from '@/lib/org-context';
 import { createAdminClient } from '@/lib/supabase/server';
-import SidebarLink from './SidebarLink';
-import {
-    LayoutDashboard,
-    Package,
-    Users,
-    FileText,
-    ShoppingCart,
-    BarChart2,
-    LogOut,
-    Settings,
-} from 'lucide-react';
-
-const navItems = [
-    { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
-    { href: '/dashboard/products', icon: Package, label: 'Products' },
-    { href: '/dashboard/customers', icon: Users, label: 'Customers' },
-    { href: '/dashboard/pos', icon: ShoppingCart, label: 'POS' },
-    { href: '/dashboard/invoices', icon: FileText, label: 'Bills' },
-    { href: '/dashboard/reports', icon: BarChart2, label: 'Reports' },
-    { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
-];
+import SidebarNav from './SidebarNav';
+import { LogOut } from 'lucide-react';
 
 export default async function Sidebar() {
     const { organizationName, organizationId } = await getOrgContext();
@@ -102,15 +83,7 @@ export default async function Sidebar() {
             </div>
 
             {/* Navigation */}
-            <nav style={{ flex: 1, padding: '16px 12px', overflowY: 'auto' }}>
-                <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    {navItems.map(({ href, icon: Icon, label }) => (
-                        <li key={href}>
-                            <SidebarLink href={href} icon={Icon} label={label} />
-                        </li>
-                    ))}
-                </ul>
-            </nav>
+            <SidebarNav />
 
             {/* Sign Out */}
             <div style={{ padding: '16px 12px', borderTop: '1px solid var(--glass-border)' }}>
