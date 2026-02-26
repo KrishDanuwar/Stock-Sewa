@@ -219,6 +219,12 @@ export default function LoginPage() {
                 .clerk-wrapper :global(.cl-internal-b3fm6y) {
                     display: none; /* Hide Clerk branding footer if any */
                 }
+                .clerk-wrapper :global(.cl-cardBox),
+                .clerk-wrapper :global(.cl-card) {
+                    background: transparent !important;
+                    box-shadow: none !important;
+                    border: none !important;
+                }
                 .clerk-wrapper :global(.clerk-header-title) { color: var(--text-primary) !important; }
                 .clerk-wrapper :global(.clerk-header-subtitle) { color: var(--text-muted) !important; }
                 .clerk-wrapper :global(.clerk-text-primary) { color: var(--text-primary) !important; }
