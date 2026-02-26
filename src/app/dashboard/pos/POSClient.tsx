@@ -119,6 +119,8 @@ export default function POSClient({
                     subtotal,
                     tax_amount: tax,
                     total_amount: total,
+                    amount_paid: amountPaid,
+                    due_amount: total - amountPaid,
                     payment_mode: paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1),
                     items: cart.map(i => ({
                         product_name: i.product_name,

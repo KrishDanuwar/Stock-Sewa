@@ -19,6 +19,8 @@ export interface InvoiceData {
     subtotal: number;
     tax_amount: number;
     total_amount: number;
+    amount_paid?: number;
+    due_amount?: number;
     payment_mode: string;
     items: {
         product_name: string;
@@ -130,7 +132,27 @@ function prepareInvoiceDoc(data: InvoiceData): jsPDF {
 
     doc.setFontSize(11);
     doc.text(`Grand Total: Rs. ${data.total_amount.toLocaleString()}`, 15, finalY + 5);
-    finalY += 15;
+    finalY += 12;
+
+    if (data.amount_paid !== undefined) {
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`Amount Paid: Rs. ${Number(data.amount_paid).toLocaleString()}`, 15, finalY);
+        finalY += 5;
+
+        const due = data.due_amount !== undefined ? Number(data.due_amount) : Number(data.total_amount) - Number(data.amount_paid);
+
+        if (due > 0) {
+            doc.setFont('helvetica', 'bold');
+            doc.text(`Due Amount: Rs. ${due.toLocaleString()}`, 15, finalY);
+            doc.setFont('helvetica', 'normal');
+        } else {
+            doc.text(`Due Amount: Rs. 0`, 15, finalY);
+        }
+        finalY += 7;
+    } else {
+        finalY += 3;
+    }
 
     // notes
     doc.setFontSize(10);
