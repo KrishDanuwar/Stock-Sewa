@@ -139,9 +139,9 @@ export default function POSClient({
             setCart([]);
             setCustomerId('');
             setCustomerMode('walkin');
+            setInvoiceType('normal');
             setAmountPaid(0);
             setManualCustomerName('');
-            setManualCustomerPan('');
         } catch (error) {
             console.error('POS Checkout Critical Error:', error);
             toast.error('A critical error occurred. Please refresh the page.');
@@ -250,17 +250,21 @@ export default function POSClient({
                             Bill Type
                         </label>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
-                            {(['normal', 'pan', 'vat'] as const).map(t => (
-                                <button key={t} onClick={() => setInvoiceType(t)}
-                                    style={{
-                                        padding: '7px 0', borderRadius: 8, border: '1px solid', fontSize: '0.8125rem', fontWeight: 500, cursor: 'pointer', transition: 'all 0.2s',
-                                        borderColor: invoiceType === t ? 'var(--brand-primary)' : 'var(--glass-border)',
-                                        background: invoiceType === t ? 'rgba(79,142,247,0.15)' : 'transparent',
-                                        color: invoiceType === t ? 'var(--brand-primary)' : 'var(--text-secondary)'
-                                    }}>
-                                    {t.toUpperCase()}
-                                </button>
-                            ))}
+                            {(['normal', 'pan', 'vat'] as const).map(t => {
+                                const isDisabled = customerMode === 'walkin' && t !== 'normal';
+                                return (
+                                    <button key={t} onClick={() => setInvoiceType(t)} disabled={isDisabled}
+                                        style={{
+                                            padding: '7px 0', borderRadius: 8, border: '1px solid', fontSize: '0.8125rem', fontWeight: 500, cursor: isDisabled ? 'not-allowed' : 'pointer', transition: 'all 0.2s',
+                                            borderColor: invoiceType === t ? 'var(--brand-primary)' : 'var(--glass-border)',
+                                            background: invoiceType === t ? 'rgba(79,142,247,0.15)' : 'transparent',
+                                            color: invoiceType === t ? 'var(--brand-primary)' : 'var(--text-secondary)',
+                                            opacity: isDisabled ? 0.4 : 1
+                                        }}>
+                                        {t.toUpperCase()}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
 
@@ -270,6 +274,7 @@ export default function POSClient({
                                 <input type="radio" checked={customerMode === 'walkin'} onChange={() => {
                                     setCustomerMode('walkin');
                                     setCustomerId('');
+                                    if (invoiceType !== 'normal') setInvoiceType('normal');
                                     if (paymentMethod === 'credit') setPaymentMethod('cash');
                                 }} />
                                 Walk-in
@@ -323,21 +328,14 @@ export default function POSClient({
                             </div>
                         )}
 
-                        {customerMode === 'walkin' && (invoiceType === 'pan' || invoiceType === 'vat') && (
+                        {customerMode === 'walkin' && (
                             <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                                 <input
                                     className="glass-input"
                                     style={{ fontSize: '0.8125rem' }}
-                                    placeholder="Customer Name (required)..."
+                                    placeholder="Customer Name (optional)..."
                                     value={manualCustomerName}
                                     onChange={e => setManualCustomerName(e.target.value)}
-                                />
-                                <input
-                                    className="glass-input"
-                                    style={{ fontSize: '0.8125rem' }}
-                                    placeholder="Customer PAN/VAT # (optional)..."
-                                    value={manualCustomerPan}
-                                    onChange={e => setManualCustomerPan(e.target.value)}
                                 />
                             </div>
                         )}
