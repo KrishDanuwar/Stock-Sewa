@@ -49,20 +49,56 @@ export default async function Sidebar() {
             }}
         >
             {/* Brand */}
-            <div style={{ padding: '24px 20px', borderBottom: '1px solid var(--glass-border)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{ width: 36, height: 36, borderRadius: 10, background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0, overflow: 'hidden', padding: 4 }}>
+            <div style={{ padding: '28px 20px', borderBottom: '1px solid var(--glass-border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{
+                        width: 44,
+                        height: 44,
+                        borderRadius: 12,
+                        background: 'white',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        overflow: 'hidden',
+                        padding: org?.logo_url ? 0 : 6,
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        border: '1px solid var(--glass-border)'
+                    }}>
                         {org?.logo_url ? (
                             <img src={org.logo_url} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         ) : (
                             <img src="/logo.jpg" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                         )}
                     </div>
-                    <div>
-                        <div translate="no" style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--text-primary)' }}>Stock Sewa</div>
-                        <div style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 150 }}>
-                            {organizationName}
+                    <div style={{ overflow: 'hidden' }}>
+                        <div translate="no" style={{
+                            fontSize: '1.125rem',
+                            fontWeight: 800,
+                            color: 'var(--text-primary)',
+                            whiteSpace: 'nowrap',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis'
+                        }}>
+                            {org?.logo_url ? organizationName : 'Stock Sewa'}
                         </div>
+                        {org?.logo_url && (
+                            <div style={{
+                                fontSize: '0.6875rem',
+                                color: 'var(--text-secondary)',
+                                fontWeight: 600,
+                                textTransform: 'uppercase',
+                                letterSpacing: '0.05em',
+                                opacity: 0.7
+                            }}>
+                                Powered by Stock Sewa
+                            </div>
+                        )}
+                        {!org?.logo_url && (
+                            <div style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)' }}>
+                                {organizationName}
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
