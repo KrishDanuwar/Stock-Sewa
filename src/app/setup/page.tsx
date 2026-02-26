@@ -29,7 +29,7 @@ export default function SetupPage() {
                             <div className="brand-glow"></div>
                             <Store size={32} className="brand-icon" />
                         </div>
-                        <h1 className="setup-title">Welcome to Stock Sewa</h1>
+                        <h1 className="setup-title">Welcome to <span className="whitespace-nowrap">Stock Sewa</span></h1>
                         <p className="setup-subtitle">
                             Ready to take your business to the next level? <br />
                             Let's start by naming your organization.

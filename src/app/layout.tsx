@@ -11,7 +11,7 @@ export const metadata: Metadata = {
   description: 'Multi-tenant inventory management and point-of-sale system designed for Nepali shopkeepers.',
 };
 
-import { ClerkProvider } from '@clerk/nextjs';
+import { ClerkProvider, ClerkLoaded, ClerkLoading } from '@clerk/nextjs';
 import { ThemeProvider } from '@/components/ThemeProvider';
 
 const CLERK_PUBLISHABLE_KEY = process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY || 'pk_test_aG9wZWZ1bC1zdGFsbGlvbi05OC5jbGVyay5hY2NvdW50cy5kZXYk';
@@ -22,18 +22,25 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <html lang="en">
         <body className={inter.className}>
           <ThemeProvider>
-            {children}
-            <Toaster
-              position="top-right"
-              toastOptions={{
-                style: {
-                  background: 'var(--bg-secondary)',
-                  border: '1px solid var(--glass-border)',
-                  color: 'var(--text-primary)',
-                  backdropFilter: 'var(--glass-blur)',
-                },
-              }}
-            />
+            <ClerkLoading>
+              <div className="fixed inset-0 flex items-center justify-center" style={{ background: 'var(--bg-base)' }}>
+                <div className="w-12 h-12 border-4 border-[var(--glass-border)] border-t-[var(--brand-primary)] rounded-full animate-spin"></div>
+              </div>
+            </ClerkLoading>
+            <ClerkLoaded>
+              {children}
+              <Toaster
+                position="top-right"
+                toastOptions={{
+                  style: {
+                    background: 'var(--bg-secondary)',
+                    border: '1px solid var(--glass-border)',
+                    color: 'var(--text-primary)',
+                    backdropFilter: 'var(--glass-blur)',
+                  },
+                }}
+              />
+            </ClerkLoaded>
           </ThemeProvider>
         </body>
       </html>
