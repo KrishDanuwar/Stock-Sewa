@@ -1,7 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { createInvoice, type CartItem } from '@/lib/actions/invoices';
+import { createInvoice } from '@/lib/actions/invoices';
+import type { CartItem } from '@/lib/actions/invoices';
 import { toast } from 'sonner';
 import { Plus, Minus, Trash2, ShoppingCart, Search, Receipt, CheckCircle, Printer } from 'lucide-react';
 import { printInvoicePDF } from '@/lib/utils/invoiceGenerator';
@@ -22,7 +23,11 @@ export default function POSClient({
     const productsList = products || [];
     const customersList = customers || [];
 
-    const [cart, setCart] = useState<CartItem[]>([]);
+    interface CartItemWithDiscount extends CartItem {
+        discountable?: boolean;
+    }
+
+    const [cart, setCart] = useState<CartItemWithDiscount[]>([]);
     const [invoiceType, setInvoiceType] = useState<'normal' | 'pan' | 'vat'>('normal');
     const [paymentMethod, setPaymentMethod] = useState('cash');
     const [customerId, setCustomerId] = useState('');
@@ -34,6 +39,7 @@ export default function POSClient({
     const [amountPaid, setAmountPaid] = useState<number | string>('');
     const [manualCustomerName, setManualCustomerName] = useState('');
     const [manualCustomerPan, setManualCustomerPan] = useState('');
+    const [discountPercent, setDiscountPercent] = useState<number | string>('');
 
     const filteredProducts = productsList.filter(p =>
         (p?.name || '').toLowerCase().includes(search.toLowerCase())
@@ -49,7 +55,7 @@ export default function POSClient({
         setCart(prev => {
             const exists = prev.find(i => i.product_id === p.id);
             if (exists) return prev.map(i => i.product_id === p.id ? { ...i, quantity: Math.min(i.quantity + 1, p.stock_quantity) } : i);
-            return [...prev, { product_id: p.id, product_name: p.name, quantity: 1, unit_price: p.price }];
+            return [...prev, { product_id: p.id, product_name: p.name, quantity: 1, unit_price: p.price, discountable: false }];
         });
     };
 
@@ -58,8 +64,13 @@ export default function POSClient({
     };
 
     const removeFromCart = (id: string) => setCart(prev => prev.filter(i => i.product_id !== id));
+    const toggleDiscountable = (id: string) => setCart(prev => prev.map(i => i.product_id === id ? { ...i, discountable: !i.discountable } : i));
 
-    const subtotal = cart.reduce((s, i) => s + i.unit_price * i.quantity, 0);
+    const numericDiscountPercent = typeof discountPercent === 'string' ? parseFloat(discountPercent) || 0 : discountPercent;
+
+    const discountAmount = cart.reduce((s, i) => s + (i.discountable ? i.unit_price * i.quantity * (numericDiscountPercent / 100) : 0), 0);
+    const rawSubtotal = cart.reduce((s, i) => s + i.unit_price * i.quantity, 0);
+    const subtotal = Math.max(0, rawSubtotal - discountAmount);
     const tax = invoiceType === 'vat' ? subtotal * 0.13 : 0;
     const total = subtotal + tax;
 
@@ -95,9 +106,10 @@ export default function POSClient({
                 payment_method: paymentMethod,
                 payment_status: getPaymentStatus(),
                 amount_paid: numericAmountPaid,
+                discount_amount: discountAmount,
                 customer_name_manual: customerMode === 'walkin' ? manualCustomerName : undefined,
                 customer_pan_manual: customerMode === 'walkin' ? manualCustomerPan : undefined,
-                items: cart,
+                items: cart.map(({ discountable, ...rest }) => rest), // Strip out UI-only fields
             });
 
             if (result?.error || !result?.invoice) {
@@ -118,6 +130,8 @@ export default function POSClient({
                     customer_name: customerMode === 'registered' ? selectedCustomer?.name : (manualCustomerName || 'Walk-in Customer'),
                     customer_pan: customerMode === 'registered' ? selectedCustomer?.pan_number || undefined : manualCustomerPan || undefined,
                     customer_tax_type: customerMode === 'registered' ? selectedCustomer?.tax_type as 'pan' | 'vat' | undefined : (manualCustomerPan ? (invoiceType as 'pan' | 'vat' | undefined) : undefined),
+                    raw_subtotal: rawSubtotal,
+                    discount_amount: discountAmount,
                     subtotal,
                     tax_amount: tax,
                     total_amount: total,
@@ -143,6 +157,7 @@ export default function POSClient({
             setCustomerMode('walkin');
             setInvoiceType('normal');
             setAmountPaid('');
+            setDiscountPercent('');
             setManualCustomerName('');
         } catch (error) {
             console.error('POS Checkout Critical Error:', error);
@@ -239,7 +254,13 @@ export default function POSClient({
                                 <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>
                                     Rs. {(item.unit_price * item.quantity).toLocaleString()}
                                 </span>
-                                <button onClick={() => removeFromCart(item.product_id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand-danger)', padding: 4 }}><Trash2 size={14} /></button>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: '0.6875rem', color: 'var(--text-secondary)' }}>
+                                        <input type="checkbox" checked={item.discountable} onChange={() => toggleDiscountable(item.product_id)} />
+                                        Dis. %
+                                    </label>
+                                    <button onClick={() => removeFromCart(item.product_id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand-danger)', padding: 4 }}><Trash2 size={14} /></button>
+                                </div>
                             </div>
                         </div>
                     ))}
@@ -374,6 +395,18 @@ export default function POSClient({
 
                     {/* Totals & Status */}
                     <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
+                            <span>Gross Amount</span>
+                            <span>Rs. {rawSubtotal.toLocaleString()}</span>
+                        </div>
+
+                        {discountAmount > 0 && (
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--brand-success)' }}>
+                                <span>Discount {numericDiscountPercent > 0 ? `(${numericDiscountPercent}%)` : ''}</span>
+                                <span>- Rs. {discountAmount.toLocaleString()}</span>
+                            </div>
+                        )}
+
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
                             <span>Total Bill</span>
                             <span>Rs. {total.toLocaleString()}</span>

@@ -16,6 +16,8 @@ export interface InvoiceData {
     customer_name?: string;
     customer_pan?: string;
     customer_tax_type?: 'pan' | 'vat';
+    raw_subtotal?: number;
+    discount_amount?: number;
     subtotal: number;
     tax_amount: number;
     total_amount: number;
@@ -117,17 +119,26 @@ function prepareInvoiceDoc(data: InvoiceData): jsPDF {
 
     // Totals
     doc.setFont('helvetica', 'bold');
-    if (data.invoice_type === 'vat') {
-        doc.text(`Subtotal: Rs. ${data.subtotal.toLocaleString()}`, 15, finalY);
+
+    // Optionally show raw subtotal and discount if applicable
+    if (data.discount_amount && data.discount_amount > 0 && data.raw_subtotal) {
+        doc.text(`Gross Subtotal: Rs. ${data.raw_subtotal.toLocaleString()}`, 15, finalY);
         finalY += 6;
-        doc.text(`VAT (13%): Rs. ${data.tax_amount.toLocaleString()}`, 15, finalY);
-        finalY += 1;
-    } else if (data.invoice_type === 'pan') {
-        doc.text(`Total: Rs. ${data.total_amount.toLocaleString()}`, 15, finalY);
-        finalY += 1;
+        doc.text(`Discount: Rs. ${data.discount_amount.toLocaleString()}`, 15, finalY);
+        finalY += 6;
+        doc.text(`Net Subtotal: Rs. ${data.subtotal.toLocaleString()}`, 15, finalY);
+        finalY += 6;
     } else {
         doc.text(`Subtotal: Rs. ${data.subtotal.toLocaleString()}`, 15, finalY);
         finalY += 6;
+    }
+
+    if (data.invoice_type === 'vat') {
+        doc.text(`VAT (13%): Rs. ${data.tax_amount.toLocaleString()}`, 15, finalY);
+        finalY += 1;
+    } else if (data.invoice_type === 'pan') {
+        // Just the total, which might just be subtotal anyway
+        finalY -= 5;
     }
 
     doc.setFontSize(11);

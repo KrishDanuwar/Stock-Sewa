@@ -21,6 +21,7 @@ export interface CreateInvoicePayload {
     customer_name_manual?: string;
     customer_pan_manual?: string;
     notes?: string;
+    discount_amount?: number;
     items: CartItem[];
 }
 
@@ -30,10 +31,12 @@ export async function createInvoice(payload: CreateInvoicePayload) {
     const today = getTodayBs();
 
     // ---- Calculation Engine ----
-    const subtotal = payload.items.reduce(
+    const rawSubtotal = payload.items.reduce(
         (sum, item) => sum + item.unit_price * item.quantity,
         0
     );
+    const discount_amount = payload.discount_amount || 0;
+    const subtotal = Math.max(0, rawSubtotal - discount_amount);
     const taxRate = payload.invoice_type === 'vat' ? 0.13 : 0;
     const tax_amount = parseFloat((subtotal * taxRate).toFixed(2));
     const total_amount = parseFloat((subtotal + tax_amount).toFixed(2));
@@ -60,6 +63,7 @@ export async function createInvoice(payload: CreateInvoicePayload) {
             payment_method: payload.payment_method,
             payment_status: payload.payment_status,
             amount_paid: payload.amount_paid,
+            discount_amount: payload.discount_amount || 0,
             notes: payload.notes || null,
             customer_name_manual: payload.customer_name_manual || null,
             customer_pan_manual: payload.customer_pan_manual || null,

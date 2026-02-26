@@ -23,6 +23,7 @@ type Invoice = {
     payment_method: string;
     payment_status?: string;
     amount_paid?: number;
+    discount_amount?: number;
     customers: { name: string; pan_number?: string; tax_type?: string } | null;
     customer_name_manual?: string;
     customer_pan_manual?: string;
@@ -59,7 +60,9 @@ export default function InvoicesClient({ invoices, organization }: { invoices: I
             customer_name: inv.customers?.name || inv.customer_name_manual,
             customer_pan: inv.customers?.pan_number || inv.customer_pan_manual || undefined,
             customer_tax_type: inv.customers?.tax_type as 'pan' | 'vat' | undefined,
-            subtotal: inv.total_amount - (inv.vat_amount || 0),
+            raw_subtotal: Number(inv.subtotal) + Number(inv.discount_amount || 0),
+            discount_amount: Number(inv.discount_amount || 0),
+            subtotal: Number(inv.subtotal),
             tax_amount: inv.vat_amount || 0,
             total_amount: inv.total_amount,
             amount_paid: Number(inv.amount_paid || 0),
