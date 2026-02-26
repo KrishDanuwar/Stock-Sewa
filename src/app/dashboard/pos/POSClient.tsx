@@ -24,7 +24,7 @@ export default function POSClient({
     const customersList = customers || [];
 
     interface CartItemWithDiscount extends CartItem {
-        discountable?: boolean;
+        discount_percent?: number | string;
     }
 
     const [cart, setCart] = useState<CartItemWithDiscount[]>([]);
@@ -39,7 +39,6 @@ export default function POSClient({
     const [amountPaid, setAmountPaid] = useState<number | string>('');
     const [manualCustomerName, setManualCustomerName] = useState('');
     const [manualCustomerPan, setManualCustomerPan] = useState('');
-    const [discountPercent, setDiscountPercent] = useState<number | string>('');
 
     const filteredProducts = productsList.filter(p =>
         (p?.name || '').toLowerCase().includes(search.toLowerCase())
@@ -55,7 +54,7 @@ export default function POSClient({
         setCart(prev => {
             const exists = prev.find(i => i.product_id === p.id);
             if (exists) return prev.map(i => i.product_id === p.id ? { ...i, quantity: Math.min(i.quantity + 1, p.stock_quantity) } : i);
-            return [...prev, { product_id: p.id, product_name: p.name, quantity: 1, unit_price: p.price, discountable: false }];
+            return [...prev, { product_id: p.id, product_name: p.name, quantity: 1, unit_price: p.price, discount_percent: '' }];
         });
     };
 
@@ -64,11 +63,12 @@ export default function POSClient({
     };
 
     const removeFromCart = (id: string) => setCart(prev => prev.filter(i => i.product_id !== id));
-    const toggleDiscountable = (id: string) => setCart(prev => prev.map(i => i.product_id === id ? { ...i, discountable: !i.discountable } : i));
+    const updateItemDiscount = (id: string, disc: string) => setCart(prev => prev.map(i => i.product_id === id ? { ...i, discount_percent: disc === '' ? '' : Math.min(100, Math.max(0, parseFloat(disc) || 0)) } : i));
 
-    const numericDiscountPercent = typeof discountPercent === 'string' ? parseFloat(discountPercent) || 0 : discountPercent;
-
-    const discountAmount = cart.reduce((s, i) => s + (i.discountable ? i.unit_price * i.quantity * (numericDiscountPercent / 100) : 0), 0);
+    const discountAmount = cart.reduce((s, i) => {
+        const discPercent = typeof i.discount_percent === 'string' ? parseFloat(i.discount_percent) || 0 : (i.discount_percent || 0);
+        return s + (i.unit_price * i.quantity * (discPercent / 100));
+    }, 0);
     const rawSubtotal = cart.reduce((s, i) => s + i.unit_price * i.quantity, 0);
     const subtotal = Math.max(0, rawSubtotal - discountAmount);
     const tax = invoiceType === 'vat' ? subtotal * 0.13 : 0;
@@ -109,7 +109,7 @@ export default function POSClient({
                 discount_amount: discountAmount,
                 customer_name_manual: customerMode === 'walkin' ? manualCustomerName : undefined,
                 customer_pan_manual: customerMode === 'walkin' ? manualCustomerPan : undefined,
-                items: cart.map(({ discountable, ...rest }) => rest), // Strip out UI-only fields
+                items: cart.map(({ discount_percent, ...rest }) => rest), // Strip out UI-only fields
             });
 
             if (result?.error || !result?.invoice) {
@@ -157,7 +157,6 @@ export default function POSClient({
             setCustomerMode('walkin');
             setInvoiceType('normal');
             setAmountPaid('');
-            setDiscountPercent('');
             setManualCustomerName('');
         } catch (error) {
             console.error('POS Checkout Critical Error:', error);
@@ -255,10 +254,14 @@ export default function POSClient({
                                     Rs. {(item.unit_price * item.quantity).toLocaleString()}
                                 </span>
                                 <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-                                    <label style={{ display: 'flex', alignItems: 'center', gap: 4, cursor: 'pointer', fontSize: '0.6875rem', color: 'var(--text-secondary)' }}>
-                                        <input type="checkbox" checked={item.discountable} onChange={() => toggleDiscountable(item.product_id)} />
-                                        Dis. %
-                                    </label>
+                                    <input
+                                        type="number"
+                                        placeholder="Dis. %"
+                                        min="0" max="100"
+                                        value={item.discount_percent || ''}
+                                        onChange={(e) => updateItemDiscount(item.product_id, e.target.value)}
+                                        style={{ width: 55, padding: '4px 6px', borderRadius: 4, border: '1px solid var(--glass-border)', background: 'rgba(255,255,255,0.05)', color: 'var(--text-primary)', fontSize: '0.75rem', textAlign: 'center' }}
+                                    />
                                     <button onClick={() => removeFromCart(item.product_id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand-danger)', padding: 4 }}><Trash2 size={14} /></button>
                                 </div>
                             </div>
@@ -402,7 +405,7 @@ export default function POSClient({
 
                         {discountAmount > 0 && (
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--brand-success)' }}>
-                                <span>Discount {numericDiscountPercent > 0 ? `(${numericDiscountPercent}%)` : ''}</span>
+                                <span>Discount</span>
                                 <span>- Rs. {discountAmount.toLocaleString()}</span>
                             </div>
                         )}
