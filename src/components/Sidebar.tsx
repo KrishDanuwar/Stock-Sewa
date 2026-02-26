@@ -1,7 +1,7 @@
 import { SignOutButton } from '@clerk/nextjs';
 import { getOrgContext } from '@/lib/org-context';
 import { createAdminClient } from '@/lib/supabase/server';
-import Link from 'next/link';
+import SidebarLink from './SidebarLink';
 import {
     LayoutDashboard,
     Package,
@@ -106,25 +106,7 @@ export default async function Sidebar() {
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
                     {navItems.map(({ href, icon: Icon, label }) => (
                         <li key={href}>
-                            <Link
-                                href={href}
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: 12,
-                                    padding: '10px 12px',
-                                    borderRadius: 10,
-                                    color: 'var(--text-secondary)',
-                                    textDecoration: 'none',
-                                    fontSize: '0.875rem',
-                                    fontWeight: 500,
-                                    transition: 'all 0.2s ease',
-                                }}
-                                className="nav-link"
-                            >
-                                <Icon size={18} />
-                                <span>{label}</span>
-                            </Link>
+                            <SidebarLink href={href} icon={Icon} label={label} />
                         </li>
                     ))}
                 </ul>
