@@ -103,11 +103,7 @@ export default function SetupPage() {
                     align-items: center;
                     justify-content: center;
                     padding: 24px;
-                    background-color: #0f172a; /* Match auth background base */
-                    background-image: 
-                        radial-gradient(ellipse at 20% 20%, rgba(79, 142, 247, 0.15) 0%, transparent 60%),
-                        radial-gradient(ellipse at 80% 80%, rgba(124, 58, 237, 0.12) 0%, transparent 60%),
-                        radial-gradient(ellipse at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 70%); /* Match auth background gradient */
+                    background: transparent; /* Handled by body in globals.css */
                     position: relative;
                     overflow: hidden;
                     font-family: var(--font-inter, 'Inter', sans-serif);
@@ -122,12 +118,12 @@ export default function SetupPage() {
 
                 /* Premium Glass Card */
                 .premium-glass-card {
-                    background: rgba(15, 23, 42, 0.6);
-                    backdrop-filter: blur(24px) saturate(180%);
-                    border: 1px solid rgba(255, 255, 255, 0.08);
-                    border-radius: 28px; /* Matched to border-radius: 28px in auth */
-                    padding: 32px; /* Matched to padding: 32px in auth */
-                    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3); /* Matched auth box-shadow */
+                    background: var(--glass-bg);
+                    backdrop-filter: var(--glass-blur);
+                    border: 1px solid var(--glass-border);
+                    border-radius: 28px;
+                    padding: 32px;
+                    box-shadow: var(--glass-shadow);
                     position: relative;
                     overflow: hidden;
                 }
@@ -175,15 +171,13 @@ export default function SetupPage() {
                     font-size: 2.25rem;
                     font-weight: 900;
                     letter-spacing: -0.03em;
-                    background: linear-gradient(to bottom, #fff, #94a3b8);
-                    -webkit-background-clip: text;
-                    -webkit-text-fill-color: transparent;
+                    color: var(--text-primary);
                     margin-bottom: 12px;
                 }
 
                 .setup-subtitle {
                     font-size: 1rem;
-                    color: #94a3b8;
+                    color: var(--text-secondary);
                     line-height: 1.6;
                     font-weight: 500;
                 }
@@ -199,7 +193,7 @@ export default function SetupPage() {
                     display: block;
                     font-size: 0.8125rem;
                     font-weight: 700;
-                    color: #475569;
+                    color: var(--text-muted);
                     text-transform: uppercase;
                     letter-spacing: 0.1em;
                     margin-bottom: 12px;
@@ -208,8 +202,8 @@ export default function SetupPage() {
 
                 .input-affix-wrapper {
                     position: relative;
-                    background: rgba(0, 0, 0, 0.25);
-                    border: 1px solid rgba(255, 255, 255, 0.1);
+                    background: var(--glass-input-bg);
+                    border: 1px solid var(--glass-border);
                     border-radius: 18px;
                     transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
                     display: flex;
@@ -218,8 +212,8 @@ export default function SetupPage() {
                 }
 
                 .input-affix-wrapper:focus-within {
-                    background: rgba(0, 0, 0, 0.4);
-                    border-color: rgba(79, 142, 247, 0.6);
+                    background: var(--glass-bg);
+                    border-color: var(--brand-primary);
                     transform: translateY(-2px);
                     box-shadow: 
                         0 10px 30px -10px rgba(0, 0, 0, 0.5),
@@ -227,7 +221,7 @@ export default function SetupPage() {
                 }
 
                 .input-icon {
-                    color: #475569;
+                    color: var(--text-muted);
                     transition: all 0.3s ease;
                     pointer-events: none;
                     flex-shrink: 0;
@@ -244,13 +238,13 @@ export default function SetupPage() {
                     border: none;
                     padding: 18px 14px;
                     font-size: 1.0625rem;
-                    color: #f8fafc;
+                    color: var(--text-primary);
                     outline: none;
                     font-weight: 500;
                 }
 
                 .premium-input::placeholder {
-                    color: #334155;
+                    color: var(--text-muted);
                 }
 
                 /* Submit Button */
@@ -339,16 +333,16 @@ export default function SetupPage() {
                 .setup-footer {
                     margin-top: 40px;
                     padding-top: 24px;
-                    border-t: 1px solid rgba(255, 255, 255, 0.05);
+                    border-t: 1px solid var(--glass-border);
                     text-align: center;
                 }
 
                 .premium-signout-btn {
                     background: transparent;
-                    border: 1px solid rgba(255, 255, 255, 0.05);
+                    border: 1px solid var(--glass-border);
                     padding: 10px 20px;
                     border-radius: 12px;
-                    color: #64748b;
+                    color: var(--text-muted);
                     font-size: 0.8125rem;
                     font-weight: 500;
                     cursor: pointer;
@@ -359,16 +353,16 @@ export default function SetupPage() {
                 }
 
                 .premium-signout-btn:hover {
-                    background: rgba(255, 255, 255, 0.03);
-                    color: #94a3b8;
-                    border-color: rgba(255, 255, 255, 0.1);
+                    background: var(--glass-bg);
+                    color: var(--text-primary);
+                    border-color: var(--brand-primary);
                 }
 
                 .copyright-text {
                     text-align: center;
                     margin-top: 32px;
                     font-size: 0.75rem;
-                    color: #475569;
+                    color: var(--text-muted);
                     letter-spacing: 0.02em;
                 }
 

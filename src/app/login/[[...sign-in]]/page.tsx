@@ -5,44 +5,47 @@ import { SignIn } from "@clerk/nextjs";
 
 export default function LoginPage() {
     return (
-        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: 'var(--bg-base)' }}>
-            {/* Premium Animated Background */}
-            <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div className="orb orb-1" />
-                <div className="orb orb-2" />
-                <div className="orb orb-3" />
-            </div>
+        <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: 'transparent' }}>
+            {/* Premium Animated Background handled by body in globals.css */}
+
 
             <div className="relative z-10 w-full max-w-[440px] animate-fade-in-up">
                 {/* Brand Identity */}
-                <div className="flex flex-col items-center mb-8">
-                    <div className="login-logo-container">
-                        <img src="/logo.jpg" alt="Stock Sewa Logo" className="login-logo" />
+                <div className="flex flex-col items-center mb-10">
+                    <div className="brand-icon-wrapper-premium">
+                        <div className="brand-glow"></div>
+                        <img src="/logo.jpg" alt="Logo" className="premium-logo-img" />
                     </div>
                     <div className="text-center">
                         <h1 translate="no" className="brand-title">Stock Sewa</h1>
-                        <p className="brand-tagline">Premium Inventory & POS System</p>
+                        <p className="brand-tagline">Premium Inventory & POS Solution</p>
                     </div>
                 </div>
 
-                {/* Clerk SignIn Component with custom styling override in globals.css */}
-                <div className="clerk-wrapper">
+                {/* Clerk SignIn Component */}
+                <div className="clerk-wrapper premium-auth-card">
                     <SignIn
                         routing="path"
                         path="/login"
                         appearance={{
+                            baseTheme: undefined, // We will manually override to get the perfect glass look
                             elements: {
-                                rootBox: "mx-auto",
-                                card: "glass-card-no-padding overflow-hidden",
-                                headerTitle: "hidden",
-                                headerSubtitle: "hidden",
-                                socialButtonsBlockButton: "glass-button login-social-btn",
-                                formButtonPrimary: "glass-button glass-button-primary w-full py-3",
-                                footerActionLink: "text-brand-primary font-semibold hover:underline",
-                                identityPreviewText: "text-text-primary",
+                                rootBox: "mx-auto w-full",
+                                card: "bg-transparent shadow-none border-none p-0",
+                                headerTitle: "clerk-header-title text-2xl font-extrabold tracking-tight",
+                                headerSubtitle: "clerk-header-subtitle font-medium",
+                                socialButtonsBlockButton: "glass-button-premium w-full mb-4",
+                                socialButtonsBlockButtonText: "clerk-text-primary font-semibold",
+                                formButtonPrimary: "premium-submit-btn-auth w-full py-4 mt-2",
+                                footerActionLink: "text-brand-primary font-bold hover:brightness-110 transition-colors",
+                                identityPreviewText: "clerk-text-primary font-medium",
                                 identityPreviewEditButtonIcon: "text-brand-primary",
-                                formFieldInput: "glass-input",
-                                formFieldLabel: "glass-label",
+                                formFieldInput: "premium-input-auth",
+                                formFieldLabel: "premium-label-auth",
+                                dividerLine: "clerk-divider-line",
+                                dividerText: "clerk-divider-text font-bold text-xs uppercase tracking-widest",
+                                formFieldAction: "text-brand-primary font-bold hover:brightness-110",
+                                footerActionText: "clerk-text-muted font-medium",
                             }
                         }}
                         signUpUrl="/signup"
@@ -51,13 +54,13 @@ export default function LoginPage() {
 
                 {/* Aesthetic Support Links */}
                 <div className="login-footer">
-                    <p>Need assistance?</p>
-                    <div className="flex justify-center gap-6 mt-2">
-                        <a href="https://wa.me/9779703360369" target="_blank" rel="noopener noreferrer" className="support-link support-whatsapp">
-                            WhatsApp
+                    <p className="mb-4">Need technical assistance?</p>
+                    <div className="flex justify-center gap-4">
+                        <a href="https://wa.me/9779703360369" target="_blank" rel="noopener noreferrer" className="support-card support-whatsapp">
+                            WhatsApp Support
                         </a>
-                        <a href="mailto:junsangsingh@gmail.com" className="support-link support-email">
-                            Email
+                        <a href="mailto:junsangsingh@gmail.com" className="support-card support-email">
+                            Email Support
                         </a>
                     </div>
                 </div>
@@ -98,57 +101,131 @@ export default function LoginPage() {
                     0% { transform: translate(0, 0) scale(1); }
                     100% { transform: translate(50px, 30px) scale(1.1); }
                 }
-                .login-logo-container {
-                    width: 80px;
-                    height: 80px;
+                .brand-icon-wrapper-premium {
+                    position: relative;
+                    width: 72px;
+                    height: 72px;
+                    background: var(--bg-card);
+                    border: 1px solid var(--glass-border);
                     border-radius: 20px;
-                    background: white;
                     display: flex;
+
                     align-items: center;
                     justify-content: center;
-                    margin-bottom: 20px;
-                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
-                    padding: 12px;
-                    animation: pulse 4s infinite;
+                    margin-bottom: 24px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+                    padding: 8px;
                 }
-                @keyframes pulse {
-                    0%, 100% { transform: scale(1); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12); }
-                    50% { transform: scale(1.03); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18); }
+                .brand-glow {
+                    position: absolute;
+                    inset: -4px;
+                    background: var(--brand-primary);
+                    opacity: 0.15;
+                    filter: blur(10px);
+                    border-radius: 24px;
                 }
-                .login-logo {
+                .premium-logo-img {
                     width: 100%;
                     height: 100%;
                     object-fit: contain;
+                    position: relative;
+                    z-index: 1;
                 }
                 .brand-title {
-                    font-size: 1.75rem;
+                    font-size: 2rem;
                     font-weight: 800;
                     color: var(--text-primary);
-                    letter-spacing: -0.03em;
+                    letter-spacing: -0.02em;
                 }
                 .brand-tagline {
-                    font-size: 0.875rem;
+                    font-size: 0.9375rem;
                     color: var(--text-secondary);
                     font-weight: 500;
-                    margin-top: 4px;
+                    margin-top: 6px;
                 }
-                .clerk-wrapper :global(.cl-internal-1dauvqw) {
-                    display: none;
+                .premium-auth-card {
+                    background: var(--glass-bg);
+                    backdrop-filter: var(--glass-blur);
+                    border: 1px solid var(--glass-border);
+                    border-radius: 28px;
+                    padding: 32px;
+                    box-shadow: var(--glass-shadow);
                 }
+                :global(.premium-input-auth) {
+                    background: var(--glass-input-bg) !important;
+                    border: 1px solid var(--glass-border) !important;
+                    border-radius: 12px !important;
+                    color: var(--text-primary) !important;
+                    padding: 12px 16px !important;
+                    transition: all 0.3s !important;
+                }
+                :global(.premium-input-auth:focus) {
+                    border-color: var(--brand-primary) !important;
+                    background: var(--glass-bg) !important;
+                    box-shadow: 0 0 0 1px var(--brand-primary) !important;
+                }
+                :global(.premium-label-auth) {
+                    color: var(--text-muted) !important;
+                    font-weight: 600 !important;
+                    font-size: 0.8125rem !important;
+                    margin-bottom: 6px !important;
+                    text-transform: uppercase !important;
+                    letter-spacing: 0.05em !important;
+                }
+                :global(.premium-submit-btn-auth) {
+                    background: var(--brand-primary) !important;
+                    border-radius: 12px !important;
+                    font-weight: 700 !important;
+                    letter-spacing: 0.02em !important;
+                    transition: all 0.3s !important;
+                }
+                :global(.premium-submit-btn-auth:hover) {
+                    filter: brightness(1.1) !important;
+                    transform: translateY(-1px) !important;
+                    box-shadow: 0 8px 20px rgba(79, 142, 247, 0.3) !important;
+                }
+                :global(.glass-button-premium) {
+                    background: var(--glass-bg) !important;
+                    border: 1px solid var(--glass-border) !important;
+                    border-radius: 12px !important;
+                    transition: all 0.3s !important;
+                }
+                :global(.glass-button-premium:hover) {
+                    background: var(--bg-card-hover) !important;
+                    border-color: var(--brand-primary) !important;
+                }
+                .support-card {
+                    flex: 1;
+                    padding: 12px;
+                    background: var(--glass-bg);
+                    border: 1px solid var(--glass-border);
+
+                    border-radius: 14px;
+                    font-weight: 600;
+                    font-size: 0.8125rem;
+                    text-decoration: none;
+                    transition: all 0.2s;
+                    text-align: center;
+                }
+                .support-whatsapp:hover { color: var(--brand-success); border-color: rgba(16, 185, 129, 0.3); background: rgba(16, 185, 129, 0.05); }
+                .support-email:hover { color: var(--brand-primary); border-color: rgba(79, 142, 247, 0.3); background: rgba(79, 142, 247, 0.05); }
                 .login-footer {
-                    margin-top: 40px;
+                    margin-top: 32px;
                     text-align: center;
                     font-size: 0.8125rem;
                     color: var(--text-muted);
                 }
-                .support-link {
-                    font-weight: 600;
-                    text-decoration: none;
-                    transition: all 0.2s;
+                .clerk-wrapper :global(.cl-internal-1dauvqw), 
+                .clerk-wrapper :global(.cl-internal-b3fm6y) {
+                    display: none; /* Hide Clerk branding footer if any */
                 }
-                .support-whatsapp:hover { color: var(--brand-success); text-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
-                .support-email:hover { color: var(--brand-primary); text-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+                .clerk-wrapper :global(.clerk-header-title) { color: var(--text-primary) !important; }
+                .clerk-wrapper :global(.clerk-header-subtitle) { color: var(--text-muted) !important; }
+                .clerk-wrapper :global(.clerk-text-primary) { color: var(--text-primary) !important; }
+                .clerk-wrapper :global(.clerk-text-muted) { color: var(--text-muted) !important; }
+                .clerk-wrapper :global(.clerk-divider-line) { background-color: var(--glass-border) !important; }
+                .clerk-wrapper :global(.clerk-divider-text) { color: var(--text-muted) !important; }
             `}</style>
-        </div>
+        </div >
     );
 }
