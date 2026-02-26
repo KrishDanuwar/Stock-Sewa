@@ -17,12 +17,7 @@ export default function SetupPage() {
 
     return (
         <div className="setup-container">
-            {/* Immersive Animated Background */}
-            <div className="bg-mesh">
-                <div className="orb orb-1"></div>
-                <div className="orb orb-2"></div>
-                <div className="orb orb-3"></div>
-            </div>
+            {/* The background gradients are now handled purely by CSS on .setup-container, matching the auth pages exactly */}
 
             <div className="setup-wrapper animate-reveal">
                 <div className="premium-glass-card">
@@ -66,7 +61,10 @@ export default function SetupPage() {
                         >
                             <span className="btn-content">
                                 {isPending ? (
-                                    'Preparing your workspace...'
+                                    <>
+                                        <div className="btn-spinner"></div>
+                                        Preparing your workspace...
+                                    </>
                                 ) : (
                                     <>
                                         Get Started <Rocket size={18} className="btn-icon" />
@@ -105,61 +103,19 @@ export default function SetupPage() {
                     align-items: center;
                     justify-content: center;
                     padding: 24px;
-                    background: #020617;
+                    background-color: #0f172a; /* Match auth background base */
+                    background-image: 
+                        radial-gradient(ellipse at 20% 20%, rgba(79, 142, 247, 0.15) 0%, transparent 60%),
+                        radial-gradient(ellipse at 80% 80%, rgba(124, 58, 237, 0.12) 0%, transparent 60%),
+                        radial-gradient(ellipse at 50% 50%, rgba(6, 182, 212, 0.05) 0%, transparent 70%); /* Match auth background gradient */
                     position: relative;
                     overflow: hidden;
                     font-family: var(--font-inter, 'Inter', sans-serif);
                 }
 
-                /* Immersive Background */
-                .bg-mesh {
-                    position: fixed;
-                    inset: 0;
-                    z-index: 0;
-                    filter: blur(80px);
-                    opacity: 0.6;
-                }
-
-                .orb {
-                    position: absolute;
-                    border-radius: 50%;
-                    animation: float 20s infinite alternate ease-in-out;
-                }
-
-                .orb-1 {
-                    top: -10%;
-                    left: -10%;
-                    width: 60vw;
-                    height: 60vw;
-                    background: radial-gradient(circle, var(--brand-primary) 0%, transparent 70%);
-                }
-
-                .orb-2 {
-                    bottom: -10%;
-                    right: -10%;
-                    width: 50vw;
-                    height: 50vw;
-                    background: radial-gradient(circle, var(--brand-secondary) 0%, transparent 70%);
-                    animation-delay: -5s;
-                }
-
-                .orb-3 {
-                    top: 40%;
-                    left: 30%;
-                    width: 40vw;
-                    height: 40vw;
-                    background: radial-gradient(circle, var(--brand-accent) 0%, transparent 70%);
-                    animation-delay: -10s;
-                }
-
-                @keyframes float {
-                    0% { transform: translate(0, 0) scale(1); }
-                    100% { transform: translate(100px, 50px) scale(1.1); }
-                }
-
                 .setup-wrapper {
                     width: 100%;
-                    max-width: 480px;
+                    max-width: 440px; /* Slightly narrower to match Clerk auth card width */
                     position: relative;
                     z-index: 10;
                 }
@@ -168,13 +124,10 @@ export default function SetupPage() {
                 .premium-glass-card {
                     background: rgba(15, 23, 42, 0.6);
                     backdrop-filter: blur(24px) saturate(180%);
-                    -webkit-backdrop-filter: blur(24px) saturate(180%);
                     border: 1px solid rgba(255, 255, 255, 0.08);
-                    border-radius: 32px;
-                    padding: 48px;
-                    box-shadow: 
-                        0 20px 50px rgba(0, 0, 0, 0.3),
-                        0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+                    border-radius: 28px; /* Matched to border-radius: 28px in auth */
+                    padding: 32px; /* Matched to padding: 32px in auth */
+                    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3); /* Matched auth box-shadow */
                     position: relative;
                     overflow: hidden;
                 }
@@ -219,77 +172,85 @@ export default function SetupPage() {
                 }
 
                 .setup-title {
-                    font-size: 2rem;
-                    font-weight: 800;
-                    letter-spacing: -0.02em;
-                    color: #fff;
+                    font-size: 2.25rem;
+                    font-weight: 900;
+                    letter-spacing: -0.03em;
+                    background: linear-gradient(to bottom, #fff, #94a3b8);
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
                     margin-bottom: 12px;
                 }
 
                 .setup-subtitle {
-                    font-size: 0.9375rem;
+                    font-size: 1rem;
                     color: #94a3b8;
                     line-height: 1.6;
+                    font-weight: 500;
                 }
 
                 /* Form */
                 .setup-form {
                     display: flex;
                     flex-direction: column;
-                    gap: 28px;
+                    gap: 32px;
                 }
 
                 .premium-label {
                     display: block;
                     font-size: 0.8125rem;
-                    font-weight: 600;
-                    color: #64748b;
+                    font-weight: 700;
+                    color: #475569;
                     text-transform: uppercase;
-                    letter-spacing: 0.05em;
-                    margin-bottom: 10px;
-                    margin-left: 4px;
+                    letter-spacing: 0.1em;
+                    margin-bottom: 12px;
+                    margin-left: 2px;
                 }
 
                 .input-affix-wrapper {
                     position: relative;
-                    background: rgba(0, 0, 0, 0.2);
+                    background: rgba(0, 0, 0, 0.25);
                     border: 1px solid rgba(255, 255, 255, 0.1);
-                    border-radius: 16px;
-                    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                    border-radius: 18px;
+                    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+                    display: flex;
+                    align-items: center;
+                    padding: 0 20px;
                 }
 
                 .input-affix-wrapper:focus-within {
-                    background: rgba(0, 0, 0, 0.3);
-                    border-color: rgba(79, 142, 247, 0.5);
-                    transform: translateY(-1px);
-                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+                    background: rgba(0, 0, 0, 0.4);
+                    border-color: rgba(79, 142, 247, 0.6);
+                    transform: translateY(-2px);
+                    box-shadow: 
+                        0 10px 30px -10px rgba(0, 0, 0, 0.5),
+                        0 0 0 1px rgba(79, 142, 247, 0.2);
                 }
 
                 .input-icon {
-                    position: absolute;
-                    left: 16px;
-                    top: 50%;
-                    transform: translateY(-50%);
                     color: #475569;
-                    transition: color 0.3s;
+                    transition: all 0.3s ease;
+                    pointer-events: none;
+                    flex-shrink: 0;
                 }
 
                 .input-affix-wrapper:focus-within .input-icon {
                     color: var(--brand-primary);
+                    transform: scale(1.1);
                 }
 
                 .premium-input {
-                    width: 100%;
+                    flex: 1;
                     background: transparent;
                     border: none;
-                    padding: 16px 16px 16px 48px;
-                    font-size: 1rem;
+                    padding: 18px 14px;
+                    font-size: 1.0625rem;
                     color: #f8fafc;
                     outline: none;
+                    font-weight: 500;
                 }
 
                 .premium-input::placeholder {
-                    color: #475569;
+                    color: #334155;
                 }
 
                 /* Submit Button */
@@ -297,17 +258,24 @@ export default function SetupPage() {
                     position: relative;
                     background: var(--brand-primary);
                     border: none;
-                    border-radius: 16px;
-                    padding: 16px 24px;
+                    border-radius: 18px;
+                    padding: 18px 28px;
                     color: #fff;
-                    font-size: 1rem;
-                    font-weight: 700;
+                    font-size: 1.0625rem;
+                    font-weight: 800;
                     cursor: pointer;
                     overflow: hidden;
-                    transition: all 0.3s;
+                    transition: all 0.4s cubic-bezier(0.23, 1, 0.32, 1);
+                    box-shadow: 0 8px 16px -4px rgba(79, 142, 247, 0.3);
+                }
+
+                .btn-content {
+                    position: relative;
+                    z-index: 10;
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    gap: 10px;
                 }
 
                 .premium-submit-btn:hover:not(:disabled) {
@@ -352,6 +320,19 @@ export default function SetupPage() {
 
                 .premium-submit-btn:hover .btn-icon {
                     transform: translateX(4px) translateY(-2px);
+                }
+
+                .btn-spinner {
+                    width: 20px;
+                    height: 20px;
+                    border: 2px solid rgba(255, 255, 255, 0.3);
+                    border-radius: 50%;
+                    border-top-color: white;
+                    animation: spin 0.8s linear infinite;
+                }
+
+                @keyframes spin {
+                    to { transform: rotate(360deg); }
                 }
 
                 /* Footer */
