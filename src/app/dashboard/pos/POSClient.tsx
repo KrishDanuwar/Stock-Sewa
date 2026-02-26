@@ -8,7 +8,7 @@ import { printInvoicePDF } from '@/lib/utils/invoiceGenerator';
 
 type Product = { id: string; name: string; price: number; stock_quantity: number; unit: string; };
 type Customer = { id: string; name: string; pan_number: string | null; tax_type?: 'pan' | 'vat'; };
-type Organization = { name: string; pan_vat: string | null; address: string | null; phone: string | null; } | null;
+type Organization = { name: string; pan_vat: string | null; address: string | null; phone: string | null; logo_url: string | null; } | null;
 
 export default function POSClient({
     products = [],
@@ -108,7 +108,7 @@ export default function POSClient({
 
             try {
                 const invData = {
-                    organization: organization || { name: 'Stock Sewa', pan_vat: null, address: null, phone: null },
+                    organization: organization || { name: 'Stock Sewa', pan_vat: null, address: null, phone: null, logo_url: null },
                     invoice_number: result.invoice.invoice_number,
                     invoice_type: invoiceType,
                     date_ad: new Date().toISOString().split('T')[0],
@@ -154,8 +154,17 @@ export default function POSClient({
             {/* Left: Products */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, overflow: 'hidden' }}>
                 <div className="page-header" style={{ marginBottom: 0 }}>
-                    <h1 className="page-title">POS — Sales</h1>
-                    <p className="page-subtitle">Point of Sale</p>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                        {organization?.logo_url && (
+                            <div style={{ width: 44, height: 44, borderRadius: 10, background: 'white', overflow: 'hidden', flexShrink: 0, border: '1px solid var(--glass-border)', padding: 2 }}>
+                                <img src={organization.logo_url} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                            </div>
+                        )}
+                        <div>
+                            <h1 className="page-title">POS — Sales</h1>
+                            <p className="page-subtitle">{organization?.name || 'Point of Sale'}</p>
+                        </div>
+                    </div>
                 </div>
                 <div style={{ position: 'relative' }}>
                     <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />

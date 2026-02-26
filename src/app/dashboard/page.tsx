@@ -70,11 +70,18 @@ export default async function DashboardPage() {
 
     return (
         <div className="animate-fade-in-up">
-            <div className="page-header">
-                <h1 className="page-title">{organizationName}</h1>
-                <p className="page-subtitle">
-                    Today: {today.formattedEn}
-                </p>
+            <div className="page-header" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                {(await getOrgContext()).logoUrl && (
+                    <div style={{ width: 64, height: 64, borderRadius: 16, background: 'white', flexShrink: 0, overflow: 'hidden', border: '1px solid var(--glass-border)', padding: 4 }}>
+                        <img src={(await getOrgContext()).logoUrl!} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    </div>
+                )}
+                <div>
+                    <h1 className="page-title">{organizationName}</h1>
+                    <p className="page-subtitle">
+                        Today: {today.formattedEn}
+                    </p>
+                </div>
             </div>
 
             {/* Stat Cards */}

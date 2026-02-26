@@ -6,6 +6,7 @@ export interface OrgContext {
     userId: string;
     organizationId: string;
     organizationName: string;
+    logoUrl: string | null;
     email: string;
 }
 
@@ -26,7 +27,7 @@ export async function getOrgContext(): Promise<OrgContext> {
     // With Clerk, 'id' in profiles table corresponds to Clerk's userId
     const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('organization_id, organizations(name)')
+        .select('organization_id, organizations(name, logo_url)')
         .eq('id', userId)
         .single();
 
@@ -38,7 +39,7 @@ export async function getOrgContext(): Promise<OrgContext> {
 
     const orgData = Array.isArray(profile.organizations)
         ? profile.organizations[0]
-        : (profile.organizations as { name: string } | null);
+        : (profile.organizations as { name: string, logo_url: string | null } | null);
 
     const orgName = orgData?.name ?? 'My Organization';
 
@@ -46,6 +47,7 @@ export async function getOrgContext(): Promise<OrgContext> {
         userId: userId,
         organizationId: profile.organization_id,
         organizationName: orgName,
+        logoUrl: orgData?.logo_url || null,
         email: user.emailAddresses[0]?.emailAddress || '',
     };
 }
