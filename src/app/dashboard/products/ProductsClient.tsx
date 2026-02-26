@@ -59,7 +59,8 @@ export default function ProductsClient({ products }: { products: Product[] }) {
         e.preventDefault();
         if (!restockItem) return;
         const qty = parseInt(restockQty);
-        if (isNaN(qty) || qty <= 0) return toast.error('Enter valid quantity');
+        if (isNaN(qty) || qty <= 0) return toast.error('Enter a valid positive quantity');
+        if (parseFloat(restockPrice) < 0 || parseFloat(restockCost) < 0) return toast.error('Prices cannot be negative');
 
         setRestocking(true);
         const result = await restockProduct(
@@ -230,11 +231,11 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                                 <div className="form-group">
                                     <label className="form-label">MRP  रु *</label>
-                                    <input name="price" type="number" min="0" step="0.01" required className="glass-input" placeholder="0.00" />
+                                    <input name="price" type="number" min="0" step="0.01" required className="glass-input" placeholder="0.00" onKeyDown={e => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }} />
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label">Initial Stock *</label>
-                                    <input name="stock_quantity" type="number" min="0" required className="glass-input" placeholder="Qty" />
+                                    <input name="stock_quantity" type="number" min="0" required className="glass-input" placeholder="Qty" onKeyDown={e => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }} />
                                 </div>
                             </div>
 
@@ -245,7 +246,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label">Category</label>
-                                    <input name="category" className="glass-input" placeholder="e.g. Paint" autoComplete="off" />
+                                    <input name="category" className="glass-input" autoComplete="off" />
                                 </div>
                             </div>
 
@@ -294,10 +295,12 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                 <input
                                     className="glass-input"
                                     type="number"
+                                    min="1"
                                     autoFocus
-                                    placeholder="Enter quantity to add"
+                                    placeholder="Enter positive quantity to add"
                                     value={restockQty}
                                     onChange={e => setRestockQty(e.target.value)}
+                                    onKeyDown={e => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
                                     required
                                 />
                             </div>
@@ -308,9 +311,11 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                     <input
                                         className="glass-input"
                                         type="number"
+                                        min="0"
                                         step="0.01"
                                         value={restockPrice}
                                         onChange={e => setRestockPrice(e.target.value)}
+                                        onKeyDown={e => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
                                     />
                                 </div>
                                 <div className="form-group">
@@ -318,9 +323,11 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                     <input
                                         className="glass-input"
                                         type="number"
+                                        min="0"
                                         step="0.01"
                                         value={restockCost}
                                         onChange={e => setRestockCost(e.target.value)}
+                                        onKeyDown={e => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
                                     />
                                 </div>
                             </div>
