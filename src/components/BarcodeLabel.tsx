@@ -12,7 +12,7 @@ interface LabelProps {
     batch?: string;
 }
 
-export default function BarcodeLabel({ name, price, barcode, mfg }: LabelProps) {
+export default function BarcodeLabel({ name, price, barcode, mfg, batch }: LabelProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [imgData, setImgData] = useState<string>('');
     const [mounted, setMounted] = useState(false);
@@ -28,10 +28,10 @@ export default function BarcodeLabel({ name, price, barcode, mfg }: LabelProps) 
                 // High-resolution rendering but scaled for 50x25mm
                 JsBarcode(canvasRef.current, barcode, {
                     format: "CODE128",
-                    width: 2,
-                    height: 50,
+                    width: 1.5,
+                    height: 35,
                     displayValue: true,
-                    fontSize: 16,
+                    fontSize: 12,
                     margin: 0,
                     background: "#ffffff"
                 });
@@ -50,8 +50,6 @@ export default function BarcodeLabel({ name, price, barcode, mfg }: LabelProps) 
                 <canvas ref={canvasRef} style={{ display: 'none' }} />
 
                 <div className="label-content">
-                    <div className="mfg-text">MFG: {mfg || 'N/A'}</div>
-
                     <div className="barcode-zone">
                         {imgData ? (
                             <img src={imgData} className="barcode-img" alt="barcode" />
@@ -60,8 +58,13 @@ export default function BarcodeLabel({ name, price, barcode, mfg }: LabelProps) 
                         )}
                     </div>
 
-                    <div className="mrp-text">
-                        MRP: Rs {price.toLocaleString()}
+                    <div className="product-name">
+                        {name}
+                    </div>
+
+                    <div className="details-row">
+                        <span>MRP: Rs {price.toLocaleString()}</span>
+                        <span>MFG: {mfg || 'N/A'}</span>
                     </div>
                 </div>
             </div>
@@ -82,40 +85,56 @@ export default function BarcodeLabel({ name, price, barcode, mfg }: LabelProps) 
                     display: flex;
                     flex-direction: column;
                     align-items: center;
-                    justify-content: space-between;
-                    height: 23mm;
+                    justify-content: flex-start;
+                    height: 25mm;
                     width: 48mm;
-                    padding: 0.5mm;
+                    padding: 1mm 0;
                     box-sizing: border-box;
                 }
-                .mfg-text {
-                    font-size: 6pt;
-                    font-weight: 600;
-                    color: #000;
-                    margin: 0;
-                    text-transform: uppercase;
-                }
                 .barcode-zone {
-                    width: 46mm;
+                    width: 48mm;
                     height: 14mm;
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    margin-bottom: 1mm;
                 }
                 .barcode-img {
-                    max-width: 46mm;
+                    max-width: 48mm;
                     max-height: 14mm;
-                    image-rendering: pixelated;
+                    image-rendering: auto;
                 }
                 .barcode-placeholder {
                     font-size: 6pt;
                     color: #666;
                 }
-                .mrp-text {
-                    font-size: 10pt;
-                    font-weight: 900;
+                .product-name {
+                    font-size: 8pt;
+                    font-weight: 700;
                     color: #000;
                     margin: 0;
+                    text-transform: uppercase;
+                    text-align: center;
+                    width: 48mm;
+                    display: -webkit-box;
+                    -webkit-line-clamp: 2;
+                    -webkit-box-orient: vertical;
+                    overflow: hidden;
+                    line-height: 1.1;
+                    max-height: 18pt;
+                    margin-bottom: 0.5mm;
+                }
+                .details-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    width: 48mm;
+                    font-size: 6pt;
+                    font-weight: 700;
+                    color: #000;
+                    margin-top: auto;
+                    padding: 0 1mm;
+                    box-sizing: border-box;
                 }
             `}</style>
 
