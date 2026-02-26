@@ -245,7 +245,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                 </div>
                                 <div className="form-group">
                                     <label className="form-label">Category</label>
-                                    <input name="category" className="glass-input" placeholder="e.g. Paint" />
+                                    <input name="category" className="glass-input" placeholder="e.g. Paint" autoComplete="off" />
                                 </div>
                             </div>
 
