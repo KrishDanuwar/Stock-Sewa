@@ -119,7 +119,6 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                     price={printProduct.price}
                     barcode={printProduct.barcode || ''}
                     mfg={printProduct.mfg_date || 'N/A'}
-                    batch={printProduct.batch_number || 'N/A'}
                 />
             )}
 
