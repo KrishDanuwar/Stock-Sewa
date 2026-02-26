@@ -82,8 +82,8 @@ export default function CustomersClient({ customers }: { customers: Customer[] }
             </div>
 
             {showModal && (
-                <div style={{ position: 'fixed', inset: 0, zIndex: 100, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)' }}>
-                    <div className="glass-card animate-fade-in-up" style={{ width: '100%', maxWidth: 460, padding: 28, position: 'relative' }}>
+                <div className="glass-modal">
+                    <div className="glass-card glass-modal-card animate-fade-in-up" style={{ width: '100%', maxWidth: 460, padding: 28, position: 'relative' }}>
                         <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
                             <X size={20} />
                         </button>
