@@ -1,17 +1,6 @@
 export function numberToWords(num: number): string {
-    const a = ['', 'One ', 'Two ', 'Three ', 'Four ', 'Five ', 'Six ', 'Seven ', 'Eight ', 'Nine ', 'Ten ', 'Eleven ', 'Twelve ', 'Thirteen ', 'Fourteen ', 'Fifteen ', 'Sixteen ', 'Seventeen ', 'Eighteen ', 'Nineteen '];
-    const b = ['', '', 'Twenty', 'Thirty', 'Forty', 'Fifty', 'Sixty', 'Seventy', 'Eighty', 'Ninety'];
-
-    if ((num = num.toString().split('.')[0] as any) === '0') return 'Zero';
+    if (num === 0) return 'Zero Only';
     if (num.toString().length > 12) return 'Overflow';
-
-    const n = ('000000000000' + num).substring(num.toString().length).match(/.{1,3}/g);
-    if (!n) return '';
-
-    let str = '';
-    const units = ['Billion ', 'Million ', 'Thousand ', '']; // Simplified for International, can adapt for Lakh/Crore
-    // For Nepal/India: Hundred, Thousand, Lakh, Crore
-    // Let's use simple International for now or a custom Lakh/Crore one
 
     return internationalToWords(num);
 }
@@ -21,7 +10,6 @@ function internationalToWords(n: number): string {
 
     const units = ['', 'Thousand', 'Million', 'Billion'];
     let words = '';
-    let i = 0;
 
     const parts = [];
     let temp = Math.floor(n);

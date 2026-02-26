@@ -1,54 +1,51 @@
 import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { auth, currentUser } from '@clerk/nextjs/server';
 
 export interface OrgContext {
     userId: string;
     organizationId: string;
     organizationName: string;
-    language: 'en' | 'np';
     email: string;
 }
 
 /**
  * The gatekeeper for multi-tenancy.
- * Call this at the top of every server action and protected server component.
- * Throws a redirect to /login if the user is not authenticated.
+ * Uses Clerk for auth and Supabase for organization mapping.
  */
 export async function getOrgContext(): Promise<OrgContext> {
-    const supabase = await createClient();
+    const { userId } = await auth();
+    const user = await currentUser();
 
-    const {
-        data: { user },
-        error: authError,
-    } = await supabase.auth.getUser();
-
-    if (authError || !user) {
+    if (!userId || !user) {
         redirect('/login');
     }
 
+    const supabase = await createClient();
+
+    // With Clerk, 'id' in profiles table corresponds to Clerk's userId
     const { data: profile, error: profileError } = await supabase
         .from('profiles')
-        .select('organization_id, organizations(name, preferred_language)')
-        .eq('id', user.id)
+        .select('organization_id, organizations(name)')
+        .eq('id', userId)
         .single();
 
     if (profileError || !profile) {
-        console.error('Profile missing for user:', user.id);
+        console.error('Profile/Org missing for Clerk user:', userId);
+        // If profile doesn't exist, they need to go through the setup/onboarding
         redirect('/setup');
     }
 
     const orgData = Array.isArray(profile.organizations)
         ? profile.organizations[0]
-        : (profile.organizations as any);
+        : (profile.organizations as { name: string } | null);
 
     const orgName = orgData?.name ?? 'My Organization';
-    const language = orgData?.preferred_language || 'en';
 
     return {
-        userId: user.id,
+        userId: userId,
         organizationId: profile.organization_id,
         organizationName: orgName,
-        language: language as 'en' | 'np',
-        email: user.email || '',
+        email: user.emailAddresses[0]?.emailAddress || '',
     };
 }

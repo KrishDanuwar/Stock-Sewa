@@ -126,7 +126,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
             <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <div>
                     <h1 className="page-title">Products</h1>
-                    <p className="page-subtitle">उत्पादन व्यवस्थापन — {products.length} items</p>
+                    <p className="page-subtitle">{products.length} items</p>
                 </div>
                 <button onClick={() => setShowModal(true)} className="glass-button glass-button-primary">
                     <Plus size={16} /> Add Product
@@ -176,7 +176,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                         </div>
                                     </td>
                                     <td><span style={{ color: 'var(--text-secondary)' }}>{p.category || '—'}</span></td>
-                                    <td style={{ fontWeight: 600 }}>रु {Number(p.price).toLocaleString()}</td>
+                                    <td style={{ fontWeight: 600 }}>Rs. {Number(p.price).toLocaleString()}</td>
                                     <td>{stockBadge(p.stock_quantity)}</td>
                                     <td>{expiryBadge(p.expiry_date)}</td>
                                     <td style={{ color: 'var(--text-secondary)' }}>{p.unit}</td>

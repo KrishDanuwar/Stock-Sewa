@@ -1,140 +1,152 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from '@/lib/actions/auth';
-import { toast } from 'sonner';
-import Link from 'next/link';
-import { LogIn, Eye, EyeOff, Package, Mail, Lock } from 'lucide-react';
+import { SignIn } from "@clerk/nextjs";
+
 
 export default function LoginPage() {
-    const [loading, setLoading] = useState(false);
-    const [showPw, setShowPw] = useState(false);
-
-    async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
-        e.preventDefault();
-        setLoading(true);
-        const fd = new FormData(e.currentTarget);
-        const result = await signIn(fd);
-        if (result?.error) {
-            toast.error(result.error);
-        }
-        setLoading(false);
-    }
-
     return (
         <div className="min-h-screen flex items-center justify-center p-4 relative overflow-hidden" style={{ background: 'var(--bg-base)' }}>
-            {/* Dynamic Background Elements */}
+            {/* Premium Animated Background */}
             <div className="fixed inset-0 overflow-hidden pointer-events-none">
-                <div style={{ position: 'absolute', top: '-10%', left: '-5%', width: '600px', height: '600px', background: 'radial-gradient(circle, rgba(79,142,247,0.15) 0%, transparent 70%)', borderRadius: '50%' }} />
-                <div style={{ position: 'absolute', bottom: '-15%', right: '-5%', width: '700px', height: '700px', background: 'radial-gradient(circle, rgba(124,58,237,0.1) 0%, transparent 70%)', borderRadius: '50%' }} />
+                <div className="orb orb-1" />
+                <div className="orb orb-2" />
+                <div className="orb orb-3" />
             </div>
 
-            <div className="glass-card animate-fade-in-up w-full max-w-[480px] p-12 relative z-10" style={{ boxShadow: 'var(--glass-shadow)' }}>
+            <div className="relative z-10 w-full max-w-[440px] animate-fade-in-up">
                 {/* Brand Identity */}
-                <div className="flex flex-col items-center mb-10">
-                    <div style={{
-                        width: 72,
-                        height: 72,
-                        borderRadius: 16,
-                        background: 'white',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        marginBottom: 16,
-                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.08)',
-                        overflow: 'hidden',
-                        padding: 12
-                    }}>
-                        <img src="/logo.jpg" alt="Stock Sewa Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                <div className="flex flex-col items-center mb-8">
+                    <div className="login-logo-container">
+                        <img src="/logo.jpg" alt="Stock Sewa Logo" className="login-logo" />
                     </div>
                     <div className="text-center">
-                        <h1 translate="no" style={{ fontSize: '1.5rem', fontWeight: 800, color: 'var(--text-primary)', letterSpacing: '-0.02em' }}>
-                            Stock Sewa
-                        </h1>
-                        <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', fontWeight: 500, marginTop: 4 }}>
-                            Sign in to your account
-                        </p>
+                        <h1 translate="no" className="brand-title">Stock Sewa</h1>
+                        <p className="brand-tagline">Premium Inventory & POS System</p>
                     </div>
                 </div>
 
-                <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-                    <div className="form-group">
-                        <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Email Address</label>
-                        <div style={{ position: 'relative' }}>
-                            <Mail size={16} color="var(--text-muted)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
-                            <input
-                                name="email"
-                                type="email"
-                                required
-                                className="glass-input"
-                                placeholder="name@company.com"
-                                style={{ paddingLeft: 44, fontSize: '0.875rem' }}
-                            />
-                        </div>
-                    </div>
-
-                    <div className="form-group">
-                        <label style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--text-secondary)', display: 'block', marginBottom: 8 }}>Password</label>
-                        <div style={{ position: 'relative' }}>
-                            <Lock size={16} color="var(--text-muted)" style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} />
-                            <input
-                                name="password"
-                                type={showPw ? 'text' : 'password'}
-                                required
-                                className="glass-input"
-                                placeholder="••••••••"
-                                style={{ paddingLeft: 44, paddingRight: 44, fontSize: '0.875rem' }}
-                            />
-                            <button
-                                type="button"
-                                onClick={() => setShowPw(!showPw)}
-                                style={{ position: 'absolute', right: 16, top: '50%', transform: 'translateY(-50%)', background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', display: 'flex' }}
-                            >
-                                {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-                            </button>
-                        </div>
-                    </div>
-
-                    <button
-                        type="submit"
-                        disabled={loading}
-                        className="glass-button glass-button-primary"
-                        style={{
-                            width: '100%',
-                            justifyContent: 'center',
-                            padding: '12px 24px',
-                            fontSize: '0.9375rem',
-                            fontWeight: 600,
-                            marginTop: 24,
-                            borderRadius: 12
+                {/* Clerk SignIn Component with custom styling override in globals.css */}
+                <div className="clerk-wrapper">
+                    <SignIn
+                        appearance={{
+                            elements: {
+                                rootBox: "mx-auto",
+                                card: "glass-card-no-padding overflow-hidden",
+                                headerTitle: "hidden",
+                                headerSubtitle: "hidden",
+                                socialButtonsBlockButton: "glass-button login-social-btn",
+                                formButtonPrimary: "glass-button glass-button-primary w-full py-3",
+                                footerActionLink: "text-brand-primary font-semibold hover:underline",
+                                identityPreviewText: "text-text-primary",
+                                identityPreviewEditButtonIcon: "text-brand-primary",
+                                formFieldInput: "glass-input",
+                                formFieldLabel: "glass-label",
+                            }
                         }}
-                    >
-                        {loading ? 'Entering System...' : <><LogIn size={18} /> Sign In</>}
-                    </button>
-                </form>
-
-                <div style={{ marginTop: 32, textAlign: 'center' }}>
-                    <span style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                        New to Stock Sewa?
-                    </span>
-                    {' '}
-                    <Link href="/signup" style={{ color: 'var(--brand-primary)', fontWeight: 600, textDecoration: 'none', paddingLeft: 4, fontSize: '0.8125rem' }}>
-                        Create an account
-                    </Link>
+                        signUpUrl="/signup"
+                    />
                 </div>
 
-                <div style={{ marginTop: 40, paddingTop: 24, borderTop: '1px solid var(--glass-border)', textAlign: 'center' }}>
-                    <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', marginBottom: 12 }}>Need help? Contact support:</p>
-                    <div style={{ display: 'flex', justifyContent: 'center', gap: 16 }}>
-                        <a href="https://wa.me/9779703360369" target="_blank" rel="noopener noreferrer" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8125rem', color: 'var(--brand-success)', textDecoration: 'none', fontWeight: 600 }}>
+                {/* Aesthetic Support Links */}
+                <div className="login-footer">
+                    <p>Need assistance?</p>
+                    <div className="flex justify-center gap-6 mt-2">
+                        <a href="https://wa.me/9779703360369" target="_blank" rel="noopener noreferrer" className="support-link support-whatsapp">
                             WhatsApp
                         </a>
-                        <a href="mailto:junsangsingh@gmail.com" style={{ display: 'flex', alignItems: 'center', gap: 6, fontSize: '0.8125rem', color: 'var(--brand-primary)', textDecoration: 'none', fontWeight: 600 }}>
+                        <a href="mailto:junsangsingh@gmail.com" className="support-link support-email">
                             Email
                         </a>
                     </div>
                 </div>
             </div>
+
+            <style jsx>{`
+                .orb {
+                    position: absolute;
+                    border-radius: 50%;
+                    filter: blur(80px);
+                    opacity: 0.15;
+                    animation: float 20s infinite alternate;
+                }
+                .orb-1 {
+                    top: -10%;
+                    left: -5%;
+                    width: 600px;
+                    height: 600px;
+                    background: var(--brand-primary);
+                }
+                .orb-2 {
+                    bottom: -15%;
+                    right: -5%;
+                    width: 700px;
+                    height: 700px;
+                    background: var(--brand-accent);
+                    animation-delay: -5s;
+                }
+                .orb-3 {
+                    top: 20%;
+                    right: 15%;
+                    width: 400px;
+                    height: 400px;
+                    background: var(--brand-secondary);
+                    animation-delay: -10s;
+                }
+                @keyframes float {
+                    0% { transform: translate(0, 0) scale(1); }
+                    100% { transform: translate(50px, 30px) scale(1.1); }
+                }
+                .login-logo-container {
+                    width: 80px;
+                    height: 80px;
+                    border-radius: 20px;
+                    background: white;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-bottom: 20px;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+                    padding: 12px;
+                    animation: pulse 4s infinite;
+                }
+                @keyframes pulse {
+                    0%, 100% { transform: scale(1); box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12); }
+                    50% { transform: scale(1.03); box-shadow: 0 15px 40px rgba(0, 0, 0, 0.18); }
+                }
+                .login-logo {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: contain;
+                }
+                .brand-title {
+                    font-size: 1.75rem;
+                    font-weight: 800;
+                    color: var(--text-primary);
+                    letter-spacing: -0.03em;
+                }
+                .brand-tagline {
+                    font-size: 0.875rem;
+                    color: var(--text-secondary);
+                    font-weight: 500;
+                    margin-top: 4px;
+                }
+                .clerk-wrapper :global(.cl-internal-1dauvqw) {
+                    display: none;
+                }
+                .login-footer {
+                    margin-top: 40px;
+                    text-align: center;
+                    font-size: 0.8125rem;
+                    color: var(--text-muted);
+                }
+                .support-link {
+                    font-weight: 600;
+                    text-decoration: none;
+                    transition: all 0.2s;
+                }
+                .support-whatsapp:hover { color: var(--brand-success); text-shadow: 0 0 10px rgba(16, 185, 129, 0.3); }
+                .support-email:hover { color: var(--brand-primary); text-shadow: 0 0 10px rgba(59, 130, 246, 0.3); }
+            `}</style>
         </div>
     );
 }

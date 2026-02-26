@@ -1,4 +1,4 @@
-import { signOut } from '@/lib/actions/auth';
+import { SignOutButton } from '@clerk/nextjs';
 import { getOrgContext } from '@/lib/org-context';
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
@@ -10,22 +10,21 @@ import {
     ShoppingCart,
     BarChart2,
     LogOut,
-    Package2,
     Settings,
 } from 'lucide-react';
 
 const navItems = [
-    { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard', labelNp: 'ड्यासबोर्ड' },
-    { href: '/dashboard/products', icon: Package, label: 'Products', labelNp: 'उत्पादन' },
-    { href: '/dashboard/customers', icon: Users, label: 'Customers', labelNp: 'ग्राहक' },
-    { href: '/dashboard/pos', icon: ShoppingCart, label: 'POS', labelNp: 'बिक्री' },
-    { href: '/dashboard/invoices', icon: FileText, label: 'Bills', labelNp: 'बिल' },
-    { href: '/dashboard/reports', icon: BarChart2, label: 'Reports', labelNp: 'रिपोर्ट' },
-    { href: '/dashboard/settings', icon: Settings, label: 'Settings', labelNp: 'सेटिङ' },
+    { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
+    { href: '/dashboard/products', icon: Package, label: 'Products' },
+    { href: '/dashboard/customers', icon: Users, label: 'Customers' },
+    { href: '/dashboard/pos', icon: ShoppingCart, label: 'POS' },
+    { href: '/dashboard/invoices', icon: FileText, label: 'Bills' },
+    { href: '/dashboard/reports', icon: BarChart2, label: 'Reports' },
+    { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
 ];
 
 export default async function Sidebar() {
-    const { organizationName, organizationId, language } = await getOrgContext();
+    const { organizationName, organizationId } = await getOrgContext();
     const supabase = await createClient();
 
     // Fetch logo
@@ -71,7 +70,7 @@ export default async function Sidebar() {
             {/* Navigation */}
             <nav style={{ flex: 1, padding: '16px 12px', overflowY: 'auto' }}>
                 <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: 4 }}>
-                    {navItems.map(({ href, icon: Icon, label, labelNp }) => (
+                    {navItems.map(({ href, icon: Icon, label }) => (
                         <li key={href}>
                             <Link
                                 href={href}
@@ -90,10 +89,7 @@ export default async function Sidebar() {
                                 className="nav-link"
                             >
                                 <Icon size={18} />
-                                <span>{language === 'np' ? labelNp : label}</span>
-                                {language === 'np' && (
-                                    <span style={{ marginLeft: 'auto', fontSize: '0.625rem', color: 'var(--text-muted)' }}>{label}</span>
-                                )}
+                                <span>{label}</span>
                             </Link>
                         </li>
                     ))}
@@ -102,9 +98,8 @@ export default async function Sidebar() {
 
             {/* Sign Out */}
             <div style={{ padding: '16px 12px', borderTop: '1px solid var(--glass-border)' }}>
-                <form action={signOut}>
+                <SignOutButton>
                     <button
-                        type="submit"
                         style={{
                             display: 'flex',
                             alignItems: 'center',
@@ -122,9 +117,9 @@ export default async function Sidebar() {
                         }}
                     >
                         <LogOut size={18} />
-                        {language === 'np' ? 'बाहिर निस्कनुहोस् (Sign Out)' : 'Sign Out'}
+                        Sign Out
                     </button>
-                </form>
+                </SignOutButton>
             </div>
         </aside>
     );

@@ -8,7 +8,7 @@ import { printInvoicePDF } from '@/lib/utils/invoiceGenerator';
 
 type Product = { id: string; name: string; price: number; stock_quantity: number; unit: string; };
 type Customer = { id: string; name: string; pan_number: string | null; tax_type?: 'pan' | 'vat'; };
-type Organization = { name: string; pan_vat: string | null; address: string | null; phone: string | null; preferred_language: string | null; } | null;
+type Organization = { name: string; pan_vat: string | null; address: string | null; phone: string | null; } | null;
 
 export default function POSClient({
     products = [],
@@ -34,7 +34,6 @@ export default function POSClient({
     const [amountPaid, setAmountPaid] = useState<number>(0);
     const [manualCustomerName, setManualCustomerName] = useState('');
     const [manualCustomerPan, setManualCustomerPan] = useState('');
-    const [errorOccurred, setErrorOccurred] = useState(false);
 
     const filteredProducts = productsList.filter(p =>
         (p?.name || '').toLowerCase().includes(search.toLowerCase())
@@ -109,14 +108,14 @@ export default function POSClient({
 
             try {
                 const invData = {
-                    organization: organization || { name: 'Stock Sewa', pan_vat: null, address: null, phone: null, preferred_language: 'en' },
+                    organization: organization || { name: 'Stock Sewa', pan_vat: null, address: null, phone: null },
                     invoice_number: result.invoice.invoice_number,
                     invoice_type: invoiceType,
                     date_ad: new Date().toISOString().split('T')[0],
                     date_bs: result.invoice.date_bs || '',
                     customer_name: customerMode === 'registered' ? selectedCustomer?.name : (manualCustomerName || 'Walk-in Customer'),
                     customer_pan: customerMode === 'registered' ? selectedCustomer?.pan_number || undefined : manualCustomerPan || undefined,
-                    customer_tax_type: customerMode === 'registered' ? selectedCustomer?.tax_type as any : (manualCustomerPan ? (invoiceType as any) : undefined),
+                    customer_tax_type: customerMode === 'registered' ? selectedCustomer?.tax_type as 'pan' | 'vat' | undefined : (manualCustomerPan ? (invoiceType as 'pan' | 'vat' | undefined) : undefined),
                     subtotal,
                     tax_amount: tax,
                     total_amount: total,
@@ -155,8 +154,8 @@ export default function POSClient({
             {/* Left: Products */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, overflow: 'hidden' }}>
                 <div className="page-header" style={{ marginBottom: 0 }}>
-                    <h1 className="page-title">{organization?.preferred_language === 'np' ? 'POS — बिक्री' : 'POS — Sales'}</h1>
-                    <p className="page-subtitle">{organization?.preferred_language === 'np' ? 'बिक्री केन्द्र' : 'Point of Sale'}</p>
+                    <h1 className="page-title">POS — Sales</h1>
+                    <p className="page-subtitle">Point of Sale</p>
                 </div>
                 <div style={{ position: 'relative' }}>
                     <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
@@ -169,10 +168,10 @@ export default function POSClient({
                             style={{ padding: 16, textAlign: 'left', cursor: p.stock_quantity === 0 ? 'not-allowed' : 'pointer', border: 'none', opacity: p.stock_quantity === 0 ? 0.5 : 1, transition: 'all 0.2s' }}>
                             <div style={{ fontSize: '0.9375rem', fontWeight: 600, marginBottom: 6 }}>{p.name}</div>
                             <div style={{ fontSize: '1rem', fontWeight: 700, color: 'var(--brand-primary)', marginBottom: 4 }}>
-                                {organization?.preferred_language === 'np' ? 'रु' : 'Rs.'} {p.price.toLocaleString()}
+                                Rs. {p.price.toLocaleString()}
                             </div>
                             <div style={{ fontSize: '0.75rem', color: p.stock_quantity <= 5 ? 'var(--brand-warning)' : 'var(--text-secondary)' }}>
-                                {organization?.preferred_language === 'np' ? 'स्टक' : 'Stock'}: {p.stock_quantity} {p.unit}
+                                Stock: {p.stock_quantity} {p.unit}
                             </div>
                         </button>
                     ))}
@@ -192,9 +191,9 @@ export default function POSClient({
                         <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                             <CheckCircle size={18} color="var(--brand-success)" />
                             <div>
-                                <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--brand-success)' }}>{lastInvoice.number} {organization?.preferred_language === 'np' ? 'सिर्जना भयो' : 'created'}</div>
+                                <div style={{ fontSize: '0.8125rem', fontWeight: 600, color: 'var(--brand-success)' }}>{lastInvoice.number} created</div>
                                 <div style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>
-                                    {organization?.preferred_language === 'np' ? 'रु' : 'Rs.'} {lastInvoice.total.toLocaleString()} {organization?.preferred_language === 'np' ? 'संकलन गरियो' : 'collected'}
+                                    Rs. {lastInvoice.total.toLocaleString()} collected
                                 </div>
                             </div>
                         </div>
@@ -203,7 +202,7 @@ export default function POSClient({
                             className="glass-button"
                             style={{ padding: '6px 12px', fontSize: '0.75rem', width: '100%', justifyContent: 'center' }}
                         >
-                            <Printer size={14} /> {organization?.preferred_language === 'np' ? 'बिल पुन: प्रिन्ट गर्नुहोस्' : 'Re-print Bill'}
+                            <Printer size={14} /> Re-print Bill
                         </button>
                     </div>
                 )}
@@ -213,7 +212,7 @@ export default function POSClient({
                     {cart.length === 0 ? (
                         <div style={{ textAlign: 'center', padding: '32px 0', color: 'var(--text-secondary)' }}>
                             <ShoppingCart size={36} style={{ margin: '0 auto 10px', opacity: 0.5 }} />
-                            <p style={{ fontSize: '0.875rem' }}>{organization?.preferred_language === 'np' ? 'थप्नको लागि उत्पादनहरू क्लिक गर्नुहोस्' : 'Click products to add'}</p>
+                            <p style={{ fontSize: '0.875rem' }}>Click products to add</p>
                         </div>
                     ) : cart.map(item => (
                         <div key={item.product_id} style={{ padding: '10px 12px', borderRadius: 10, background: 'rgba(255,255,255,0.04)', border: '1px solid var(--glass-border)' }}>
@@ -225,7 +224,7 @@ export default function POSClient({
                                     <button onClick={() => updateQty(item.product_id, 1)} style={{ width: 26, height: 26, borderRadius: 6, background: 'var(--glass-bg)', border: '1px solid var(--glass-border)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'var(--text-primary)' }}><Plus size={12} /></button>
                                 </div>
                                 <span style={{ fontWeight: 600, fontSize: '0.875rem' }}>
-                                    {organization?.preferred_language === 'np' ? 'रु' : 'Rs.'} {(item.unit_price * item.quantity).toLocaleString()}
+                                    Rs. {(item.unit_price * item.quantity).toLocaleString()}
                                 </span>
                                 <button onClick={() => removeFromCart(item.product_id)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--brand-danger)', padding: 4 }}><Trash2 size={14} /></button>
                             </div>
@@ -237,7 +236,7 @@ export default function POSClient({
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 10, borderTop: '1px solid var(--glass-border)', paddingTop: 14 }}>
                     <div>
                         <label className="glass-label">
-                            {organization?.preferred_language === 'np' ? 'बिल प्रकार' : 'Bill Type'}
+                            Bill Type
                         </label>
                         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 6 }}>
                             {(['normal', 'pan', 'vat'] as const).map(t => (
@@ -262,11 +261,11 @@ export default function POSClient({
                                     setCustomerId('');
                                     if (paymentMethod === 'credit') setPaymentMethod('cash');
                                 }} />
-                                {organization?.preferred_language === 'np' ? 'वाक-इन ग्राहक' : 'Walk-in'}
+                                Walk-in
                             </label>
                             <label style={{ display: 'flex', alignItems: 'center', gap: 6, cursor: 'pointer' }}>
                                 <input type="radio" checked={customerMode === 'registered'} onChange={() => setCustomerMode('registered')} />
-                                {organization?.preferred_language === 'np' ? 'पुरानो ग्राहक' : 'Existing Customer'}
+                                Existing Customer
                             </label>
                         </div>
 
@@ -276,7 +275,7 @@ export default function POSClient({
                                 <input
                                     className="glass-input"
                                     style={{ paddingLeft: 30, fontSize: '0.8125rem' }}
-                                    placeholder={organization?.preferred_language === 'np' ? 'नाम/प्यान द्वारा ग्राहक खोज्नुहोस्...' : 'Search customer by name/PAN...'}
+                                    placeholder="Search customer by name/PAN..."
                                     value={customerSearch}
                                     onChange={e => setCustomerSearch(e.target.value)}
                                 />
@@ -318,7 +317,7 @@ export default function POSClient({
                                 <input
                                     className="glass-input"
                                     style={{ fontSize: '0.8125rem' }}
-                                    placeholder={organization?.preferred_language === 'np' ? 'ग्राहकको नाम...' : 'Customer Name (required)...'}
+                                    placeholder="Customer Name (required)..."
                                     value={manualCustomerName}
                                     onChange={e => setManualCustomerName(e.target.value)}
                                 />
@@ -336,7 +335,7 @@ export default function POSClient({
                     <div style={{ display: 'grid', gridTemplateColumns: '1.2fr 1fr', gap: 10 }}>
                         <div>
                             <label className="glass-label">
-                                {organization?.preferred_language === 'np' ? 'भुक्तानी विधि' : 'Payment Method'}
+                                Payment Method
                             </label>
                             <select value={paymentMethod} onChange={e => setPaymentMethod(e.target.value)} className="glass-input" style={{ cursor: 'pointer' }}>
                                 <option value="cash">Cash</option>
@@ -349,7 +348,7 @@ export default function POSClient({
                         </div>
                         <div>
                             <label className="glass-label">
-                                {organization?.preferred_language === 'np' ? 'भुक्तान गरिएको रु' : 'Amount Paid Rs.'}
+                                Amount Paid Rs.
                             </label>
                             <input
                                 type="number"
@@ -357,7 +356,7 @@ export default function POSClient({
                                 className="glass-input"
                                 value={amountPaid}
                                 onChange={e => setAmountPaid(parseFloat(e.target.value) || 0)}
-                                onFocus={(e) => { if (amountPaid === 0) setAmountPaid(total); }}
+                                onFocus={() => { if (amountPaid === 0) setAmountPaid(total); }}
                             />
                         </div>
                     </div>
@@ -365,8 +364,8 @@ export default function POSClient({
                     {/* Totals & Status */}
                     <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: 12, display: 'flex', flexDirection: 'column', gap: 6 }}>
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--text-secondary)' }}>
-                            <span>{organization?.preferred_language === 'np' ? 'कुल बिल' : 'Total Bill'}</span>
-                            <span>{organization?.preferred_language === 'np' ? 'रु' : 'Rs.'} {total.toLocaleString()}</span>
+                            <span>Total Bill</span>
+                            <span>Rs. {total.toLocaleString()}</span>
                         </div>
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem' }}>
@@ -380,18 +379,18 @@ export default function POSClient({
 
                         {getPaymentStatus() !== 'paid' && (
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--brand-danger)', fontWeight: 600 }}>
-                                <span>Due Amount</span><span>रु {(total - amountPaid).toLocaleString()}</span>
+                                <span>Due Amount</span><span>Rs. {(total - amountPaid).toLocaleString()}</span>
                             </div>
                         )}
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.125rem', fontWeight: 700, marginTop: 4, color: 'var(--brand-primary)' }}>
-                            <span>{organization?.preferred_language === 'np' ? 'भुक्तान गरियो' : 'Paid'}</span>
-                            <span>{organization?.preferred_language === 'np' ? 'रु' : 'Rs.'} {amountPaid.toLocaleString()}</span>
+                            <span>Paid</span>
+                            <span>Rs. {amountPaid.toLocaleString()}</span>
                         </div>
                     </div>
 
                     <button onClick={handleCheckout} disabled={loading || cart.length === 0} className="glass-button glass-button-primary" style={{ justifyContent: 'center', padding: 14, fontSize: '1rem' }}>
-                        {loading ? (organization?.preferred_language === 'np' ? 'प्रक्रिया चल्दैछ...' : 'Processing...') : <><Receipt size={18} /> {organization?.preferred_language === 'np' ? 'बिक्री पूरा गर्नुहोस्' : 'Complete Sale'}</>}
+                        {loading ? 'Processing...' : <><Receipt size={18} /> Complete Sale</>}
                     </button>
                 </div>
             </div>

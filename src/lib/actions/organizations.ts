@@ -1,18 +1,16 @@
-'use server';
-
 import { createClient } from '@/lib/supabase/server';
-import { cookies } from 'next/headers';
+import { auth } from '@clerk/nextjs/server';
 
 export async function getOrganization() {
-    const supabase = await createClient();
+    const { userId } = await auth();
+    if (!userId) return null;
 
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) return null;
+    const supabase = await createClient();
 
     const { data: profile } = await supabase
         .from('profiles')
         .select('organization_id')
-        .eq('id', user.id)
+        .eq('id', userId)
         .single();
 
     if (!profile) return null;
@@ -31,8 +29,7 @@ export async function getOrganization() {
         pan_vat: org.pan_vat || null,
         address: org.address || null,
         phone: org.phone || null,
-        logo_url: org.logo_url || null,
-        preferred_language: org.preferred_language || 'en'
+        logo_url: org.logo_url || null
     };
 }
 
@@ -80,7 +77,6 @@ export async function updateOrganizationDetails(formData: FormData) {
     const pan_vat = formData.get('pan_vat') as string;
     const address = formData.get('address') as string;
     const phone = formData.get('phone') as string;
-    const preferred_language = formData.get('preferred_language') as string;
 
     const { error } = await supabase
         .from('organizations')
@@ -89,7 +85,6 @@ export async function updateOrganizationDetails(formData: FormData) {
             pan_vat,
             address,
             phone,
-            preferred_language,
         })
         .eq('id', org.id);
 

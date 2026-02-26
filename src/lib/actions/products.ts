@@ -137,7 +137,16 @@ export async function restockProduct(
         return { error: 'Product not found' };
     }
 
-    const updates: any = {
+    interface ProductUpdates {
+        stock_quantity: number;
+        price?: number;
+        cost_price?: number;
+        mfg_date?: string | null;
+        expiry_date?: string | null;
+        batch_number?: string | null;
+    }
+
+    const updates: ProductUpdates = {
         stock_quantity: (Number(product.stock_quantity) || 0) + quantity
     };
 

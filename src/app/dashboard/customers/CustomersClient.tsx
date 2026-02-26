@@ -32,7 +32,7 @@ export default function CustomersClient({ customers }: { customers: Customer[] }
             <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <div>
                     <h1 className="page-title">Customers</h1>
-                    <p className="page-subtitle">ग्राहक व्यवस्थापन — {customers.length} records</p>
+                    <p className="page-subtitle">{customers.length} records</p>
                 </div>
                 <button onClick={() => setShowModal(true)} className="glass-button glass-button-primary">
                     <Plus size={16} /> Add Customer
@@ -87,7 +87,7 @@ export default function CustomersClient({ customers }: { customers: Customer[] }
                         <button onClick={() => setShowModal(false)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
                             <X size={20} />
                         </button>
-                        <h2 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: 20 }}>Add Customer — ग्राहक थप्नुहोस्</h2>
+                        <h2 style={{ fontSize: '1.125rem', fontWeight: 700, marginBottom: 20 }}>Add Customer</h2>
                         <form onSubmit={handleAdd} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
                             <input name="name" required className="glass-input" placeholder="Full name *" />
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>

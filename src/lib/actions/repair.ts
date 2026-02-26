@@ -1,71 +1,69 @@
-'use server';
-
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
+import { auth, currentUser } from '@clerk/nextjs/server';
 
-export async function repairOrganization(prevState: any, formData: FormData) {
-    const supabase = await createClient();
+export async function repairOrganization(_prevState: unknown, formData: FormData) {
+    // 1. Get current authenticated Clerk user
+    const { userId } = await auth();
+    const user = await currentUser();
 
-    // 1. Get current authenticated user
-    const { data: { user }, error: authError } = await supabase.auth.getUser();
-    if (authError || !user) {
+    if (!userId || !user) {
         redirect('/login');
     }
 
-    // 2. Check if profile already exists (safety check)
+    const supabase = await createAdminClient();
+
+    // 2. Check if profile already exists
     const { data: existingProfile } = await supabase
         .from('profiles')
         .select('organization_id')
-        .eq('id', user.id)
+        .eq('id', userId)
         .single();
 
     if (existingProfile?.organization_id) {
-        console.log('Profile already exists for user:', user.id);
         redirect('/dashboard');
     }
 
-    // 3. Extract metadata for repair
-    console.log('--- Repair Attempting ---');
-    console.log('User ID:', user.id);
-    console.log('User Metadata:', user.user_metadata);
+    // 3. Extract metadata for creation
+    const orgName = formData.get('org_name') as string || 'My Organization';
+    const email = user.emailAddresses[0]?.emailAddress || '';
+    const username = email.split('@')[0] || 'user';
 
-    const orgName = user.user_metadata?.org_name || 'My Organization';
-    const username = user.user_metadata?.username || user.email?.split('@')[0] || 'user';
-
-    console.log(`Attempting repair for ${user.id} (Org: ${orgName}, User: ${username})`);
+    console.log(`Initial Setup for Clerk User ${userId} (Org: ${orgName})`);
 
     try {
-        // 4. Call repair RPC (bypasses RLS since it is SECURITY DEFINER)
-        console.log('Calling RPC: repair_user_org_v2...');
-        const { data: rpcMessage, error: rpcError } = await supabase.rpc('repair_user_org_v2', {
-            target_user_id: user.id,
-            org_name: orgName,
-            username_val: username
-        });
+        // 4. Create the organization
+        const { data: newOrg, error: orgError } = await supabase
+            .from('organizations')
+            .insert({ name: orgName })
+            .select()
+            .single();
 
-        if (rpcError) {
-            console.error('RPC Error:', rpcError);
-            throw rpcError;
-        }
+        if (orgError) throw orgError;
 
-        console.log('RPC result message:', rpcMessage);
+        // 5. Create the profile
+        const { error: profileError } = await supabase
+            .from('profiles')
+            .insert({
+                id: userId,
+                organization_id: newOrg.id,
+                username: username
+            });
 
-        if (rpcMessage && rpcMessage.startsWith('ERROR:')) {
-            throw new Error(rpcMessage);
-        }
+        if (profileError) throw profileError;
 
-        console.log('Repair logic successful, redirecting to /dashboard');
+        console.log('Setup successful, redirecting to /dashboard');
         redirect('/dashboard');
 
-    } catch (error: any) {
-        // Handle redirect errors so Next.js can process them
-        if (error?.digest?.startsWith('NEXT_REDIRECT')) {
+    } catch (error: unknown) {
+        if (error instanceof Error && 'digest' in error && typeof error.digest === 'string' && error.digest.startsWith('NEXT_REDIRECT')) {
             throw error;
         }
 
-        console.error('Repair Action Exception:', error);
+        const errorMessage = error instanceof Error ? error.message : 'Setup failed. Please ensure the profiles table supports TEXT IDs.';
+        console.error('Setup Action Exception:', error);
         return {
-            error: error?.message || 'Repair failed. Please ensure you ran the SQL snippet in Supabase SQL Editor.'
+            error: errorMessage
         };
     }
 }

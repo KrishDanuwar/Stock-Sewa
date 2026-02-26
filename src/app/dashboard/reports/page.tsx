@@ -3,7 +3,7 @@ import { createClient } from '@/lib/supabase/server';
 import { BarChart2 } from 'lucide-react';
 
 export default async function ReportsPage() {
-    const { organizationId, language } = await getOrgContext();
+    const { organizationId } = await getOrgContext();
     const supabase = await createClient();
 
     // Fetch all invoices with items for deep reporting
@@ -35,9 +35,15 @@ export default async function ReportsPage() {
     const normalInvoices = invoices?.filter(i => i.invoice_type === 'normal') ?? [];
 
     // Aggregating Top Selling Products
+    interface ReportInvoiceItem {
+        product_name: string;
+        quantity: number;
+        unit_price: number;
+    }
+
     const productSales: Record<string, { name: string, quantity: number, revenue: number }> = {};
     invoices?.forEach(inv => {
-        inv.invoice_items?.forEach((item: any) => {
+        (inv.invoice_items as unknown as ReportInvoiceItem[] || []).forEach((item) => {
             if (!productSales[item.product_name]) {
                 productSales[item.product_name] = { name: item.product_name, quantity: 0, revenue: 0 };
             }
@@ -51,19 +57,19 @@ export default async function ReportsPage() {
         .slice(0, 5);
 
     const stats = [
-        { label: 'Total Revenue', value: `Rs. ${totalRevenue.toLocaleString()}`, sub: 'कुल आम्दानी', color: 'var(--brand-success)' },
-        { label: 'VAT Collected', value: `Rs. ${totalTax.toLocaleString()}`, sub: 'संकलित भ्याट', color: 'var(--brand-primary)' },
-        { label: 'Net Subtotal', value: `Rs. ${totalSubtotal.toLocaleString()}`, sub: 'कुल उप-योग', color: 'var(--brand-secondary)' },
-        { label: 'Total Sales', value: invoices?.length ?? 0, sub: 'जम्मा बिक्री', color: 'var(--brand-accent)' },
+        { label: 'Total Revenue', value: `Rs. ${totalRevenue.toLocaleString()}`, color: 'var(--brand-success)' },
+        { label: 'VAT Collected', value: `Rs. ${totalTax.toLocaleString()}`, color: 'var(--brand-primary)' },
+        { label: 'Net Subtotal', value: `Rs. ${totalSubtotal.toLocaleString()}`, color: 'var(--brand-secondary)' },
+        { label: 'Total Sales', value: invoices?.length ?? 0, color: 'var(--brand-accent)' },
     ];
 
     return (
         <div className="animate-fade-in-up">
             <div className="page-header">
                 <div>
-                    <h1 className="page-title">{language === 'np' ? 'रिपोर्ट र विश्लेषण' : 'Reports & Analytics'}</h1>
+                    <h1 className="page-title">Reports & Analytics</h1>
                     <p className="page-subtitle">
-                        {language === 'np' ? 'व्यावसायिक अन्तर्दृष्टि' : 'Business Intelligence Insights'}
+                        Business Intelligence Insights
                     </p>
                 </div>
             </div>
@@ -73,11 +79,8 @@ export default async function ReportsPage() {
                 {stats.map(s => (
                     <div key={s.label} className="glass-card" style={{ padding: 20 }}>
                         <div style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-primary)' }}>
-                            {language === 'np' ? s.sub : s.label}
+                            {s.label}
                         </div>
-                        {language === 'np' && (
-                            <div style={{ fontSize: '0.625rem', color: 'var(--text-muted)', marginBottom: 8 }}>{s.label}</div>
-                        )}
                         <div style={{ fontSize: '1.5rem', fontWeight: 700, color: s.color }}>{s.value}</div>
                     </div>
                 ))}
@@ -87,15 +90,15 @@ export default async function ReportsPage() {
                 {/* Top Selling Products */}
                 <div className="glass-card" style={{ padding: 24 }}>
                     <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 20 }}>
-                        {language === 'np' ? 'सर्वाधिक बिक्री हुने वस्तुहरू — Top Selling Products' : 'Top Selling Products'}
+                        Top Selling Products
                     </h2>
                     {topProducts.length > 0 ? (
                         <table className="glass-table">
                             <thead>
                                 <tr>
-                                    <th>{language === 'np' ? 'उत्पादन' : 'Product Name'}</th>
-                                    <th style={{ textAlign: 'center' }}>{language === 'np' ? 'बिक्री' : 'Qty Sold'}</th>
-                                    <th style={{ textAlign: 'right' }}>{language === 'np' ? 'आम्दानी' : 'Revenue'}</th>
+                                    <th>Product Name</th>
+                                    <th style={{ textAlign: 'center' }}>Qty Sold</th>
+                                    <th style={{ textAlign: 'right' }}>Revenue</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -113,7 +116,7 @@ export default async function ReportsPage() {
                         </table>
                     ) : (
                         <div style={{ textAlign: 'center', padding: '40px 0', color: 'var(--text-muted)' }}>
-                            <p>{language === 'np' ? 'उत्पादनहरू श्रेणीबद्ध गर्न कुनै बिक्री डाटा उपलब्ध छैन।' : 'No sales data available to rank products.'}</p>
+                            <p>No sales data available to rank products.</p>
                         </div>
                     )}
                 </div>
@@ -121,26 +124,26 @@ export default async function ReportsPage() {
                 {/* Invoice Type Breakdown */}
                 <div className="glass-card" style={{ padding: 24 }}>
                     <h2 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 20 }}>
-                        {language === 'np' ? 'बिल विवरण — Bill Breakdown' : 'Bill Breakdown'}
+                        Bill Breakdown
                     </h2>
                     <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
                         <div className="breakdown-item">
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{language === 'np' ? 'भ्याट बिल' : 'VAT Bills'}</span>
+                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>VAT Bills</span>
                                 <span style={{ fontSize: '0.875rem', color: 'var(--brand-success)' }}>{vatInvoices.length}</span>
                             </div>
                             <div className="progress-bar-bg"><div className="progress-bar-fill" style={{ width: `${(vatInvoices.length / (invoices?.length || 1)) * 100}%`, backgroundColor: 'var(--brand-success)' }}></div></div>
                         </div>
                         <div className="breakdown-item">
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{language === 'np' ? 'प्यान बिल' : 'PAN Bills'}</span>
+                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>PAN Bills</span>
                                 <span style={{ fontSize: '0.875rem', color: 'var(--brand-primary)' }}>{panInvoices.length}</span>
                             </div>
                             <div className="progress-bar-bg"><div className="progress-bar-fill" style={{ width: `${(panInvoices.length / (invoices?.length || 1)) * 100}%`, backgroundColor: 'var(--brand-primary)' }}></div></div>
                         </div>
                         <div className="breakdown-item">
                             <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
-                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>{language === 'np' ? 'साधारण रसिद' : 'Normal Bills'}</span>
+                                <span style={{ fontSize: '0.875rem', fontWeight: 500 }}>Normal Bills</span>
                                 <span style={{ fontSize: '0.875rem', color: 'var(--brand-secondary)' }}>{normalInvoices.length}</span>
                             </div>
                             <div className="progress-bar-bg"><div className="progress-bar-fill" style={{ width: `${(normalInvoices.length / (invoices?.length || 1)) * 100}%`, backgroundColor: 'var(--brand-secondary)' }}></div></div>

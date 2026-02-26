@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-import { numberToWords } from './numberToWords';
+// import { numberToWords } from './numberToWords'; // Flagged as unused but kept for future reference
 
 export interface InvoiceData {
     organization: {
@@ -8,7 +8,6 @@ export interface InvoiceData {
         pan_vat: string | null;
         address: string | null;
         phone: string | null;
-        preferred_language: string | null;
     };
     invoice_number: string;
     invoice_type: 'normal' | 'pan' | 'vat';
@@ -112,7 +111,7 @@ function prepareInvoiceDoc(data: InvoiceData): jsPDF {
         }
     });
 
-    let finalY = (doc as any).lastAutoTable.finalY + 10;
+    let finalY = ((doc as unknown) as { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 10;
 
     // Totals
     doc.setFont('helvetica', 'bold');
@@ -139,12 +138,10 @@ function prepareInvoiceDoc(data: InvoiceData): jsPDF {
     doc.text(`Payment Mode: ${data.payment_mode}`, 15, finalY);
     finalY += 6;
 
-    const isNp = data.organization.preferred_language === 'np';
-
     if (data.invoice_type === 'vat') {
-        doc.text(isNp ? 'द्रष्टव्य: नेपाल IRD नियमहरू अनुसार VAT लगाइएको छ।' : 'Note: VAT Charged as per Nepal IRD Rules.', 15, finalY);
+        doc.text('Note: VAT Charged as per Nepal IRD Rules.', 15, finalY);
     } else if (data.invoice_type === 'pan') {
-        doc.text(isNp ? 'द्रष्टव्य: भ्याट लागू हुँदैन (व्यवसाय केवल प्यान दर्ता गरिएको छ)।' : 'Note: VAT Not Applicable (Business is PAN registered only).', 15, finalY);
+        doc.text('Note: VAT Not Applicable (Business is PAN registered only).', 15, finalY);
     }
 
     // branding at the very bottom

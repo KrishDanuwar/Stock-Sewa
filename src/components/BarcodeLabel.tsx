@@ -9,16 +9,16 @@ interface LabelProps {
     price: number;
     barcode: string;
     mfg?: string;
-    batch?: string;
 }
 
-export default function BarcodeLabel({ name, price, barcode, mfg, batch }: LabelProps) {
+export default function BarcodeLabel({ name, price, barcode, mfg }: LabelProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const [imgData, setImgData] = useState<string>('');
     const [mounted, setMounted] = useState(false);
 
     useEffect(() => {
-        setMounted(true);
+        const frame = requestAnimationFrame(() => setMounted(true));
+        return () => cancelAnimationFrame(frame);
     }, []);
 
     // Separated generator to ensure it runs AFTER mount and whenever barcode changes
