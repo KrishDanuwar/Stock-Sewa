@@ -27,6 +27,8 @@ export default function SignupPage() {
                 {/* Clerk SignUp Component */}
                 <div className="clerk-wrapper">
                     <SignUp
+                        routing="path"
+                        path="/signup"
                         appearance={{
                             elements: {
                                 rootBox: "mx-auto",

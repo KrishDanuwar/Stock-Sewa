@@ -28,6 +28,8 @@ export default function LoginPage() {
                 {/* Clerk SignIn Component with custom styling override in globals.css */}
                 <div className="clerk-wrapper">
                     <SignIn
+                        routing="path"
+                        path="/login"
                         appearance={{
                             elements: {
                                 rootBox: "mx-auto",
