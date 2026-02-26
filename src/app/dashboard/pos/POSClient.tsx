@@ -31,7 +31,7 @@ export default function POSClient({
     const [lastInvoice, setLastInvoice] = useState<{ number: string; total: number; data?: any } | null>(null);
     const [customerMode, setCustomerMode] = useState<'walkin' | 'registered'>('walkin');
     const [customerSearch, setCustomerSearch] = useState('');
-    const [amountPaid, setAmountPaid] = useState<number>(0);
+    const [amountPaid, setAmountPaid] = useState<number | string>('');
     const [manualCustomerName, setManualCustomerName] = useState('');
     const [manualCustomerPan, setManualCustomerPan] = useState('');
 
@@ -63,10 +63,12 @@ export default function POSClient({
     const tax = invoiceType === 'vat' ? subtotal * 0.13 : 0;
     const total = subtotal + tax;
 
+    const numericAmountPaid = typeof amountPaid === 'string' ? parseFloat(amountPaid) || 0 : amountPaid;
+
     // Derived payment status
     const getPaymentStatus = (): 'paid' | 'unpaid' | 'partial' => {
-        if (amountPaid >= total) return 'paid';
-        if (amountPaid <= 0) return 'unpaid';
+        if (numericAmountPaid >= total) return 'paid';
+        if (numericAmountPaid <= 0) return 'unpaid';
         return 'partial';
     };
 
@@ -92,7 +94,7 @@ export default function POSClient({
                 invoice_type: invoiceType,
                 payment_method: paymentMethod,
                 payment_status: getPaymentStatus(),
-                amount_paid: amountPaid,
+                amount_paid: numericAmountPaid,
                 customer_name_manual: customerMode === 'walkin' ? manualCustomerName : undefined,
                 customer_pan_manual: customerMode === 'walkin' ? manualCustomerPan : undefined,
                 items: cart,
@@ -119,8 +121,8 @@ export default function POSClient({
                     subtotal,
                     tax_amount: tax,
                     total_amount: total,
-                    amount_paid: amountPaid,
-                    due_amount: total - amountPaid,
+                    amount_paid: numericAmountPaid,
+                    due_amount: total - numericAmountPaid,
                     payment_mode: paymentMethod.charAt(0).toUpperCase() + paymentMethod.slice(1),
                     items: cart.map(i => ({
                         product_name: i.product_name,
@@ -140,7 +142,7 @@ export default function POSClient({
             setCustomerId('');
             setCustomerMode('walkin');
             setInvoiceType('normal');
-            setAmountPaid(0);
+            setAmountPaid('');
             setManualCustomerName('');
         } catch (error) {
             console.error('POS Checkout Critical Error:', error);
@@ -364,8 +366,8 @@ export default function POSClient({
                                 min="0"
                                 className="glass-input"
                                 value={amountPaid}
-                                onChange={e => setAmountPaid(parseFloat(e.target.value) || 0)}
-                                onFocus={() => { if (amountPaid === 0) setAmountPaid(total); }}
+                                onChange={e => setAmountPaid(e.target.value === '' ? '' : e.target.value)}
+                                onFocus={() => { if (amountPaid === '' || amountPaid === 0) setAmountPaid(total); }}
                             />
                         </div>
                     </div>
@@ -388,13 +390,13 @@ export default function POSClient({
 
                         {getPaymentStatus() !== 'paid' && (
                             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '0.875rem', color: 'var(--brand-danger)', fontWeight: 600 }}>
-                                <span>Due Amount</span><span>Rs. {(total - amountPaid).toLocaleString()}</span>
+                                <span>Due Amount</span><span>Rs. {(total - numericAmountPaid).toLocaleString()}</span>
                             </div>
                         )}
 
                         <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '1.125rem', fontWeight: 700, marginTop: 4, color: 'var(--brand-primary)' }}>
                             <span>Paid</span>
-                            <span>Rs. {amountPaid.toLocaleString()}</span>
+                            <span>Rs. {numericAmountPaid.toLocaleString()}</span>
                         </div>
                     </div>
 
@@ -403,6 +405,16 @@ export default function POSClient({
                     </button>
                 </div>
             </div>
+            <style>{`
+                input[type=number]::-webkit-inner-spin-button, 
+                input[type=number]::-webkit-outer-spin-button { 
+                    -webkit-appearance: none; 
+                    margin: 0; 
+                }
+                input[type=number] {
+                    -moz-appearance: textfield;
+                }
+            `}</style>
         </div>
     );
 }
