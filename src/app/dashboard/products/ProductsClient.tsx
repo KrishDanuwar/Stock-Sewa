@@ -1,14 +1,14 @@
 'use client';
 
 import { useState } from 'react';
-import { addProduct, deleteProduct, restockProduct } from '@/lib/actions/products';
+import { addProduct, deleteProduct, restockProduct, adjustStock } from '@/lib/actions/products';
 import { toast } from 'sonner';
-import { Printer, Trash2, Package, X, Search, Plus, RefreshCw } from 'lucide-react';
+import { Printer, Trash2, Package, X, Search, Plus, RefreshCw, SlidersHorizontal } from 'lucide-react';
 import BarcodeLabel from '@/components/BarcodeLabel';
 
 type Product = {
     id: string; name: string; barcode: string | null;
-    price: number; cost_price: number; stock_quantity: number;
+    price: number; stock_quantity: number;
     unit: string; category: string | null; created_at: string;
     mfg_date?: string | null; expiry_date?: string | null; batch_number?: string | null;
 };
@@ -21,12 +21,17 @@ export default function ProductsClient({ products }: { products: Product[] }) {
     const [restockItem, setRestockItem] = useState<Product | null>(null);
     const [restockQty, setRestockQty] = useState('');
     const [restockPrice, setRestockPrice] = useState('');
-    const [restockCost, setRestockCost] = useState('');
     const [restockMfg, setRestockMfg] = useState('');
     const [restockExpiry, setRestockExpiry] = useState('');
     const [restockBatch, setRestockBatch] = useState('');
     const [restocking, setRestocking] = useState(false);
     const [includeMfg, setIncludeMfg] = useState(false);
+
+    // Adjust stock state
+    const [adjustItem, setAdjustItem] = useState<Product | null>(null);
+    const [adjustQty, setAdjustQty] = useState('');
+    const [adjustNotes, setAdjustNotes] = useState('');
+    const [adjusting, setAdjusting] = useState(false);
 
     const filtered = products.filter(p =>
         p.name.toLowerCase().includes(search.toLowerCase()) ||
@@ -60,14 +65,13 @@ export default function ProductsClient({ products }: { products: Product[] }) {
         if (!restockItem) return;
         const qty = parseInt(restockQty);
         if (isNaN(qty) || qty <= 0) return toast.error('Enter a valid positive quantity');
-        if (parseFloat(restockPrice) < 0 || parseFloat(restockCost) < 0) return toast.error('Prices cannot be negative');
+        if (parseFloat(restockPrice) < 0) return toast.error('Price cannot be negative');
 
         setRestocking(true);
         const result = await restockProduct(
             restockItem.id,
             qty,
             parseFloat(restockPrice),
-            parseFloat(restockCost),
             restockMfg,
             restockExpiry,
             restockBatch
@@ -77,7 +81,6 @@ export default function ProductsClient({ products }: { products: Product[] }) {
             setRestockItem(null);
             setRestockQty('');
             setRestockPrice('');
-            setRestockCost('');
             setRestockMfg('');
             setRestockExpiry('');
             setRestockBatch('');
@@ -85,6 +88,25 @@ export default function ProductsClient({ products }: { products: Product[] }) {
             toast.error(result?.error || 'Failed to restock');
         }
         setRestocking(false);
+    }
+
+    async function handleAdjust(e: React.FormEvent) {
+        e.preventDefault();
+        if (!adjustItem) return;
+        const qty = parseInt(adjustQty);
+        if (isNaN(qty) || qty === 0) return toast.error('Enter a non-zero quantity (+/-)');
+
+        setAdjusting(true);
+        const result = await adjustStock(adjustItem.id, qty, adjustNotes);
+        if (result?.success) {
+            toast.success(`Stock adjusted by ${qty > 0 ? '+' : ''}${qty} for ${adjustItem.name}`);
+            setAdjustItem(null);
+            setAdjustQty('');
+            setAdjustNotes('');
+        } else {
+            toast.error(result?.error || 'Failed to adjust stock');
+        }
+        setAdjusting(false);
     }
 
     const handlePrint = (product: Product) => {
@@ -192,12 +214,18 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                                 setRestockItem(p);
                                                 setRestockQty('');
                                                 setRestockPrice(p.price.toString());
-                                                setRestockCost(p.cost_price.toString());
                                                 setRestockMfg(p.mfg_date || '');
                                                 setRestockExpiry(p.expiry_date || '');
                                                 setRestockBatch(p.batch_number || '');
                                             }} className="action-button action-success" title="Restock Product">
                                                 <RefreshCw size={15} />
+                                            </button>
+                                            <button onClick={() => {
+                                                setAdjustItem(p);
+                                                setAdjustQty('');
+                                                setAdjustNotes('');
+                                            }} className="action-button action-warning" title="Adjust Stock">
+                                                <SlidersHorizontal size={15} />
                                             </button>
                                             <button onClick={() => handlePrint(p)} className="action-button action-info" title="Print Barcode Label">
                                                 <Printer size={15} />
@@ -318,18 +346,6 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                         onKeyDown={e => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
                                     />
                                 </div>
-                                <div className="form-group">
-                                    <label className="form-label">Update Cost Price रु</label>
-                                    <input
-                                        className="glass-input"
-                                        type="number"
-                                        min="0"
-                                        step="0.01"
-                                        value={restockCost}
-                                        onChange={e => setRestockCost(e.target.value)}
-                                        onKeyDown={e => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
-                                    />
-                                </div>
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
@@ -403,11 +419,60 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                     border-color: rgba(239, 68, 68, 0.4);
                     color: #f87171;
                 }
+                .action-warning:hover {
+                    background: rgba(245, 158, 11, 0.2);
+                    border-color: rgba(245, 158, 11, 0.4);
+                    color: #fbbf24;
+                }
                 @media print {
                     .print-only { display: block !important; }
                 }
                 .print-only { display: none; }
             `}</style>
+
+            {/* Adjust Stock Modal */}
+            {adjustItem && (
+                <div className="glass-modal">
+                    <div className="glass-card glass-modal-card animate-fade-in-up" style={{ width: '100%', maxWidth: 400, padding: 28, position: 'relative' }}>
+                        <button onClick={() => setAdjustItem(null)} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+                            <X size={20} />
+                        </button>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 8 }}>Adjust Stock</h2>
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: 20 }}>
+                            Manually adjust stock for <strong>{adjustItem.name}</strong><br />
+                            Current stock: <strong>{adjustItem.stock_quantity} {adjustItem.unit}</strong>
+                        </p>
+
+                        <form onSubmit={handleAdjust} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+                            <div className="form-group">
+                                <label className="form-label">Quantity (+/-)</label>
+                                <input
+                                    className="glass-input"
+                                    type="number"
+                                    autoFocus
+                                    placeholder="e.g. -5 for damage, +10 for found"
+                                    value={adjustQty}
+                                    onChange={e => setAdjustQty(e.target.value)}
+                                    required
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="form-label">Reason / Notes</label>
+                                <input
+                                    className="glass-input"
+                                    type="text"
+                                    placeholder="e.g. Damaged, Counting correction, Theft"
+                                    value={adjustNotes}
+                                    onChange={e => setAdjustNotes(e.target.value)}
+                                />
+                            </div>
+                            <button type="submit" className="glass-button-primary" disabled={adjusting} style={{ marginTop: 8 }}>
+                                {adjusting ? 'Adjusting...' : 'Apply Adjustment'}
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div >
     );
 }

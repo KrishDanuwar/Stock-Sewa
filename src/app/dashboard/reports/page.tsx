@@ -1,6 +1,7 @@
 import { getOrgContext } from '@/lib/org-context';
 import { createAdminClient } from '@/lib/supabase/server';
 import { BarChart2 } from 'lucide-react';
+import ReportsClient from './ReportsClient';
 
 export default async function ReportsPage() {
     const { organizationId } = await getOrgContext();
@@ -11,11 +12,17 @@ export default async function ReportsPage() {
         .from('invoices')
         .select(`
             id, 
+            invoice_number,
             invoice_type, 
             total_amount, 
             tax_amount, 
             subtotal,
+            discount_amount,
             date_ad,
+            date_bs,
+            payment_method,
+            payment_status,
+            customers ( name ),
             invoice_items (
                 product_id,
                 product_name,
@@ -56,6 +63,25 @@ export default async function ReportsPage() {
         .sort((a, b) => b.quantity - a.quantity)
         .slice(0, 5);
 
+    // Build invoice rows for CSV export
+    const invoiceRows = (invoices || []).map(i => {
+        const custRaw = (i as any).customers;
+        const custName = Array.isArray(custRaw) ? custRaw[0]?.name : custRaw?.name;
+        return {
+            invoice_number: (i as any).invoice_number || '',
+            date_bs: (i as any).date_bs || '',
+            date_ad: (i as any).date_ad || '',
+            invoice_type: i.invoice_type,
+            subtotal: Number(i.subtotal) || 0,
+            tax_amount: Number(i.tax_amount) || 0,
+            total_amount: Number(i.total_amount) || 0,
+            discount_amount: Number((i as any).discount_amount) || 0,
+            payment_method: (i as any).payment_method || 'cash',
+            payment_status: (i as any).payment_status || 'paid',
+            customer_name: custName || 'Walk-in',
+        };
+    });
+
     const stats = [
         { label: 'Total Revenue', value: `Rs. ${totalRevenue.toLocaleString()}`, color: 'var(--brand-success)' },
         { label: 'VAT Collected', value: `Rs. ${totalTax.toLocaleString()}`, color: 'var(--brand-primary)' },
@@ -65,13 +91,21 @@ export default async function ReportsPage() {
 
     return (
         <div className="animate-fade-in-up">
-            <div className="page-header">
+            <div className="page-header" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div>
                     <h1 className="page-title">Reports & Analytics</h1>
                     <p className="page-subtitle">
                         Business Intelligence Insights
                     </p>
                 </div>
+                <ReportsClient
+                    topProducts={topProducts}
+                    invoiceRows={invoiceRows}
+                    totalRevenue={totalRevenue}
+                    totalTax={totalTax}
+                    totalSubtotal={totalSubtotal}
+                    totalSales={invoices?.length ?? 0}
+                />
             </div>
 
             {/* Financial Overview */}

@@ -18,7 +18,6 @@ export async function getProducts() {
         id: p.id,
         name: p.name,
         price: Number(p.price) || 0,
-        cost_price: Number(p.cost_price) || 0,
         stock_quantity: Number(p.stock_quantity) || 0,
         unit: p.unit || 'pcs',
         category: p.category || '',
@@ -36,7 +35,6 @@ export async function addProduct(formData: FormData) {
 
     const name = formData.get('name') as string;
     const price = parseFloat(formData.get('price') as string);
-    const cost_price = parseFloat((formData.get('cost_price') as string) || '0');
     const stock_quantity = parseInt(formData.get('stock_quantity') as string);
     const unit = formData.get('unit') as string;
     const category = formData.get('category') as string;
@@ -54,7 +52,7 @@ export async function addProduct(formData: FormData) {
 
     const { error } = await supabase.from('products').insert({
         organization_id: organizationId,
-        name, price, cost_price, stock_quantity, unit, category,
+        name, price, stock_quantity, unit, category,
         barcode,
         mfg_date: mfg_date || null,
         expiry_date: expiry_date || null,
@@ -77,7 +75,6 @@ export async function updateProduct(id: string, formData: FormData) {
         .update({
             name: formData.get('name') as string,
             price: parseFloat(formData.get('price') as string),
-            cost_price: parseFloat((formData.get('cost_price') as string) || '0'),
             stock_quantity: parseInt(formData.get('stock_quantity') as string),
             unit: formData.get('unit') as string,
             category: formData.get('category') as string,
@@ -115,7 +112,6 @@ export async function restockProduct(
     id: string,
     quantity: number,
     newPrice?: number,
-    newCostPrice?: number,
     newMfgDate?: string,
     newExpiryDate?: string,
     newBatchNumber?: string
@@ -128,7 +124,7 @@ export async function restockProduct(
     // Fetch current stock and metadata
     const { data: product, error: fetchError } = await supabase
         .from('products')
-        .select('stock_quantity, price, cost_price, mfg_date, expiry_date, batch_number')
+        .select('stock_quantity, price, mfg_date, expiry_date, batch_number')
         .eq('id', id)
         .eq('organization_id', organizationId)
         .single();
@@ -140,7 +136,6 @@ export async function restockProduct(
     interface ProductUpdates {
         stock_quantity: number;
         price?: number;
-        cost_price?: number;
         mfg_date?: string | null;
         expiry_date?: string | null;
         batch_number?: string | null;
@@ -151,7 +146,6 @@ export async function restockProduct(
     };
 
     if (newPrice !== undefined && !isNaN(newPrice)) updates.price = newPrice;
-    if (newCostPrice !== undefined && !isNaN(newCostPrice)) updates.cost_price = newCostPrice;
     if (newMfgDate !== undefined) updates.mfg_date = newMfgDate || null;
     if (newExpiryDate !== undefined) updates.expiry_date = newExpiryDate || null;
     if (newBatchNumber !== undefined) updates.batch_number = newBatchNumber || null;
@@ -163,6 +157,50 @@ export async function restockProduct(
         .eq('organization_id', organizationId);
 
     if (updateError) return { error: updateError.message };
+
+    revalidatePath('/dashboard/products');
+    revalidatePath('/dashboard');
+    return { success: true };
+}
+
+export async function adjustStock(id: string, quantity: number, notes: string) {
+    const { organizationId } = await getOrgContext();
+    const supabase = await createAdminClient();
+
+    if (quantity === 0) return { error: 'Quantity cannot be zero' };
+
+    // Verify product exists and belongs to org
+    const { data: product, error: fetchError } = await supabase
+        .from('products')
+        .select('stock_quantity, name')
+        .eq('id', id)
+        .eq('organization_id', organizationId)
+        .single();
+
+    if (fetchError || !product) {
+        return { error: 'Product not found' };
+    }
+
+    const newQty = (Number(product.stock_quantity) || 0) + quantity;
+    if (newQty < 0) return { error: 'Adjustment would result in negative stock' };
+
+    // Update stock quantity
+    const { error: updateError } = await supabase
+        .from('products')
+        .update({ stock_quantity: newQty })
+        .eq('id', id)
+        .eq('organization_id', organizationId);
+
+    if (updateError) return { error: updateError.message };
+
+    // Log the stock movement as 'adjustment'
+    await supabase.from('stock_movements').insert({
+        organization_id: organizationId,
+        product_id: id,
+        movement_type: 'adjustment',
+        quantity: quantity,
+        notes: notes || `Manual adjustment: ${quantity > 0 ? '+' : ''}${quantity}`,
+    });
 
     revalidatePath('/dashboard/products');
     revalidatePath('/dashboard');
