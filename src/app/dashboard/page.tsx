@@ -2,7 +2,7 @@ import { getOrgContext } from '@/lib/org-context';
 import { createAdminClient } from '@/lib/supabase/server';
 import { Package, Users, FileText, TrendingUp } from 'lucide-react';
 import { getTodayBs } from '@/utils/date-utils';
-import LiveClock from '@/components/LiveClock';
+import ClockWrapper from '@/components/ClockWrapper';
 
 export default async function DashboardPage() {
     const { organizationId, organizationName } = await getOrgContext();
@@ -80,7 +80,7 @@ export default async function DashboardPage() {
                 <div>
                     <h1 className="page-title">{organizationName}</h1>
                     <p className="page-subtitle">
-                        Today: <LiveClock fallbackDate={today.formattedEn} />
+                        Today: <ClockWrapper fallbackDate={today.formattedEn} />
                     </p>
                 </div>
             </div>
