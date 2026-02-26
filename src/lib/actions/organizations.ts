@@ -1,12 +1,12 @@
 'use server';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { auth } from '@clerk/nextjs/server';
 
 export async function getOrganization() {
     const { userId } = await auth();
     if (!userId) return null;
 
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
 
     const { data: profile } = await supabase
         .from('profiles')
@@ -35,7 +35,7 @@ export async function getOrganization() {
 }
 
 export async function updateOrganizationLogo(formData: FormData) {
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const file = formData.get('logo') as File;
     if (!file) return { error: 'No file provided' };
 
@@ -70,7 +70,7 @@ export async function updateOrganizationLogo(formData: FormData) {
 }
 
 export async function updateOrganizationDetails(formData: FormData) {
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const org = await getOrganization();
     if (!org) return { error: 'Organization not found' };
 
@@ -95,7 +95,7 @@ export async function updateOrganizationDetails(formData: FormData) {
 }
 
 export async function removeOrganizationLogo() {
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const org = await getOrganization();
     if (!org) return { error: 'Organization not found' };
 

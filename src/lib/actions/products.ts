@@ -1,12 +1,12 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { getOrgContext } from '@/lib/org-context';
 import { revalidatePath } from 'next/cache';
 
 export async function getProducts() {
     const { organizationId } = await getOrgContext();
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const { data, error } = await supabase
         .from('products')
         .select('*')
@@ -32,7 +32,7 @@ export async function getProducts() {
 
 export async function addProduct(formData: FormData) {
     const { organizationId } = await getOrgContext();
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
 
     const name = formData.get('name') as string;
     const price = parseFloat(formData.get('price') as string);
@@ -70,7 +70,7 @@ export async function addProduct(formData: FormData) {
 
 export async function updateProduct(id: string, formData: FormData) {
     const { organizationId } = await getOrgContext();
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
 
     const { error } = await supabase
         .from('products')
@@ -96,7 +96,7 @@ export async function updateProduct(id: string, formData: FormData) {
 
 export async function deleteProduct(id: string) {
     const { organizationId } = await getOrgContext();
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
 
     const { error } = await supabase
         .from('products')
@@ -121,7 +121,7 @@ export async function restockProduct(
     newBatchNumber?: string
 ) {
     const { organizationId } = await getOrgContext();
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
 
     if (quantity <= 0) return { error: 'Quantity must be greater than zero' };
 

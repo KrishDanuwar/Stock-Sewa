@@ -1,6 +1,6 @@
 import { SignOutButton } from '@clerk/nextjs';
 import { getOrgContext } from '@/lib/org-context';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import {
     LayoutDashboard,
@@ -25,7 +25,7 @@ const navItems = [
 
 export default async function Sidebar() {
     const { organizationName, organizationId } = await getOrgContext();
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
 
     // Fetch logo
     const { data: org } = await supabase

@@ -1,10 +1,10 @@
 import { getOrgContext } from '@/lib/org-context';
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { BarChart2 } from 'lucide-react';
 
 export default async function ReportsPage() {
     const { organizationId } = await getOrgContext();
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
 
     // Fetch all invoices with items for deep reporting
     const { data: invoices } = await supabase

@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { getOrgContext } from '@/lib/org-context';
 import { getTodayBs } from '@/utils/date-utils';
 import { revalidatePath } from 'next/cache';
@@ -26,7 +26,7 @@ export interface CreateInvoicePayload {
 
 export async function createInvoice(payload: CreateInvoicePayload) {
     const { organizationId } = await getOrgContext();
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const today = getTodayBs();
 
     // ---- Calculation Engine ----
@@ -119,7 +119,7 @@ export async function createInvoice(payload: CreateInvoicePayload) {
 
 export async function getInvoices() {
     const { organizationId } = await getOrgContext();
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const { data, error } = await supabase
         .from('invoices')
         .select('*, customers(name)')

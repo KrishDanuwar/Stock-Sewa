@@ -1,12 +1,12 @@
 'use server';
 
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/server';
 import { getOrgContext } from '@/lib/org-context';
 import { revalidatePath } from 'next/cache';
 
 export async function getCustomers() {
     const { organizationId } = await getOrgContext();
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const { data, error } = await supabase
         .from('customers')
         .select('*')
@@ -26,7 +26,7 @@ export async function getCustomers() {
 
 export async function addCustomer(formData: FormData) {
     const { organizationId } = await getOrgContext();
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const { error } = await supabase.from('customers').insert({
         organization_id: organizationId,
         name: formData.get('name') as string,
@@ -43,7 +43,7 @@ export async function addCustomer(formData: FormData) {
 
 export async function deleteCustomer(id: string) {
     const { organizationId } = await getOrgContext();
-    const supabase = await createClient();
+    const supabase = await createAdminClient();
     const { error } = await supabase
         .from('customers')
         .delete()
