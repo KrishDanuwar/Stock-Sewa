@@ -47,9 +47,17 @@ export async function repairOrganization(_prevState: unknown, formData: FormData
 
     try {
         // 4. Create the organization
+        const trialExpiry = new Date();
+        trialExpiry.setDate(trialExpiry.getDate() + 3);
+
         const { data: newOrg, error: orgError } = await supabase
             .from('organizations')
-            .insert({ name: orgName })
+            .insert({
+                name: orgName,
+                subscription_plan: 'trial',
+                subscription_status: 'active',
+                trial_ends_at: trialExpiry.toISOString()
+            })
             .select()
             .single();
 
@@ -58,14 +66,14 @@ export async function repairOrganization(_prevState: unknown, formData: FormData
             throw new Error(`Failed to create organization: ${orgError.message}`);
         }
 
-        // 5. Create the profile
+        // 5. Create or Update the profile
         const { error: profileError } = await supabase
             .from('profiles')
-            .insert({
+            .upsert({
                 id: userId,
                 organization_id: newOrg.id,
                 username: username
-            });
+            }, { onConflict: 'id' });
 
         if (profileError) {
             console.error('Profile Creation Error:', profileError);

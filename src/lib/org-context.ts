@@ -29,57 +29,86 @@ export async function getOrgContext(): Promise<OrgContext> {
 
     const supabase = await createAdminClient();
 
-    // With Clerk, 'id' in profiles table corresponds to Clerk's userId
-    const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select(`
-            organization_id, 
-            organizations(
-                name, 
-                logo_url, 
-                subscription_plan, 
-                subscription_status, 
-                trial_ends_at, 
-                subscription_ends_at
-            )
-        `)
-        .eq('id', userId)
-        .single();
+    try {
+        // 1. Attempt full query with subscription fields
+        const { data: profile, error: profileError } = await supabase
+            .from('profiles')
+            .select(`
+                organization_id, 
+                organizations(
+                    name, 
+                    logo_url, 
+                    subscription_plan, 
+                    subscription_status, 
+                    trial_ends_at, 
+                    subscription_ends_at
+                )
+            `)
+            .eq('id', userId)
+            .single();
 
-    if (profileError || !profile) {
-        console.error('Profile/Org missing for Clerk user:', userId);
+        if (!profileError && profile) {
+            const orgData = Array.isArray(profile.organizations)
+                ? profile.organizations[0]
+                : (profile.organizations as any);
+
+            const orgName = orgData?.name ?? 'My Organization';
+            const subStatus = orgData?.subscription_status || 'active';
+            const trialEndsAt = orgData?.trial_ends_at;
+            const subEndsAt = orgData?.subscription_ends_at;
+
+            const now = new Date();
+            const isTrialExpired = trialEndsAt ? new Date(trialEndsAt) < now : false;
+
+            return {
+                userId,
+                organizationId: profile.organization_id,
+                organizationName: orgName,
+                logoUrl: orgData?.logo_url || null,
+                email: user.emailAddresses[0]?.emailAddress || '',
+                subscriptionPlan: orgData?.subscription_plan || 'trial',
+                subscriptionStatus: subStatus,
+                trialEndsAt,
+                subscriptionEndsAt: subEndsAt,
+                isTrialExpired,
+            };
+        }
+
+        // 2. Fallback: If subscription columns are missing, try basic fetch
+        console.warn('getOrgContext: Primary query failed, attempting fallback...', profileError);
+        const { data: basicProfile, error: fallbackError } = await supabase
+            .from('profiles')
+            .select(`
+                organization_id,
+                organizations(name)
+            `)
+            .eq('id', userId)
+            .single();
+
+        if (fallbackError || !basicProfile) {
+            console.error('getOrgContext Error (Primary & Fallback failed):', { userId, profileError, fallbackError });
+            redirect('/setup');
+        }
+
+        const fallbackOrg = Array.isArray(basicProfile.organizations) ? basicProfile.organizations[0] : basicProfile.organizations as any;
+
+        return {
+            userId,
+            organizationId: basicProfile.organization_id,
+            organizationName: fallbackOrg?.name || 'My Shop',
+            logoUrl: null,
+            email: user.emailAddresses[0]?.emailAddress || '',
+            subscriptionPlan: 'trial',
+            subscriptionStatus: 'active',
+            trialEndsAt: null,
+            subscriptionEndsAt: null,
+            isTrialExpired: false,
+        };
+    } catch (error) {
+        if (error instanceof Error && (error as any).digest?.startsWith('NEXT_REDIRECT')) {
+            throw error;
+        }
+        console.error('getOrgContext Exception:', error);
         redirect('/setup');
     }
-
-    const orgData = Array.isArray(profile.organizations)
-        ? profile.organizations[0]
-        : (profile.organizations as any);
-
-    const orgName = orgData?.name ?? 'My Organization';
-
-    // Subscription Check
-    const subStatus = orgData?.subscription_status || 'expired';
-    const trialEndsAt = orgData?.trial_ends_at;
-    const subEndsAt = orgData?.subscription_ends_at;
-
-    const now = new Date();
-    const isTrialExpired = trialEndsAt ? new Date(trialEndsAt) < now : true;
-    const isSubExpired = subEndsAt ? new Date(subEndsAt) < now : true;
-
-    // Decision Logic
-    // Allow access if active subscription, or if trial is still active
-    const hasAccess = subStatus === 'active' && (!isTrialExpired || (subEndsAt && !isSubExpired));
-
-    return {
-        userId: userId,
-        organizationId: profile.organization_id,
-        organizationName: orgName,
-        logoUrl: orgData?.logo_url || null,
-        email: user.emailAddresses[0]?.emailAddress || '',
-        subscriptionPlan: orgData?.subscription_plan || 'trial',
-        subscriptionStatus: subStatus,
-        trialEndsAt: trialEndsAt,
-        subscriptionEndsAt: subEndsAt,
-        isTrialExpired,
-    };
 }
