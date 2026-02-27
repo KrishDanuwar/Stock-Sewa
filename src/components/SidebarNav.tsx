@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useUser } from '@clerk/nextjs';
+import { useState, useEffect } from 'react';
 import {
     LayoutDashboard,
     Package,
@@ -12,14 +13,30 @@ import {
     BarChart2,
     Settings,
     ShieldCheck,
+    Lock,
 } from 'lucide-react';
+import { isAuthorizedAdmin } from '@/lib/actions/admin-management';
 
 export default function SidebarNav() {
     const pathname = usePathname();
     const { user } = useUser();
 
+    const [isAdmin, setIsAdmin] = useState(false);
+
     const userEmail = user?.emailAddresses[0]?.emailAddress || '';
-    const isAdmin = ['junsangsingh@gmail.com'].includes(userEmail);
+
+    // Check admin status on load
+    useEffect(() => {
+        async function check() {
+            if (userEmail === 'junsangsingh@gmail.com') {
+                setIsAdmin(true);
+                return;
+            }
+            const status = await isAuthorizedAdmin();
+            setIsAdmin(status);
+        }
+        if (userEmail) check();
+    }, [userEmail]);
 
     const navItems = [
         { href: '/dashboard', icon: LayoutDashboard, label: 'Dashboard' },
@@ -33,10 +50,15 @@ export default function SidebarNav() {
 
     // Add Admin Subscriptions link if the user is the master admin
     if (isAdmin) {
-        navItems.splice(navItems.length - 1, 0, {
+        navItems.push({
             href: '/admin/subscriptions',
             icon: ShieldCheck,
             label: 'Subscriptions'
+        });
+        navItems.push({
+            href: '/admin/management',
+            icon: Lock,
+            label: 'Admin Panel'
         });
     }
 

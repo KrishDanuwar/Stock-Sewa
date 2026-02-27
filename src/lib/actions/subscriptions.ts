@@ -6,7 +6,7 @@ import { revalidatePath } from 'next/cache';
 import { currentUser } from '@clerk/nextjs/server';
 import { getPlanConfig } from '@/config/plans';
 
-const AUTHORIZED_ADMIN = 'junsangsingh@gmail.com';
+import { isAuthorizedAdmin } from './admin-management';
 
 export async function submitTransactionId(transactionId: string, plan: string) {
     const { organizationId } = await getOrgContext();
@@ -31,10 +31,8 @@ export async function submitTransactionId(transactionId: string, plan: string) {
 }
 
 export async function activateSubscription(orgId: string, plan: string) {
-    const user = await currentUser();
-    const email = user?.emailAddresses[0]?.emailAddress;
-
-    if (email !== AUTHORIZED_ADMIN) {
+    const isAuthorized = await isAuthorizedAdmin();
+    if (!isAuthorized) {
         throw new Error('Unauthorized');
     }
 
@@ -65,10 +63,8 @@ export async function activateSubscription(orgId: string, plan: string) {
 }
 
 export async function rejectSubscription(orgId: string) {
-    const user = await currentUser();
-    const email = user?.emailAddresses[0]?.emailAddress;
-
-    if (email !== AUTHORIZED_ADMIN) {
+    const isAuthorized = await isAuthorizedAdmin();
+    if (!isAuthorized) {
         throw new Error('Unauthorized');
     }
 

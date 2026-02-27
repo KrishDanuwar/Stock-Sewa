@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { updateOrganizationLogo, updateOrganizationDetails, removeOrganizationLogo } from '@/lib/actions/organizations';
 import { deleteAccount } from '@/lib/actions/user';
 import { toast } from 'sonner';
-import { Building2, Upload, Camera, Save, Trash2, Mail, Sun, Moon, Palette, UserCircle, CreditCard, ShieldCheck, HeartPulse } from 'lucide-react';
+import { Building2, Upload, Camera, Save, Trash2, Mail, Sun, Moon, Palette, UserCircle, CreditCard, ShieldCheck, HeartPulse, Lock } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import Link from 'next/link';
 import { PlanConfig } from '@/config/plans';
@@ -29,7 +29,8 @@ export default function SettingsClient({
     subscriptionStatus,
     trialEndsAt,
     subscriptionEndsAt,
-    plan
+    plan,
+    isSiteAdmin
 }: {
     organization: Organization | null,
     userEmail: string,
@@ -37,7 +38,8 @@ export default function SettingsClient({
     subscriptionStatus?: string,
     trialEndsAt?: string | null,
     subscriptionEndsAt?: string | null,
-    plan: PlanConfig
+    plan: PlanConfig,
+    isSiteAdmin: boolean
 }) {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -183,7 +185,7 @@ export default function SettingsClient({
         }
     }
 
-    const isAdmin = ['junsangsingh@gmail.com'].includes(userEmail);
+    const isAdmin = isSiteAdmin;
 
     return (
         <div className="animate-fade-in-up">
@@ -208,10 +210,16 @@ export default function SettingsClient({
                         <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: 24, maxWidth: 600 }}>
                             Access the global control center to verify transaction IDs and activate user plans.
                         </p>
-                        <Link href="/admin/subscriptions" className="glass-button glass-button-primary" style={{ display: 'inline-flex', padding: '12px 24px', fontWeight: 800 }}>
-                            <CreditCard size={18} />
-                            Manage Pending Requests
-                        </Link>
+                        <div className="flex gap-2">
+                            <Link href="/admin/subscriptions" className="glass-button glass-button-primary" style={{ display: 'inline-flex', padding: '12px 24px', fontWeight: 800 }}>
+                                <CreditCard size={18} />
+                                Subscriptions
+                            </Link>
+                            <Link href="/admin/management" className="glass-button" style={{ display: 'inline-flex', padding: '12px 24px', fontWeight: 800, border: '1px solid var(--brand-primary)' }}>
+                                <Lock size={18} />
+                                Access Control
+                            </Link>
+                        </div>
                     </div>
                 )}
                 {/* Organization Profile */}

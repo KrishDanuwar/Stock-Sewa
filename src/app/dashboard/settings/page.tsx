@@ -2,9 +2,12 @@ import { getOrganization } from '@/lib/actions/organizations';
 import { getOrgContext } from '@/lib/org-context';
 import SettingsClient from './SettingsClient';
 
+import { isAuthorizedAdmin } from '@/lib/actions/admin-management';
+
 export default async function SettingsPage() {
     const organization = await getOrganization();
     const context = await getOrgContext();
+    const isAdmin = await isAuthorizedAdmin();
 
     return (
         <SettingsClient
@@ -15,6 +18,7 @@ export default async function SettingsPage() {
             trialEndsAt={context.trialEndsAt}
             subscriptionEndsAt={context.subscriptionEndsAt}
             plan={context.plan}
+            isSiteAdmin={isAdmin}
         />
     );
 }

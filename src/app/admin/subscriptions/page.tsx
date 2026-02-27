@@ -4,16 +4,13 @@ import { redirect } from 'next/navigation';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import AdminSubscriptionsClient from './AdminSubscriptionsClient';
 
+import { isAuthorizedAdmin } from '@/lib/actions/admin-management';
+
 export default async function AdminSubscriptionsPage() {
-    const { userId } = await auth();
-    const user = await currentUser();
+    // Protection: Only authorized admins can access this
+    const isAuthorized = await isAuthorizedAdmin();
 
-    // Protection: Only junsangsingh@gmail.com can access this
-    const ADMIN_EMAILS = ['junsangsingh@gmail.com'];
-
-    const userEmail = user?.emailAddresses[0]?.emailAddress || '';
-    if (!user || !ADMIN_EMAILS.includes(userEmail)) {
-        console.warn(`Unauthorized admin access attempt by: ${userEmail}`);
+    if (!isAuthorized) {
         redirect('/dashboard');
     }
 
