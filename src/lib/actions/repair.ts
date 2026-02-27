@@ -50,7 +50,10 @@ export async function repairOrganization(_prevState: unknown, formData: FormData
         const trialExpiry = new Date();
         trialExpiry.setDate(trialExpiry.getDate() + 3);
 
-        const { data: newOrg, error: orgError } = await supabase
+        let newOrg;
+
+        // Attempt 1: Full insert with subscription fields
+        const { data: orgWithSub, error: orgSubError } = await supabase
             .from('organizations')
             .insert({
                 name: orgName,
@@ -61,9 +64,23 @@ export async function repairOrganization(_prevState: unknown, formData: FormData
             .select()
             .single();
 
-        if (orgError) {
-            console.error('Org Creation Error:', orgError);
-            throw new Error(`Failed to create organization: ${orgError.message}`);
+        if (orgSubError) {
+            console.warn('Primary org creation failed (missing columns?), attempting fallback...', orgSubError);
+
+            // Attempt 2: Basic fallback insert
+            const { data: basicOrg, error: basicOrgError } = await supabase
+                .from('organizations')
+                .insert({ name: orgName })
+                .select()
+                .single();
+
+            if (basicOrgError) {
+                console.error('Basic org creation failed:', basicOrgError);
+                throw new Error(`Failed to create organization: ${basicOrgError.message}`);
+            }
+            newOrg = basicOrg;
+        } else {
+            newOrg = orgWithSub;
         }
 
         // 5. Create or Update the profile
