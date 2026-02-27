@@ -197,22 +197,23 @@ export default function TrialExpiredClient({ email }: TrialExpiredClientProps) {
                                 animation: 'qrScan 4s infinite linear', zIndex: 10
                             }} />
 
-                            <div style={{ width: '220px', height: '220px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', borderRadius: '16px' }}>
-                                <div style={{ width: '100%', height: '100%', background: '#f1f5f9', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
-                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', opacity: 0.15 }}>
-                                        <div style={{ width: '30px', height: '30px', background: 'black' }} />
-                                        <div style={{ width: '30px', height: '30px', background: 'black' }} />
-                                        <div style={{ width: '30px', height: '30px', background: 'black' }} />
-                                        <div style={{ width: '30px', height: '30px', background: 'black' }} />
+                            <div style={{ width: '220px', height: '220px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', borderRadius: '16px', overflow: 'hidden' }}>
+                                <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                                    <div style={{ width: '100%', height: '100%', background: '#f8fafc', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                                        <div style={{
+                                            width: '180px', height: '180px',
+                                            background: 'url("data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' viewBox=\'0 0 100 100\'%3E%3Crect width=\'100\' height=\'100\' fill=\'white\'/%3E%3Cpath d=\'M20 20h20v20H20zM60 20h20v20H60zM20 60h20v20H20zM40 40h20v20H40zM30 30h5v5h-5zM70 30h5v5h-5zM30 70h5v5h-5z\' fill=\'black\'/%3E%3C/svg%3E") no-repeat center',
+                                            backgroundSize: 'contain'
+                                        }} />
+                                        <p style={{ fontSize: '0.625rem', fontWeight: 800, marginTop: '8px', color: '#10b981' }}>eSewa Verified QR</p>
                                     </div>
-                                    <p style={{ fontSize: '0.625rem', fontWeight: 800, marginTop: '12px', color: '#64748b' }}>SCAN TO PAY</p>
                                 </div>
                             </div>
                         </div>
 
                         <div style={{ marginTop: '24px', textAlign: 'center' }}>
-                            <p style={{ fontWeight: 700, fontSize: '0.9375rem' }}>Krish Danuwar</p>
-                            <p style={{ color: 'var(--brand-primary)', fontWeight: 800, fontSize: '0.875rem' }}>eSewa ID: 9821818131</p>
+                            <p style={{ fontWeight: 700, fontSize: '0.9375rem' }}>Krish Singh Danuwar</p>
+                            <p style={{ color: 'var(--brand-primary)', fontWeight: 800, fontSize: '0.875rem' }}>eSewa ID: 9703360369</p>
                         </div>
                     </div>
                 </div>
@@ -225,7 +226,7 @@ export default function TrialExpiredClient({ email }: TrialExpiredClientProps) {
                 </p>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                     <a
-                        href="https://wa.me/9779821818131"
+                        href="https://wa.me/9779703360369"
                         target="_blank"
                         rel="noreferrer"
                         className="glass-button"
