@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
-import { activateSubscription } from '@/lib/actions/subscriptions';
+import { useState, useMemo } from 'react';
+import { activateSubscription, rejectSubscription } from '@/lib/actions/subscriptions';
 import { toast } from 'sonner';
-import { CheckCircle, XCircle, ExternalLink, Shield, Search, RefreshCw } from 'lucide-react';
+import { CheckCircle, XCircle, Shield, Search, RefreshCw, Filter, History } from 'lucide-react';
 
 interface Org {
     id: string;
@@ -19,130 +19,203 @@ interface Org {
 export default function AdminSubscriptionsClient({ initialOrgs }: { initialOrgs: Org[] }) {
     const [orgs, setOrgs] = useState(initialOrgs);
     const [loadingId, setLoadingId] = useState<string | null>(null);
+    const [actionType, setActionType] = useState<'activate' | 'reject' | null>(null);
     const [search, setSearch] = useState('');
+    const [showOnlyPending, setShowOnlyPending] = useState(true);
 
     const handleActivate = async (id: string, plan: string) => {
-        if (!confirm(`Activate ${plan} subscription for this organization?`)) return;
+        if (!confirm(`Verify and ACTIVATE ${plan} plan for this shop?`)) return;
 
         setLoadingId(id);
+        setActionType('activate');
         const result = await activateSubscription(id, plan as 'monthly' | 'yearly');
         if (result.success) {
-            toast.success('Subscription activated!');
-            setOrgs(prev => prev.filter(o => o.id !== id));
+            toast.success('Subscription activated successfully!');
+            setOrgs(prev => prev.map(o => o.id === id ? { ...o, subscription_status: 'active', last_transaction_id: null } : o));
         } else {
-            toast.error(result.error || 'Failed to activate');
+            toast.error(result.error || 'Activation failed');
         }
         setLoadingId(null);
+        setActionType(null);
     };
 
-    const filteredOrgs = orgs.filter(o =>
-        o.name.toLowerCase().includes(search.toLowerCase()) ||
-        o.last_transaction_id?.toLowerCase().includes(search.toLowerCase())
-    );
+    const handleReject = async (id: string) => {
+        if (!confirm('Reject this payment request? This will clear the transaction ID.')) return;
+
+        setLoadingId(id);
+        setActionType('reject');
+        const result = await rejectSubscription(id);
+        if (result.success) {
+            toast.success('Request rejected');
+            setOrgs(prev => prev.map(o => o.id === id ? { ...o, subscription_status: 'inactive', last_transaction_id: null } : o));
+        } else {
+            toast.error(result.error || 'Rejection failed');
+        }
+        setLoadingId(null);
+        setActionType(null);
+    };
+
+    const displayOrgs = useMemo(() => {
+        let filtered = orgs.filter(o =>
+            o.name.toLowerCase().includes(search.toLowerCase()) ||
+            o.last_transaction_id?.toLowerCase().includes(search.toLowerCase())
+        );
+
+        if (showOnlyPending) {
+            filtered = filtered.filter(o => o.last_transaction_id && o.subscription_status !== 'active');
+        }
+
+        // Sort: Pending requests first, then by creation date
+        return filtered.sort((a, b) => {
+            const aPending = a.last_transaction_id && a.subscription_status !== 'active';
+            const bPending = b.last_transaction_id && b.subscription_status !== 'active';
+            if (aPending && !bPending) return -1;
+            if (!aPending && bPending) return 1;
+            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        });
+    }, [orgs, search, showOnlyPending]);
 
     return (
-        <div className="p-8 max-w-7xl mx-auto">
-            <header style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 40 }}>
+        <div className="animate-fade-in-up">
+            <header className="page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
                 <div>
-                    <h1 style={{ fontSize: '1.75rem', fontWeight: 800, color: 'var(--text-primary)' }}>Admin: Subscriptions</h1>
-                    <p style={{ color: 'var(--text-muted)' }}>Verify and activate manual payments</p>
+                    <h1 className="page-title">Subscription Control Center</h1>
+                    <p className="page-subtitle">Verify payment transaction IDs and manage user plans</p>
                 </div>
-                <div style={{ padding: '8px 16px', background: 'rgba(79, 142, 247, 0.1)', borderRadius: 12, color: 'var(--brand-primary)', fontWeight: 600, display: 'flex', alignItems: 'center', gap: 8 }}>
-                    <Shield size={18} /> Master Admin Access
+                <div className="badge badge-info h-10 px-4 gap-2 shadow-sm">
+                    <Shield size={16} />
+                    <span className="font-bold tracking-tight">Authorized Admin Access</span>
                 </div>
             </header>
 
-            <div className="glass-card" style={{ padding: 24, marginBottom: 32 }}>
-                <div style={{ position: 'relative', maxWidth: 400 }}>
-                    <Search style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} size={18} />
-                    <input
-                        className="glass-input"
-                        placeholder="Search by shop name or ID..."
-                        style={{ paddingLeft: 48 }}
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                    />
+            <div className="glass-card mb-8" style={{ padding: '20px 24px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                    <div style={{ position: 'relative', flex: 1, maxWidth: 400 }}>
+                        <Search style={{ position: 'absolute', left: 16, top: '50%', transform: 'translateY(-50%)' }} size={18} className="text-muted" />
+                        <input
+                            className="glass-input"
+                            placeholder="Find shop or transaction ID..."
+                            style={{ paddingLeft: 48 }}
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                        />
+                    </div>
+
+                    <button
+                        className={`glass-button ${showOnlyPending ? 'glass-button-primary' : ''}`}
+                        onClick={() => setShowOnlyPending(!showOnlyPending)}
+                        style={{ height: 42 }}
+                    >
+                        <Filter size={16} />
+                        {showOnlyPending ? 'Viewing Pending Submissions' : 'Viewing All Organizations'}
+                    </button>
+
+                    <div className="ml-auto text-[10px] font-bold text-muted uppercase tracking-widest bg-white/5 px-4 py-2 rounded-full border border-white/5">
+                        {displayOrgs.length} Records Found
+                    </div>
                 </div>
             </div>
 
-            <div className="glass-card" style={{ overflow: 'hidden' }}>
+            <div className="glass-card overflow-hidden" style={{ minHeight: 400 }}>
                 <table className="glass-table">
                     <thead>
                         <tr>
-                            <th>Organization</th>
-                            <th>Status / Plan</th>
-                            <th>Transaction ID</th>
-                            <th>Trial Ended</th>
-                            <th style={{ textAlign: 'right' }}>Actions</th>
+                            <th style={{ width: '25%' }}>Organization</th>
+                            <th style={{ width: '15%' }}>Plan Detail</th>
+                            <th style={{ width: '25%' }}>Transaction Identification</th>
+                            <th style={{ width: '15%' }}>Status / Expiry</th>
+                            <th style={{ width: '20%', textAlign: 'right' }}>Management Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredOrgs.length > 0 ? filteredOrgs.map((org) => {
-                            const isPendingVerification = org.last_transaction_id && org.subscription_status !== 'active';
+                        {displayOrgs.length > 0 ? displayOrgs.map((org: Org) => {
+                            const isPending = org.last_transaction_id && org.subscription_status !== 'active';
 
                             return (
                                 <tr key={org.id} style={{
-                                    background: isPendingVerification ? 'rgba(79, 142, 247, 0.05)' : 'transparent',
-                                    borderLeft: isPendingVerification ? '4px solid var(--brand-primary)' : '4px solid transparent'
+                                    background: isPending ? 'rgba(79, 142, 247, 0.03)' : 'transparent',
                                 }}>
                                     <td>
-                                        <div style={{ fontWeight: 600 }}>{org.name}</div>
-                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', gap: 8 }}>
-                                            <span>Created {new Date(org.created_at).toLocaleDateString()}</span>
-                                            {isPendingVerification && <span style={{ color: 'var(--brand-primary)', fontWeight: 800 }}>• PENDING REQUEST</span>}
-                                        </div>
+                                        <div className="font-bold text-primary">{org.name}</div>
+                                        <div className="text-[10px] text-muted font-mono uppercase tracking-tighter mt-0.5">{org.id}</div>
                                     </td>
                                     <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                                            <span className={`badge ${org.subscription_status === 'pending' || isPendingVerification ? 'badge-info' : 'badge-danger'}`}>
-                                                {org.subscription_status.toUpperCase()}
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                            <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-widest ${org.subscription_plan === 'yearly' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-white/10 text-neutral-400'}`}>
+                                                {org.subscription_plan || 'TRIAL'}
                                             </span>
-                                            <span style={{ fontSize: '0.8125rem', fontWeight: 600, textTransform: 'capitalize' }}>{org.subscription_plan}</span>
                                         </div>
                                     </td>
                                     <td>
                                         {org.last_transaction_id ? (
-                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
-                                                <code style={{ background: 'rgba(79, 142, 247, 0.1)', padding: '4px 8px', borderRadius: 4, color: 'var(--brand-primary)', fontWeight: 700 }}>
-                                                    {org.last_transaction_id}
-                                                </code>
-                                                <span style={{ fontSize: '0.625rem', color: 'var(--text-muted)', fontWeight: 600 }}>SUBMITTED FOR VERIFICATION</span>
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                    <code className="bg-brand-primary/10 border border-brand-primary/20 px-3 py-1.5 rounded-lg text-brand-primary font-black tracking-widest text-[11px] shadow-[0_0_15px_rgba(79,142,247,0.15)]">
+                                                        {org.last_transaction_id}
+                                                    </code>
+                                                </div>
+                                                <span className="text-[9px] font-black text-brand-primary/60 uppercase tracking-widest ml-1 animate-pulse">Waiting for Verification</span>
                                             </div>
                                         ) : (
-                                            <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>No request yet</span>
+                                            <span className="text-muted text-[10px] italic font-medium uppercase tracking-widest opacity-40">No Pending Submission</span>
                                         )}
                                     </td>
-                                    <td style={{ fontSize: '0.8125rem' }}>
-                                        {org.subscription_ends_at ? (
-                                            <span style={{ color: 'var(--brand-success)' }}>Ends {new Date(org.subscription_ends_at).toLocaleDateString()}</span>
-                                        ) : org.trial_ends_at ? (
-                                            <span style={{ color: 'var(--brand-warning)' }}>Trial {new Date(org.trial_ends_at).toLocaleDateString()}</span>
-                                        ) : 'N/A'}
+                                    <td>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                <div className={`h-1.5 w-1.5 rounded-full ${org.subscription_status === 'active' ? 'bg-emerald-500 shadow-[0_0_8px_var(--brand-success)]' : 'bg-brand-warning animate-pulse'}`} />
+                                                <span className={`text-[10px] font-black uppercase tracking-tight ${org.subscription_status === 'active' ? 'text-emerald-400' : 'text-brand-warning'}`}>
+                                                    {org.subscription_status}
+                                                </span>
+                                            </div>
+                                            <span className="text-[10px] text-muted font-bold">
+                                                {org.subscription_ends_at
+                                                    ? `Exp: ${new Date(org.subscription_ends_at).toLocaleDateString()}`
+                                                    : org.trial_ends_at
+                                                        ? `Trial ends: ${new Date(org.trial_ends_at).toLocaleDateString()}`
+                                                        : 'N/A'
+                                                }
+                                            </span>
+                                        </div>
                                     </td>
                                     <td style={{ textAlign: 'right' }}>
                                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
                                             <button
-                                                className={`glass-button ${isPendingVerification ? 'glass-button-primary' : ''}`}
-                                                style={{
-                                                    height: '36px',
-                                                    fontSize: '0.75rem',
-                                                    fontWeight: 800,
-                                                    ...(isPendingVerification ? {} : { color: 'var(--brand-success)', borderColor: 'rgba(16, 185, 129, 0.2)' })
-                                                }}
+                                                className={`glass-button ${isPending ? 'glass-button-primary' : ''} h-9 px-4 text-[10px] font-black tracking-tighter`}
                                                 onClick={() => handleActivate(org.id, org.subscription_plan || 'monthly')}
                                                 disabled={loadingId === org.id}
                                             >
-                                                {loadingId === org.id ? <RefreshCw className="animate-spin" size={14} /> : <CheckCircle size={14} />}
-                                                {isPendingVerification ? 'VERIFY & ACTIVATE' : 'ACTIVATE'}
+                                                {loadingId === org.id && actionType === 'activate' ? <RefreshCw className="animate-spin" size={12} /> : <CheckCircle size={12} />}
+                                                ACTIVATE
                                             </button>
+
+                                            {isPending && (
+                                                <button
+                                                    className="glass-button h-9 px-4 text-[10px] font-black tracking-tighter"
+                                                    style={{ color: 'var(--brand-danger)', borderColor: 'rgba(239, 68, 68, 0.2)' }}
+                                                    onClick={() => handleReject(org.id)}
+                                                    disabled={loadingId === org.id}
+                                                >
+                                                    {loadingId === org.id && actionType === 'reject' ? <RefreshCw className="animate-spin" size={12} /> : <XCircle size={12} />}
+                                                    REJECT
+                                                </button>
+                                            )}
                                         </div>
                                     </td>
                                 </tr>
                             );
                         }) : (
                             <tr>
-                                <td colSpan={5} style={{ textAlign: 'center', padding: '64px 0', color: 'var(--text-muted)' }}>
-                                    No pending or expired organizations found.
+                                <td colSpan={5} style={{ textAlign: 'center', padding: '100px 0' }}>
+                                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+                                        <div className="w-16 h-16 rounded-2xl bg-white/5 flex items-center justify-center text-muted border border-white/5">
+                                            <History size={32} />
+                                        </div>
+                                        <div>
+                                            <p className="font-bold text-primary">No submissions found</p>
+                                            <p className="text-xs text-muted mt-1">Check search filters or view all organizations.</p>
+                                        </div>
+                                    </div>
                                 </td>
                             </tr>
                         )}

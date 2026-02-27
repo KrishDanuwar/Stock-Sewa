@@ -62,3 +62,29 @@ export async function activateSubscription(orgId: string, plan: 'monthly' | 'yea
     revalidatePath('/admin/subscriptions');
     return { success: true };
 }
+
+export async function rejectSubscription(orgId: string) {
+    const user = await currentUser();
+    const email = user?.emailAddresses[0]?.emailAddress;
+
+    if (email !== AUTHORIZED_ADMIN) {
+        throw new Error('Unauthorized');
+    }
+
+    const supabase = await createAdminClient();
+
+    const { error } = await supabase
+        .from('organizations')
+        .update({
+            subscription_status: 'inactive',
+            last_transaction_id: null,
+        })
+        .eq('id', orgId);
+
+    if (error) {
+        return { success: false, error: error.message };
+    }
+
+    revalidatePath('/admin/subscriptions');
+    return { success: true };
+}
