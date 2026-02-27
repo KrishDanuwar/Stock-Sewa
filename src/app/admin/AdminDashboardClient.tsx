@@ -28,7 +28,7 @@ interface Org {
 // --- Custom Glass Dropdown Component ---
 const GlassDropdown = ({ value, options, onChange, label }: { value: string, options: { id: string, name: string }[], onChange: (val: string) => void, label?: string }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const selected = options.find(o => o.id === value) || options[0];
+    const selected = options.find(o => o.id === value) || options[0] || { id: 'none', name: 'Select Plan' };
 
     return (
         <div className="relative">
@@ -37,11 +37,11 @@ const GlassDropdown = ({ value, options, onChange, label }: { value: string, opt
                 className="glass-input !h-14 flex items-center justify-between gap-3 !px-5 hover:border-brand-primary/50 transition-all cursor-pointer group !rounded-none min-w-[200px]"
                 style={{ background: 'var(--glass-input-bg)' }}
             >
-                <div className="flex flex-col items-start gap-0.5">
-                    {label && <span className="text-[9px] font-bold text-muted uppercase tracking-[0.2em] leading-none mb-1 opacity-60">{label}</span>}
-                    <span className="text-[12px] font-bold text-primary uppercase tracking-wider">{selected.name}</span>
+                <div className="flex flex-col items-start gap-1 py-1">
+                    {label && <span className="text-[9px] font-bold text-muted uppercase tracking-[0.1em] leading-none opacity-60 truncate w-full">{label}</span>}
+                    <span className="text-[12px] font-bold text-primary uppercase tracking-wider truncate">{selected.name}</span>
                 </div>
-                <ChevronDown size={14} className={`text-muted transition-transform group-hover:text-brand-primary ${isOpen ? 'rotate-180' : ''}`} />
+                <ChevronDown size={14} className={`text-muted transition-transform shrink-0 group-hover:text-brand-primary ${isOpen ? 'rotate-180' : ''}`} />
             </button>
 
             {isOpen && (
@@ -366,10 +366,10 @@ export default function AdminDashboardClient({
                                                 </td>
                                                 <td style={{ textAlign: 'right', paddingRight: 32 }}>
                                                     <div className="flex justify-end items-center gap-4 py-3">
-                                                        <div className="w-40">
+                                                        <div className="w-48">
                                                             <GlassDropdown
-                                                                label="Selected Tier"
-                                                                value={selectedPlans[org.id] || org.subscription_plan || 'monthly'}
+                                                                label="Activation Tier"
+                                                                value={selectedPlans[org.id] || (org.subscription_plan === 'trial' ? 'monthly' : org.subscription_plan) || 'monthly'}
                                                                 options={planOptions}
                                                                 onChange={(val) => setSelectedPlans(prev => ({ ...prev, [org.id]: val }))}
                                                             />
