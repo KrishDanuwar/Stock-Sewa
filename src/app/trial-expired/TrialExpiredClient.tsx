@@ -200,7 +200,7 @@ export default function TrialExpiredClient({ email }: TrialExpiredClientProps) {
                             <div style={{ width: '220px', height: '220px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', borderRadius: '16px', overflow: 'hidden' }}>
                                 <div style={{ width: '100%', height: '100%', position: 'relative' }}>
                                     <img
-                                        src="/images/esewa-qr.png"
+                                        src="/images/esewa-qr.jpeg"
                                         alt="eSewa QR Code"
                                         style={{ width: '100%', height: '100%', objectFit: 'contain' }}
                                     />
