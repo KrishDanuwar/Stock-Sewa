@@ -40,6 +40,23 @@ export async function createInvoice(payload: CreateInvoicePayload) {
     const taxRate = payload.invoice_type === 'vat' ? 0.13 : 0;
     const tax_amount = parseFloat((subtotal * taxRate).toFixed(2));
     const total_amount = parseFloat((subtotal + tax_amount).toFixed(2));
+    const unpaid_amount = parseFloat((total_amount - payload.amount_paid).toFixed(2));
+
+    // ---- Credit Validation ----
+    if (payload.customer_id && unpaid_amount > 0) {
+        const { data: customer } = await supabase
+            .from('customers')
+            .select('credit_balance, credit_limit')
+            .eq('id', payload.customer_id)
+            .single();
+
+        if (customer) {
+            const newBalance = (customer.credit_balance || 0) + unpaid_amount;
+            if (customer.credit_limit > 0 && newBalance > customer.credit_limit) {
+                return { error: `Sale exceeds customer's credit limit of Rs. ${customer.credit_limit}. Current balance: Rs. ${customer.credit_balance}.` };
+            }
+        }
+    }
 
     // Generate invoice number
     const { count } = await supabase
@@ -103,6 +120,29 @@ export async function createInvoice(payload: CreateInvoicePayload) {
             reference_id: invoice.id,
             notes: `Sale - ${invoice_number}`,
         });
+    }
+
+    // ---- Update Customer Credit Balance ----
+    if (payload.customer_id && unpaid_amount !== 0) {
+        // We use an RPC or manual update to ensure atomicity
+        const { error: creditError } = await supabase.rpc('update_customer_credit', {
+            p_customer_id: payload.customer_id,
+            p_amount: unpaid_amount
+        });
+
+        // If RPC doesn't exist yet, we'll need to create it or do manual update
+        if (creditError) {
+            const { data: customer } = await supabase
+                .from('customers')
+                .select('credit_balance')
+                .eq('id', payload.customer_id)
+                .single();
+
+            await supabase
+                .from('customers')
+                .update({ credit_balance: (customer?.credit_balance || 0) + unpaid_amount })
+                .eq('id', payload.customer_id);
+        }
     }
 
     revalidatePath('/dashboard');
