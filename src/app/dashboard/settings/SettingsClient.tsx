@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { updateOrganizationLogo, updateOrganizationDetails, removeOrganizationLogo } from '@/lib/actions/organizations';
 import { deleteAccount } from '@/lib/actions/user';
 import { toast } from 'sonner';
-import { Building2, Upload, Camera, Save, Trash2, Mail, Sun, Moon, Palette, UserCircle, CreditCard } from 'lucide-react';
+import { Building2, Upload, Camera, Save, Trash2, Mail, Sun, Moon, Palette, UserCircle, CreditCard, ShieldCheck } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import Link from 'next/link';
 
@@ -180,6 +180,8 @@ export default function SettingsClient({
         }
     }
 
+    const isAdmin = ['junsangsingh@gmail.com'].includes(userEmail);
+
     return (
         <div className="animate-fade-in-up">
             <div className="page-header">
@@ -190,6 +192,25 @@ export default function SettingsClient({
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 24, maxWidth: 1000 }}>
+                {/* Admin Management Section */}
+                {isAdmin && (
+                    <div className="glass-card" style={{ padding: 32, border: '1px solid var(--brand-primary)', background: 'linear-gradient(135deg, rgba(79, 142, 247, 0.1) 0%, transparent 100%)' }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <ShieldCheck size={24} color="var(--brand-primary)" />
+                                <h2 style={{ fontSize: '1.25rem', fontWeight: 800 }}>Admin Subscription Panel</h2>
+                            </div>
+                            <span className="badge badge-info shadow-[0_0_10px_rgba(79,142,247,0.3)]">Master Admin</span>
+                        </div>
+                        <p style={{ color: 'var(--text-secondary)', fontSize: '0.875rem', marginBottom: 24, maxWidth: 600 }}>
+                            Access the global control center to verify transaction IDs and activate user plans.
+                        </p>
+                        <Link href="/admin/subscriptions" className="glass-button glass-button-primary" style={{ display: 'inline-flex', padding: '12px 24px', fontWeight: 800 }}>
+                            <CreditCard size={18} />
+                            Manage Pending Requests
+                        </Link>
+                    </div>
+                )}
                 {/* Organization Profile */}
                 <div className="glass-card" style={{ padding: 32 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>

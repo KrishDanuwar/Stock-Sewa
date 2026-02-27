@@ -12,6 +12,7 @@ interface Org {
     subscription_status: string;
     last_transaction_id: string | null;
     trial_ends_at: string | null;
+    subscription_ends_at: string | null;
     created_at: string;
 }
 
@@ -76,43 +77,69 @@ export default function AdminSubscriptionsClient({ initialOrgs }: { initialOrgs:
                         </tr>
                     </thead>
                     <tbody>
-                        {filteredOrgs.length > 0 ? filteredOrgs.map((org) => (
-                            <tr key={org.id}>
-                                <td>
-                                    <div style={{ fontWeight: 600 }}>{org.name}</div>
-                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Created {new Date(org.created_at).toLocaleDateString()}</div>
-                                </td>
-                                <td>
-                                    <span className={`badge ${org.subscription_status === 'pending' ? 'badge-warning' : 'badge-danger'}`} style={{ marginRight: 8 }}>
-                                        {org.subscription_status.toUpperCase()}
-                                    </span>
-                                    <span style={{ fontSize: '0.8125rem', fontWeight: 500 }}>{org.subscription_plan}</span>
-                                </td>
-                                <td>
-                                    {org.last_transaction_id ? (
-                                        <code style={{ background: 'rgba(255,255,255,0.05)', padding: '4px 8px', borderRadius: 4, color: 'var(--brand-primary)' }}>{org.last_transaction_id}</code>
-                                    ) : (
-                                        <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>N/A</span>
-                                    )}
-                                </td>
-                                <td style={{ fontSize: '0.8125rem' }}>
-                                    {org.trial_ends_at ? new Date(org.trial_ends_at).toLocaleDateString() : 'N/A'}
-                                </td>
-                                <td style={{ textAlign: 'right' }}>
-                                    <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
-                                        <button
-                                            className="glass-button"
-                                            style={{ color: 'var(--brand-success)', borderColor: 'rgba(16, 185, 129, 0.2)' }}
-                                            onClick={() => handleActivate(org.id, org.subscription_plan || 'monthly')}
-                                            disabled={loadingId === org.id}
-                                        >
-                                            {loadingId === org.id ? <RefreshCw className="animate-spin" size={14} /> : <CheckCircle size={14} />}
-                                            Activate
-                                        </button>
-                                    </div>
-                                </td>
-                            </tr>
-                        )) : (
+                        {filteredOrgs.length > 0 ? filteredOrgs.map((org) => {
+                            const isPendingVerification = org.last_transaction_id && org.subscription_status !== 'active';
+
+                            return (
+                                <tr key={org.id} style={{
+                                    background: isPendingVerification ? 'rgba(79, 142, 247, 0.05)' : 'transparent',
+                                    borderLeft: isPendingVerification ? '4px solid var(--brand-primary)' : '4px solid transparent'
+                                }}>
+                                    <td>
+                                        <div style={{ fontWeight: 600 }}>{org.name}</div>
+                                        <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)', display: 'flex', gap: 8 }}>
+                                            <span>Created {new Date(org.created_at).toLocaleDateString()}</span>
+                                            {isPendingVerification && <span style={{ color: 'var(--brand-primary)', fontWeight: 800 }}>• PENDING REQUEST</span>}
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <span className={`badge ${org.subscription_status === 'pending' || isPendingVerification ? 'badge-info' : 'badge-danger'}`}>
+                                                {org.subscription_status.toUpperCase()}
+                                            </span>
+                                            <span style={{ fontSize: '0.8125rem', fontWeight: 600, textTransform: 'capitalize' }}>{org.subscription_plan}</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {org.last_transaction_id ? (
+                                            <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                                <code style={{ background: 'rgba(79, 142, 247, 0.1)', padding: '4px 8px', borderRadius: 4, color: 'var(--brand-primary)', fontWeight: 700 }}>
+                                                    {org.last_transaction_id}
+                                                </code>
+                                                <span style={{ fontSize: '0.625rem', color: 'var(--text-muted)', fontWeight: 600 }}>SUBMITTED FOR VERIFICATION</span>
+                                            </div>
+                                        ) : (
+                                            <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>No request yet</span>
+                                        )}
+                                    </td>
+                                    <td style={{ fontSize: '0.8125rem' }}>
+                                        {org.subscription_ends_at ? (
+                                            <span style={{ color: 'var(--brand-success)' }}>Ends {new Date(org.subscription_ends_at).toLocaleDateString()}</span>
+                                        ) : org.trial_ends_at ? (
+                                            <span style={{ color: 'var(--brand-warning)' }}>Trial {new Date(org.trial_ends_at).toLocaleDateString()}</span>
+                                        ) : 'N/A'}
+                                    </td>
+                                    <td style={{ textAlign: 'right' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                                            <button
+                                                className={`glass-button ${isPendingVerification ? 'glass-button-primary' : ''}`}
+                                                style={{
+                                                    height: '36px',
+                                                    fontSize: '0.75rem',
+                                                    fontWeight: 800,
+                                                    ...(isPendingVerification ? {} : { color: 'var(--brand-success)', borderColor: 'rgba(16, 185, 129, 0.2)' })
+                                                }}
+                                                onClick={() => handleActivate(org.id, org.subscription_plan || 'monthly')}
+                                                disabled={loadingId === org.id}
+                                            >
+                                                {loadingId === org.id ? <RefreshCw className="animate-spin" size={14} /> : <CheckCircle size={14} />}
+                                                {isPendingVerification ? 'VERIFY & ACTIVATE' : 'ACTIVATE'}
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            );
+                        }) : (
                             <tr>
                                 <td colSpan={5} style={{ textAlign: 'center', padding: '64px 0', color: 'var(--text-muted)' }}>
                                     No pending or expired organizations found.
