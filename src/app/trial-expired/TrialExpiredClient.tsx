@@ -17,20 +17,21 @@ export default function TrialExpiredClient({ email }: TrialExpiredClientProps) {
     const plans = [
         {
             id: 'monthly' as const,
-            name: 'Basic Pro',
+            name: 'Basic Monthly',
             price: '999',
             period: 'per month',
             description: 'Essential toolkit for growing shops.',
-            features: ['Unlimited Digital Invoices', 'Real-time Inventory Tracking', 'Monthly Performance Reports', 'Customer Profile Management'],
-            popular: false,
+            features: ['Unlimited Invoices', 'Inventory Tracking', 'Basic Reports', 'Customer Database'],
+            icon: Rocket,
         },
         {
             id: 'yearly' as const,
-            name: 'Business Elite',
+            name: 'Premium Yearly',
             price: '9,588',
             period: 'per year',
             description: 'Best value for established enterprises.',
-            features: ['Everything in Basic Pro', '20% Annual Savings Included', 'Priority 24/7 Support', 'Advanced Excel Export Audit'],
+            features: ['Everything in Basic', '20% Annual Savings', 'Priority Support', 'Advanced Data Export'],
+            icon: Zap,
             popular: true,
         },
     ];
@@ -45,7 +46,7 @@ export default function TrialExpiredClient({ email }: TrialExpiredClientProps) {
         try {
             const result = await submitTransactionId(transactionId, selectedPlan);
             if (result.success) {
-                toast.success('Transaction submitted! Our team will verify and activate your account shortly.');
+                toast.success('Transaction submitted! Our team will activate your account shortly.');
                 setTransactionId('');
             } else {
                 toast.error(result.error || 'Failed to submit transaction.');
@@ -59,216 +60,189 @@ export default function TrialExpiredClient({ email }: TrialExpiredClientProps) {
     };
 
     return (
-        <div className="max-w-6xl w-full z-10 space-y-24 animate-fade-in-up">
-            {/* Header Section */}
-            <header className="text-center space-y-6">
-                <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-brand-primary/10 border border-brand-primary/20 text-sm font-bold text-brand-primary mb-2 shadow-[0_0_20px_rgba(79,142,247,0.15)] animate-pulse">
-                    <Sparkles size={16} />
+        <div className="animate-fade-in-up" style={{ width: '100%', maxWidth: '1000px', margin: '0 auto', paddingBottom: '100px' }}>
+            {/* Header */}
+            <header style={{ textAlign: 'center', marginBottom: '64px' }}>
+                <div className="badge badge-info" style={{ marginBottom: '16px', padding: '6px 16px', fontSize: '0.8125rem' }}>
+                    <Sparkles size={14} style={{ marginRight: '6px' }} />
                     Trial Period Concluded
                 </div>
-                <h1 className="text-5xl md:text-7xl font-black tracking-tight leading-tight text-white">
+                <h1 style={{ fontSize: 'clamp(2.5rem, 8vw, 4rem)', fontWeight: 900, letterSpacing: '-0.04em', lineHeight: 1.1, marginBottom: '20px' }}>
                     Scale Your Business <br />
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent">
-                        Without Limits
-                    </span>
+                    <span style={{ color: 'var(--brand-primary)', textShadow: '0 0 30px rgba(79, 142, 247, 0.2)' }}>Without Limits</span>
                 </h1>
-                <p className="text-text-secondary text-lg md:text-xl max-w-2xl mx-auto leading-relaxed">
-                    Don't let your momentum stop here. Reactivate your dashboard and keep your business running smoothly with Stock Sewa.
+                <p style={{ color: 'var(--text-secondary)', fontSize: '1.125rem', maxWidth: '600px', margin: '0 auto', lineHeight: 1.6 }}>
+                    Reactivate your dashboard and keep your momentum going with Stock Sewa's professional toolkit.
                 </p>
             </header>
 
-            {/* Pricing Section */}
-            <div className="grid md:grid-cols-2 gap-8 relative">
-                {/* Decorative background for grid */}
-                <div className="absolute inset-0 bg-brand-primary/5 blur-[100px] -z-10 rounded-full" />
-
+            {/* Pricing Grid */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginBottom: '64px' }}>
                 {plans.map((plan) => (
                     <div
                         key={plan.id}
                         onClick={() => setSelectedPlan(plan.id)}
-                        className={`group relative glass-card p-10 cursor-pointer transition-all duration-500 hover:scale-[1.02] ${selectedPlan === plan.id
-                                ? 'border-brand-primary ring-2 ring-brand-primary/20 bg-white/10'
-                                : 'border-white/10 hover:border-white/20'
-                            }`}
+                        className="glass-card"
+                        style={{
+                            padding: '40px',
+                            cursor: 'pointer',
+                            position: 'relative',
+                            border: selectedPlan === plan.id ? '2px solid var(--brand-primary)' : '1px solid var(--glass-border)',
+                            transform: selectedPlan === plan.id ? 'scale(1.02)' : 'none',
+                            transition: 'all 0.4s cubic-bezier(0.23, 1, 0.32, 1)',
+                            background: selectedPlan === plan.id ? 'rgba(79, 142, 247, 0.05)' : 'var(--glass-bg)'
+                        }}
                     >
                         {plan.popular && (
-                            <div className="absolute -top-4 left-1/2 -translate-x-1/2 bg-gradient-to-r from-brand-primary to-brand-secondary text-white text-[10px] font-black uppercase tracking-[0.2em] px-4 py-1.5 rounded-full shadow-lg shadow-brand-primary/30 z-20">
-                                Most Popular
+                            <div style={{
+                                position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)',
+                                background: 'var(--brand-primary)', color: 'white', fontSize: '0.625rem', fontWeight: 800,
+                                padding: '4px 12px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.1em'
+                            }}>
+                                Best Value
                             </div>
                         )}
 
-                        <div className="flex justify-between items-start mb-8">
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
                             <div>
-                                <h3 className="text-2xl font-bold text-white mb-2 group-hover:text-brand-primary transition-colors">{plan.name}</h3>
-                                <p className="text-text-muted text-sm font-medium">{plan.description}</p>
+                                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '4px' }}>{plan.name}</h3>
+                                <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{plan.description}</p>
                             </div>
-                            <div className={`p-3 rounded-xl transition-all duration-300 ${selectedPlan === plan.id ? 'bg-brand-primary/20 text-brand-primary' : 'bg-white/5 text-text-muted'
-                                }`}>
-                                {plan.id === 'yearly' ? <Zap size={24} /> : <Rocket size={24} />}
-                            </div>
-                        </div>
-
-                        <div className="mb-8">
-                            <div className="flex items-baseline gap-2">
-                                <span className="text-5xl font-black text-white">Rs. {plan.price}</span>
-                                <span className="text-text-muted font-bold text-sm uppercase tracking-widest">{plan.period}</span>
+                            <div style={{ padding: '12px', borderRadius: '12px', background: selectedPlan === plan.id ? 'rgba(79, 142, 247, 0.1)' : 'rgba(255,255,255,0.05)', color: selectedPlan === plan.id ? 'var(--brand-primary)' : 'var(--text-muted)' }}>
+                                <plan.icon size={24} />
                             </div>
                         </div>
 
-                        <ul className="space-y-4 mb-10">
+                        <div style={{ marginBottom: '32px' }}>
+                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                                <span style={{ fontSize: '3rem', fontWeight: 900 }}>Rs. {plan.price}</span>
+                                <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', fontWeight: 600, textTransform: 'uppercase' }}>{plan.period}</span>
+                            </div>
+                        </div>
+
+                        <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 40px 0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
                             {plan.features.map((feature) => (
-                                <li key={feature} className="flex items-center gap-3 text-text-secondary group-hover:text-white transition-colors duration-300">
-                                    <div className="flex-shrink-0 w-6 h-6 rounded-full bg-brand-success/10 flex items-center justify-center border border-brand-success/20">
-                                        <Check size={14} className="text-brand-success" />
+                                <li key={feature} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.9375rem', color: 'var(--text-secondary)' }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                                        <Check size={12} color="var(--brand-success)" />
                                     </div>
-                                    <span className="text-sm font-medium">{feature}</span>
+                                    {feature}
                                 </li>
                             ))}
                         </ul>
 
-                        <div className={`w-full py-4 rounded-xl text-center font-bold tracking-wide transition-all duration-300 border ${selectedPlan === plan.id
-                                ? 'bg-brand-primary text-white border-transparent shadow-[0_10px_30px_rgba(79,142,247,0.3)]'
-                                : 'bg-white/5 text-text-secondary border-white/10 group-hover:bg-white/10'
-                            }`}>
-                            {selectedPlan === plan.id ? 'Plan Selected' : 'Choose This Plan'}
-                        </div>
+                        <button
+                            className={`glass-button ${selectedPlan === plan.id ? 'glass-button-primary' : ''}`}
+                            style={{ width: '100%', justifyContent: 'center', height: '52px', fontSize: '1rem' }}
+                        >
+                            {selectedPlan === plan.id ? 'Current Selection' : 'Choose This Plan'}
+                        </button>
                     </div>
                 ))}
             </div>
 
-            {/* Payment Section */}
-            <div className="relative">
-                <div className="glass-card p-12 overflow-hidden border-brand-primary/30">
-                    {/* Background decoration for section */}
-                    <div className="absolute top-0 right-0 w-64 h-64 bg-brand-primary/10 blur-[100px] -z-10" />
-                    <div className="absolute bottom-0 left-0 w-64 h-64 bg-brand-secondary/10 blur-[100px] -z-10" />
+            {/* Payment Verification */}
+            <div className="glass-card" style={{ padding: '48px', overflow: 'hidden', position: 'relative' }}>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '48px', alignItems: 'center' }}>
+                    <div style={{ flex: 1 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '24px' }}>
+                            <div style={{ padding: '12px', borderRadius: '12px', background: 'rgba(79, 142, 247, 0.1)', color: 'var(--brand-primary)' }}>
+                                <CreditCard size={24} />
+                            </div>
+                            <h2 style={{ fontSize: '1.75rem', fontWeight: 800 }}>Manual Payment Activation</h2>
+                        </div>
 
-                    <div className="flex flex-col lg:flex-row gap-16 items-center">
-                        <div className="flex-1 space-y-8">
-                            <div className="space-y-4">
-                                <div className="p-3 bg-brand-primary/10 rounded-xl w-fit text-brand-primary">
-                                    <CreditCard size={28} />
-                                </div>
-                                <h2 className="text-3xl font-black text-white">Secure Manual Activation</h2>
-                                <p className="text-text-secondary leading-relaxed">
-                                    Finalize your subscription in three simple steps:
-                                    <br />1. Scan the QR code. 2. Make the payment. 3. Submit your Transaction ID below.
-                                </p>
+                        <p style={{ color: 'var(--text-secondary)', lineHeight: 1.6, marginBottom: '32px' }}>
+                            1. Scan the QR code to make payment.<br />
+                            2. Note down your Transaction ID.<br />
+                            3. Enter it below for instant verification.
+                        </p>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                                <label className="glass-label" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                                    <ShieldCheck size={14} color="var(--brand-success)" />
+                                    Transaction ID (TID)
+                                </label>
+                                <input
+                                    className="glass-input"
+                                    style={{ height: '56px', fontSize: '1.125rem', fontWeight: 700, letterSpacing: '0.05em' }}
+                                    placeholder="e.g. ABC-123-XYZ"
+                                    value={transactionId}
+                                    onChange={(e) => setTransactionId(e.target.value)}
+                                />
                             </div>
 
-                            <div className="space-y-6">
-                                <div className="space-y-3">
-                                    <label className="text-xs font-black uppercase tracking-[0.2em] text-text-muted flex items-center gap-2">
-                                        <ShieldCheck size={14} className="text-brand-success" />
-                                        Transaction ID / TID
-                                    </label>
-                                    <div className="relative group">
-                                        <input
-                                            type="text"
-                                            value={transactionId}
-                                            onChange={(e) => setTransactionId(e.target.value)}
-                                            placeholder="Example: ASE8921JHK"
-                                            className="glass-input h-16 px-6 text-xl font-bold border-white/10 focus:border-brand-primary bg-white/[0.03] transition-all"
-                                        />
-                                        <div className="absolute right-4 top-1/2 -translate-y-1/2 text-brand-primary opacity-0 group-focus-within:opacity-100 transition-opacity">
-                                            <Send size={20} />
-                                        </div>
+                            <button
+                                className="glass-button glass-button-primary"
+                                style={{ height: '56px', fontSize: '1.125rem', fontWeight: 800, justifyContent: 'center' }}
+                                onClick={handleSubmit}
+                                disabled={loading || !transactionId}
+                            >
+                                {loading ? 'Validating...' : 'Submit ID for Verification'}
+                            </button>
+
+                            <p style={{ textAlign: 'center', fontSize: '0.75rem', color: 'var(--text-muted)', fontWeight: 600 }}>
+                                Activations are handled by our team within 1-2 business hours.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div style={{ flex: '0 0 340px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                        <div className="glass-card" style={{ padding: '24px', background: 'white', borderRadius: '24px', boxShadow: '0 20px 40px rgba(0,0,0,0.2)', position: 'relative' }}>
+                            {/* Scanning Animation */}
+                            <div style={{
+                                position: 'absolute', top: '24px', left: '24px', right: '24px', height: '2px',
+                                background: 'var(--brand-primary)', boxShadow: '0 0 15px var(--brand-primary)',
+                                animation: 'qrScan 4s infinite linear', zIndex: 10
+                            }} />
+
+                            <div style={{ width: '220px', height: '220px', background: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px', borderRadius: '16px' }}>
+                                <div style={{ width: '100%', height: '100%', background: '#f1f5f9', borderRadius: '12px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', color: '#94a3b8' }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px', opacity: 0.15 }}>
+                                        <div style={{ width: '30px', height: '30px', background: 'black' }} />
+                                        <div style={{ width: '30px', height: '30px', background: 'black' }} />
+                                        <div style={{ width: '30px', height: '30px', background: 'black' }} />
+                                        <div style={{ width: '30px', height: '30px', background: 'black' }} />
                                     </div>
+                                    <p style={{ fontSize: '0.625rem', fontWeight: 800, marginTop: '12px', color: '#64748b' }}>SCAN TO PAY</p>
                                 </div>
-                                <button
-                                    onClick={handleSubmit}
-                                    disabled={loading || !transactionId}
-                                    className="glass-button glass-button-primary w-full h-16 text-lg font-black uppercase tracking-widest justify-center shadow-2xl hover:scale-[1.01]"
-                                >
-                                    {loading ? (
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                                            Verifying...
-                                        </div>
-                                    ) : (
-                                        'Activate Subscriptions'
-                                    )}
-                                </button>
-                                <p className="text-center text-[10px] text-text-muted font-bold tracking-[0.1em] uppercase">
-                                    Activations are typically processed within 30-120 minutes.
-                                </p>
                             </div>
                         </div>
 
-                        <div className="w-full lg:w-[400px] space-y-6">
-                            <div className="relative group">
-                                {/* Glowing outer ring */}
-                                <div className="absolute inset-0 bg-brand-primary/20 blur-[40px] rounded-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
-
-                                <div className="relative p-10 bg-white/5 rounded-3xl border border-white/10 backdrop-blur-xl flex flex-col items-center">
-                                    <div className="w-full aspect-square bg-white rounded-2xl mb-8 flex items-center justify-center p-3 shadow-inner relative overflow-hidden group-hover:scale-[1.02] transition-transform duration-500">
-                                        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-brand-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-
-                                        {/* Mock QR Code UI */}
-                                        <div className="w-full h-full bg-neutral-50 rounded flex flex-col items-center justify-center text-neutral-400 text-center gap-4">
-                                            <div className="relative">
-                                                <div className="w-40 h-40 border-[4px] border-neutral-200 border-dashed rounded-2xl flex items-center justify-center">
-                                                    <div className="w-32 h-32 bg-neutral-100 rounded-lg flex items-center justify-center p-4">
-                                                        <div className="grid grid-cols-2 gap-1 w-full h-full opacity-40">
-                                                            <div className="bg-neutral-600 rounded-sm"></div>
-                                                            <div className="bg-neutral-400 rounded-sm"></div>
-                                                            <div className="bg-neutral-300 rounded-sm"></div>
-                                                            <div className="bg-neutral-600 rounded-sm"></div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                {/* Scanning Effect Overlay */}
-                                                <div className="absolute top-0 left-0 w-full h-1 bg-brand-primary shadow-[0_0_15px_rgba(79,142,247,0.8)] animate-[scan_3s_ease-in-out_infinite]" />
-                                            </div>
-                                            <div className="space-y-1">
-                                                <p className="font-black text-neutral-800 tracking-tighter uppercase text-sm">Scan to Pay</p>
-                                                <div className="h-1 w-8 bg-brand-primary mx-auto rounded-full" />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="text-center space-y-2">
-                                        <div className="flex items-center gap-2 text-white font-bold text-lg">
-                                            <span className="text-text-muted font-medium text-sm">Account:</span>
-                                            Krish Danuwar
-                                        </div>
-                                        <div className="flex items-center gap-2 text-brand-primary font-black text-sm tracking-widest uppercase">
-                                            <span className="text-text-muted font-medium text-xs normal-case tracking-normal">eSewa ID:</span>
-                                            9821818131
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                        <div style={{ marginTop: '24px', textAlign: 'center' }}>
+                            <p style={{ fontWeight: 700, fontSize: '0.9375rem' }}>Krish Danuwar</p>
+                            <p style={{ color: 'var(--brand-primary)', fontWeight: 800, fontSize: '0.875rem' }}>eSewa ID: 9821818131</p>
                         </div>
                     </div>
                 </div>
             </div>
 
-            {/* Support Footer */}
-            <footer className="text-center space-y-10 py-10">
-                <div className="h-px w-full bg-gradient-to-r from-transparent via-white/10 to-transparent" />
-                <div className="space-y-4">
-                    <p className="text-text-secondary font-medium italic text-lg opacity-70">
-                        "Reliable support for reliable businesses."
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-6 justify-center">
-                        <a
-                            href="https://wa.me/9779821818131"
-                            target="_blank"
-                            className="glass-button h-14 px-8 rounded-2xl border-brand-success/30 text-brand-success bg-brand-success/5 hover:bg-brand-success/10 hover:border-brand-success/50 transition-all font-bold gap-3 group"
-                        >
-                            <MessageCircle className="h-5 w-5 group-hover:scale-125 transition-transform" />
-                            Direct WhatsApp Support
-                        </a>
-                    </div>
+            {/* Footer */}
+            <footer style={{ marginTop: '80px', textAlign: 'center' }}>
+                <p style={{ color: 'var(--text-muted)', marginBottom: '24px', fontSize: '0.9375rem' }}>
+                    Need immediate assistance? We're here to help.
+                </p>
+                <div style={{ display: 'flex', justifyContent: 'center' }}>
+                    <a
+                        href="https://wa.me/9779821818131"
+                        target="_blank"
+                        rel="noreferrer"
+                        className="glass-button"
+                        style={{ padding: '12px 32px', borderRadius: '14px', borderColor: 'rgba(16, 185, 129, 0.3)', color: 'var(--brand-success)' }}
+                    >
+                        <MessageCircle size={18} />
+                        WhatsApp Support
+                    </a>
                 </div>
             </footer>
 
             <style jsx>{`
-                @keyframes scan {
-                    0%, 100% { top: 0%; opacity: 0; }
-                    10%, 90% { opacity: 1; }
-                    50% { top: 100%; }
+                @keyframes qrScan {
+                    0% { top: 24px; opacity: 0; }
+                    5% { opacity: 1; }
+                    95% { opacity: 1; }
+                    100% { top: 244px; opacity: 0; }
                 }
             `}</style>
         </div>
