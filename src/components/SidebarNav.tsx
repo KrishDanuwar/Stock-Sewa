@@ -48,17 +48,17 @@ export default function SidebarNav() {
         { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
     ];
 
-    // Add Admin Subscriptions link if the user is the master admin
+    // Admin Section
     if (isAdmin) {
         navItems.push({
-            href: '/admin/subscriptions',
+            href: '/admin/management',
             icon: ShieldCheck,
-            label: 'Subscriptions'
+            label: 'Admin Panel'
         });
         navItems.push({
-            href: '/admin/management',
+            href: '/admin/subscriptions',
             icon: Lock,
-            label: 'Admin Panel'
+            label: 'Subscriptions'
         });
     }
 
