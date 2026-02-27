@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { addAdminEmail, removeAdminEmail } from '@/lib/actions/admin-management';
 import { activateSubscription, rejectSubscription } from '@/lib/actions/subscriptions';
@@ -8,7 +8,8 @@ import { toast } from 'sonner';
 import {
     ShieldCheck, UserPlus, Trash2, Mail, Lock, AlertCircle, Info,
     CheckCircle2, ArrowLeft, History, Users, ShieldAlert, X,
-    CreditCard, Search, Filter, RefreshCw, XCircle, ChevronDown, Activity, Settings2
+    CreditCard, Search, Filter, RefreshCw, XCircle, ChevronDown, Activity,
+    Zap, Gem, Crown, Check, AlertTriangle
 } from 'lucide-react';
 import { PLANS } from '@/config/plans';
 
@@ -23,6 +24,45 @@ interface Org {
     subscription_ends_at: string | null;
     created_at: string;
 }
+
+// --- Custom Glass Dropdown Component ---
+const GlassDropdown = ({ value, options, onChange, label }: { value: string, options: { id: string, name: string }[], onChange: (val: string) => void, label?: string }) => {
+    const [isOpen, setIsOpen] = useState(false);
+    const selected = options.find(o => o.id === value) || options[0];
+
+    return (
+        <div className="relative">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className="glass-input h-10 flex items-center justify-between gap-2 !px-4 hover:border-brand-primary/50 transition-all cursor-pointer group"
+                style={{ background: 'rgba(255,255,255,0.03)' }}
+            >
+                <div className="flex flex-col items-start">
+                    {label && <span className="text-[8px] font-black text-muted uppercase tracking-widest leading-none mb-1">{label}</span>}
+                    <span className="text-[10px] font-black text-primary uppercase tracking-wider">{selected.name}</span>
+                </div>
+                <ChevronDown size={14} className={`text-muted transition-transform group-hover:text-brand-primary ${isOpen ? 'rotate-180' : ''}`} />
+            </button>
+
+            {isOpen && (
+                <>
+                    <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
+                    <div className="absolute top-12 left-0 right-0 z-50 glass-card !bg-bg-secondary border border-white/10 shadow-2xl p-1 animate-fade-in-up">
+                        {options.map((opt) => (
+                            <button
+                                key={opt.id}
+                                onClick={() => { onChange(opt.id); setIsOpen(false); }}
+                                className={`w-full text-left px-4 py-2.5 rounded-lg text-[10px] font-black uppercase tracking-widest transition-all mb-0.5 last:mb-0 ${value === opt.id ? 'bg-brand-primary text-white' : 'text-muted hover:bg-white/5 hover:text-primary'}`}
+                            >
+                                {opt.name}
+                            </button>
+                        ))}
+                    </div>
+                </>
+            )}
+        </div>
+    );
+};
 
 export default function AdminDashboardClient({
     initialAdmins,
@@ -90,7 +130,7 @@ export default function AdminDashboardClient({
             toast.success('Admin authorized successfully');
             setEmail('');
             setShowAddModal(false);
-            router.refresh(); // Refresh to get updated admin list if needed (though we'd likely need to update state if we want instant change)
+            router.refresh();
         }
         setMasterLoading(false);
     }
@@ -131,184 +171,224 @@ export default function AdminDashboardClient({
 
     return (
         <div className="animate-fade-in-up">
-            {/* Header Section */}
-            <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 24 }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                    <button onClick={() => router.back()} className="glass-button h-10 w-10 !p-0" title="Go Back">
-                        <ArrowLeft size={18} />
-                    </button>
-                    <div>
-                        <h1 className="page-title text-3xl">System Dashboard</h1>
-                        <p className="page-subtitle">Central control for shop subscriptions and master security</p>
+            {/* --- Premium Header --- */}
+            <div className="page-header" style={{ marginBottom: 40 }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+                        <button
+                            onClick={() => router.back()}
+                            className="glass-button h-12 w-12 !p-0 !rounded-2xl shadow-xl hover:scale-110 active:scale-95 transition-all"
+                        >
+                            <ArrowLeft size={22} />
+                        </button>
+                        <div>
+                            <div className="flex items-center gap-3">
+                                <h1 className="page-title text-4xl !font-[900] tracking-tighter">System</h1>
+                                <span className="bg-brand-primary text-white text-[10px] font-black px-2 py-0.5 rounded-md uppercase tracking-[0.2em]">Master</span>
+                            </div>
+                            <p className="page-subtitle !text-xs font-bold text-muted/60 uppercase tracking-widest mt-1">
+                                Infrastructure Protocol v2.5.0
+                            </p>
+                        </div>
                     </div>
+                    {activeTab === 'masters' && (
+                        <button
+                            onClick={() => setShowAddModal(true)}
+                            className="glass-button glass-button-primary !h-12 !px-8 shadow-[0_0_30px_rgba(79,142,247,0.4)] animate-fade-in !text-[11px] font-black uppercase tracking-[0.2em]"
+                        >
+                            <UserPlus size={16} /> Authorize Master
+                        </button>
+                    )}
                 </div>
-                {activeTab === 'masters' && (
-                    <button onClick={() => setShowAddModal(true)} className="glass-button glass-button-primary shadow-lg animate-fade-in">
-                        <UserPlus size={16} /> Authorize Master
-                    </button>
-                )}
             </div>
 
-            {/* Stats Bar */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))', gap: 20, marginBottom: 32 }}>
-                <div className="glass-card flex items-center gap-4 transition-all hover:scale-[1.02]" style={{ padding: '24px' }}>
-                    <div className="w-12 h-12 rounded-xl bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/10">
-                        <Activity size={24} />
+            {/* --- Premium Stats Architecture --- */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 24, marginBottom: 48 }}>
+                <div className="glass-card relative overflow-hidden group hover:border-brand-primary/30 transition-all duration-500" style={{ padding: '32px' }}>
+                    <div className="absolute -right-6 -bottom-6 opacity-[0.03] group-hover:scale-110 group-hover:opacity-[0.08] transition-all duration-700">
+                        <Activity size={180} />
                     </div>
-                    <div>
-                        <div className="text-[10px] font-black text-muted uppercase tracking-widest">Pending Requests</div>
-                        <div className={`text-2xl font-black ${pendingCount > 0 ? 'text-amber-500' : 'text-primary'}`}>
-                            {pendingCount}
+                    <div className="flex items-center gap-5">
+                        <div className="w-16 h-16 rounded-2xl bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/10 shadow-inner">
+                            <Zap size={32} />
+                        </div>
+                        <div>
+                            <div className="text-[11px] font-[900] text-muted uppercase tracking-[0.3em] mb-1">Pending Syncs</div>
+                            <div className={`text-4xl font-[900] tracking-tighter ${pendingCount > 0 ? 'text-amber-500 underline underline-offset-8 decoration-4' : 'text-primary'}`}>
+                                {pendingCount.toString().padStart(2, '0')}
+                            </div>
                         </div>
                     </div>
                 </div>
-                <div className="glass-card flex items-center gap-4 transition-all hover:scale-[1.02]" style={{ padding: '24px' }}>
-                    <div className="w-12 h-12 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-500 border border-purple-500/10">
-                        <Users size={24} />
+
+                <div className="glass-card relative overflow-hidden group hover:border-purple-500/30 transition-all duration-500" style={{ padding: '32px' }}>
+                    <div className="absolute -right-6 -bottom-6 opacity-[0.03] group-hover:scale-110 group-hover:opacity-[0.08] transition-all duration-700">
+                        <Users size={180} />
                     </div>
-                    <div>
-                        <div className="text-[10px] font-black text-muted uppercase tracking-widest">Active Masters</div>
-                        <div className="text-2xl font-black text-primary">{totalMasters}</div>
+                    <div className="flex items-center gap-5">
+                        <div className="w-16 h-16 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500 border border-purple-500/10 shadow-inner">
+                            <Crown size={32} />
+                        </div>
+                        <div>
+                            <div className="text-[11px] font-[900] text-muted uppercase tracking-[0.3em] mb-1">Active Masters</div>
+                            <div className="text-4xl font-[900] text-primary tracking-tighter">
+                                {totalMasters.toString().padStart(2, '0')}
+                            </div>
+                        </div>
                     </div>
                 </div>
-                <div className="glass-card flex items-center gap-4 transition-all hover:scale-[1.02]" style={{ padding: '24px', borderLeft: '4px solid var(--brand-success)' }}>
-                    <div className="w-12 h-12 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/10">
-                        <ShieldCheck size={24} />
+
+                <div className="glass-card relative overflow-hidden group hover:border-emerald-500/30 transition-all duration-500" style={{ padding: '32px', borderLeft: '6px solid var(--brand-success)' }}>
+                    <div className="absolute -right-6 -bottom-6 opacity-[0.03] group-hover:scale-110 group-hover:opacity-[0.08] transition-all duration-700">
+                        <ShieldCheck size={180} />
                     </div>
-                    <div>
-                        <div className="text-[10px] font-black text-muted uppercase tracking-widest">Security Status</div>
-                        <div className="text-2xl font-black text-emerald-500">ROOT LEVEL</div>
+                    <div className="flex items-center gap-5">
+                        <div className="w-16 h-16 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/10 shadow-inner">
+                            <ShieldCheck size={32} />
+                        </div>
+                        <div>
+                            <div className="text-[11px] font-[900] text-muted uppercase tracking-[0.3em] mb-1">Security Grid</div>
+                            <div className="text-3xl font-[900] text-emerald-500 tracking-tighter leading-none">
+                                ROOT-LEVEL
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
 
-            {/* Premium Tab Switcher */}
-            <div className="flex gap-2 mb-6 p-1.5 bg-white/5 w-fit rounded-2xl border border-white/10 glass-card">
+            {/* --- Premium Sliding Tab Switcher --- */}
+            <div className="flex gap-1.5 mb-8 p-1.5 bg-white/5 w-fit rounded-[20px] border border-white/10 glass-card">
                 <button
                     onClick={() => setActiveTab('subscriptions')}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'subscriptions' ? 'bg-brand-primary text-white shadow-lg' : 'text-muted hover:text-primary hover:bg-white/5'}`}
+                    className={`flex items-center gap-3 px-8 py-3 rounded-2xl text-[11px] font-[900] uppercase tracking-[0.2em] transition-all duration-300 ${activeTab === 'subscriptions' ? 'bg-brand-primary text-white shadow-[0_8px_20px_rgba(79,142,247,0.3)]' : 'text-muted/60 hover:text-primary hover:bg-white/5'}`}
                 >
-                    <CreditCard size={14} /> Subscriptions
+                    <CreditCard size={16} /> Subscriptions
                 </button>
                 <button
                     onClick={() => setActiveTab('masters')}
-                    className={`flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'masters' ? 'bg-brand-primary text-white shadow-lg' : 'text-muted hover:text-primary hover:bg-white/5'}`}
+                    className={`flex items-center gap-3 px-8 py-3 rounded-2xl text-[11px] font-[900] uppercase tracking-[0.2em] transition-all duration-300 ${activeTab === 'masters' ? 'bg-brand-primary text-white shadow-[0_8px_20px_rgba(79,142,247,0.3)]' : 'text-muted/60 hover:text-primary hover:bg-white/5'}`}
                 >
-                    <Lock size={14} /> Master Access
+                    <Lock size={16} /> Master Access
                 </button>
             </div>
 
-            {/* Main Content Area */}
-            <div className="glass-card min-h-[500px]" style={{ padding: 0, overflow: 'hidden' }}>
+            {/* --- Main High-Octane Content --- */}
+            <div className="glass-card min-h-[500px] border-t-4 border-t-brand-primary/50" style={{ padding: 0, overflow: 'hidden' }}>
                 {activeTab === 'subscriptions' ? (
                     <>
-                        <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                            <div className="flex items-center gap-4 flex-1">
-                                <div className="relative flex-1 max-w-sm">
-                                    <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted" size={16} />
+                        <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                            <div className="flex items-center gap-6 flex-1">
+                                <div className="relative flex-1 max-w-md group">
+                                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-brand-primary transition-colors" size={18} />
                                     <input
-                                        className="glass-input !pl-12 !h-11"
-                                        placeholder="Search shop or transaction..."
+                                        className="glass-input !pl-14 !h-14 !text-sm !font-bold !rounded-2xl border-white/5 focus:border-brand-primary/50"
+                                        placeholder="Find shop or transmission protocol..."
                                         value={subSearch}
                                         onChange={(e) => setSubSearch(e.target.value)}
                                     />
                                 </div>
                                 <button
                                     onClick={() => setShowOnlyPending(!showOnlyPending)}
-                                    className={`glass-button h-11 px-6 !text-[10px] font-black ${showOnlyPending ? 'glass-button-primary' : ''}`}
+                                    className={`glass-button h-14 px-8 !rounded-2xl !text-[10px] font-black tracking-[0.2em] transition-all ${showOnlyPending ? 'glass-button-primary' : 'bg-white/5 text-muted hover:text-primary'}`}
                                 >
-                                    <Filter size={14} /> {showOnlyPending ? 'PENDING ONLY' : 'SHOW ALL'}
+                                    <Filter size={16} /> {showOnlyPending ? 'PENDING SYNC' : 'ALL ENTRIES'}
                                 </button>
                             </div>
-                            <div className="flex items-center gap-2 text-[10px] text-muted font-black uppercase tracking-[0.2em] opacity-40">
-                                Global Live Schema Sync
+                            <div className="flex items-center gap-3 pl-8 border-l border-white/5">
+                                <Activity className="text-brand-primary shadow-glow animate-pulse" size={16} />
+                                <span className="text-[10px] font-[900] text-muted/40 uppercase tracking-[0.4em]">Live System Telemetry</span>
                             </div>
                         </div>
 
-                        <table className="glass-table">
+                        <table className="glass-table !table-fixed">
                             <thead>
                                 <tr>
-                                    <th style={{ paddingLeft: 24 }}>Shop / ID</th>
-                                    <th>Verification ID</th>
-                                    <th>Status / Expiry</th>
-                                    <th style={{ textAlign: 'right', paddingRight: 24 }}>Actions</th>
+                                    <th style={{ paddingLeft: 32, width: '30%' }}>Infrastructure Node</th>
+                                    <th style={{ width: '25%' }}>Transmission ID</th>
+                                    <th style={{ width: '15%' }}>Node Status</th>
+                                    <th style={{ textAlign: 'right', paddingRight: 32, width: '30%' }}>Protocol Control</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {filteredOrgs.length > 0 ? filteredOrgs.map(org => {
                                     const isPending = org.last_transaction_id && org.subscription_status !== 'active';
+                                    const planOptions = Object.values(PLANS).filter(p => p.id !== 'trial').map(p => ({ id: p.id, name: p.name.toUpperCase() }));
+
                                     return (
-                                        <tr key={org.id} className={`${isPending ? 'bg-brand-primary/5' : ''}`}>
-                                            <td style={{ paddingLeft: 24 }}>
-                                                <div className="flex flex-col">
-                                                    <span className="font-bold text-primary">{org.name}</span>
-                                                    <span className="text-[9px] text-muted font-mono">{org.id}</span>
+                                        <tr key={org.id} className={`group transition-all ${isPending ? 'bg-brand-primary/[0.04]' : 'hover:bg-white/[0.01]'}`}>
+                                            <td style={{ paddingLeft: 32 }}>
+                                                <div className="flex flex-col gap-1 py-3 group-hover:translate-x-1 transition-transform">
+                                                    <span className="text-[13px] font-[900] text-primary uppercase tracking-tight">{org.name}</span>
+                                                    <span className="text-[9px] text-muted/60 font-mono font-bold">{org.id}</span>
                                                 </div>
                                             </td>
                                             <td>
                                                 {org.last_transaction_id ? (
-                                                    <div className="flex flex-col gap-1">
-                                                        <code className="bg-brand-primary/10 border border-brand-primary/20 px-3 py-1.5 rounded-lg text-brand-primary font-black tracking-widest text-[11px] w-fit">
+                                                    <div className="flex flex-col gap-1.5 py-3">
+                                                        <code className="bg-brand-primary/10 border border-brand-primary/20 px-4 py-2 rounded-xl text-brand-primary font-black tracking-[0.15em] text-[11px] w-fit shadow-2xl">
                                                             {org.last_transaction_id}
                                                         </code>
-                                                        <span className="text-[8px] text-amber-500 font-black uppercase ml-1">Waiting Verification</span>
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="h-1 w-1 rounded-full bg-amber-500 animate-ping" />
+                                                            <span className="text-[8px] text-amber-500 font-black uppercase tracking-widest leading-none">Awaiting Manual Verification</span>
+                                                        </div>
                                                     </div>
-                                                ) : <span className="text-[10px] text-muted/30 italic">No submissions</span>}
+                                                ) : <span className="text-[10px] text-muted/20 font-black uppercase tracking-widest italic">— VOID —</span>}
                                             </td>
                                             <td>
-                                                <div className="flex flex-col gap-1">
+                                                <div className="flex flex-col gap-1 py-3">
                                                     <div className="flex items-center gap-2">
-                                                        <div className={`h-1.5 w-1.5 rounded-full ${org.subscription_status === 'active' ? 'bg-emerald-500' : 'bg-brand-warning animate-pulse'}`} />
-                                                        <span className={`text-[10px] font-black uppercase ${org.subscription_status === 'active' ? 'text-emerald-400' : 'text-brand-warning'}`}>
+                                                        <div className={`h-2 w-2 rounded-full ${org.subscription_status === 'active' ? 'bg-brand-success shadow-[0_0_12px_var(--brand-success)]' : 'bg-brand-warning animate-pulse shadow-[0_0_12px_#f59e0b]'}`} />
+                                                        <span className={`text-[10px] font-black uppercase tracking-wider ${org.subscription_status === 'active' ? 'text-emerald-400' : 'text-brand-warning'}`}>
                                                             {org.subscription_status}
                                                         </span>
                                                     </div>
-                                                    <span className="text-[10px] text-muted font-bold">
-                                                        {org.subscription_ends_at ? `Exp: ${new Date(org.subscription_ends_at).toLocaleDateString()}` : org.trial_ends_at ? `Trial: ${new Date(org.trial_ends_at).toLocaleDateString()}` : 'N/A'}
+                                                    <span className="text-[10px] text-muted font-[900] uppercase tracking-tighter opacity-70">
+                                                        {org.subscription_ends_at ? `Expires ${new Date(org.subscription_ends_at).toLocaleDateString()}` : org.trial_ends_at ? `Trial ${new Date(org.trial_ends_at).toLocaleDateString()}` : 'No Horizon'}
                                                     </span>
                                                 </div>
                                             </td>
-                                            <td style={{ textAlign: 'right', paddingRight: 24 }}>
-                                                <div className="flex justify-end gap-3">
-                                                    <div className="relative group min-w-[120px]">
-                                                        <select
-                                                            className="appearance-none bg-white/5 border border-white/10 rounded-lg px-3 py-2 pr-8 text-[10px] font-black uppercase tracking-wider text-primary focus:outline-none focus:border-brand-primary transition-all cursor-pointer w-full h-9"
+                                            <td style={{ textAlign: 'right', paddingRight: 32 }}>
+                                                <div className="flex justify-end items-center gap-4 py-3">
+                                                    <div className="w-40">
+                                                        <GlassDropdown
+                                                            label="Selected Tier"
                                                             value={selectedPlans[org.id] || org.subscription_plan || 'monthly'}
-                                                            onChange={(e) => setSelectedPlans(prev => ({ ...prev, [org.id]: e.target.value }))}
-                                                        >
-                                                            {Object.values(PLANS).filter(p => p.id !== 'trial').map(p => (
-                                                                <option key={p.id} value={p.id} className="bg-bg-secondary">{p.name}</option>
-                                                            ))}
-                                                        </select>
-                                                        <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+                                                            options={planOptions}
+                                                            onChange={(val) => setSelectedPlans(prev => ({ ...prev, [org.id]: val }))}
+                                                        />
                                                     </div>
-                                                    <button
-                                                        onClick={() => handleActivate(org.id, selectedPlans[org.id] || org.subscription_plan || 'monthly')}
-                                                        className={`glass-button !h-9 !px-4 !text-[9px] font-black ${isPending ? 'glass-button-primary' : ''}`}
-                                                        disabled={loadingId === org.id}
-                                                    >
-                                                        {loadingId === org.id && actionType === 'activate' ? <RefreshCw className="animate-spin" size={14} /> : <CheckCircle2 size={14} />}
-                                                        ACTIVATE
-                                                    </button>
-                                                    {isPending && (
+                                                    <div className="flex gap-2">
                                                         <button
-                                                            onClick={() => handleReject(org.id)}
-                                                            className="glass-button !h-9 !px-4 !text-[9px] font-black border-red-500/20 text-red-500"
+                                                            onClick={() => handleActivate(org.id, selectedPlans[org.id] || org.subscription_plan || 'monthly')}
+                                                            className={`glass-button !h-10 !px-5 !rounded-xl !text-[9px] font-black tracking-widest transition-all ${isPending ? 'glass-button-primary scale-105 shadow-xl hover:scale-110 active:scale-95' : 'hover:bg-brand-primary/10'}`}
                                                             disabled={loadingId === org.id}
                                                         >
-                                                            {loadingId === org.id && actionType === 'reject' ? <RefreshCw className="animate-spin" size={14} /> : <XCircle size={14} />}
-                                                            REJECT
+                                                            {loadingId === org.id && actionType === 'activate' ? <RefreshCw className="animate-spin" size={14} /> : <CheckCircle2 size={16} />}
+                                                            ACTIVATE
                                                         </button>
-                                                    )}
+                                                        {isPending && (
+                                                            <button
+                                                                onClick={() => handleReject(org.id)}
+                                                                className="glass-button !h-10 !px-5 !rounded-xl !text-[9px] font-black tracking-widest border-red-500/10 text-red-500 hover:bg-red-500/10 active:scale-95"
+                                                                disabled={loadingId === org.id}
+                                                            >
+                                                                {loadingId === org.id && actionType === 'reject' ? <RefreshCw className="animate-spin" size={14} /> : <XCircle size={16} />}
+                                                                REJECT
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 </div>
                                             </td>
                                         </tr>
                                     );
                                 }) : (
                                     <tr>
-                                        <td colSpan={4} className="py-32 text-center opacity-40">
-                                            <Activity size={48} className="mx-auto mb-4" />
-                                            <p className="text-sm font-bold uppercase tracking-widest">No matching records</p>
+                                        <td colSpan={4} className="py-48 text-center bg-white/[0.01]">
+                                            <div className="flex flex-col items-center gap-4 opacity-10 scale-150 grayscale">
+                                                <Activity size={80} />
+                                                <p className="text-xl font-black uppercase tracking-[0.5em]">No Data Flow</p>
+                                            </div>
                                         </td>
                                     </tr>
                                 )}
@@ -317,72 +397,86 @@ export default function AdminDashboardClient({
                     </>
                 ) : (
                     <>
-                        <div className="p-6 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                            <div className="flex items-center gap-3">
-                                <ShieldCheck size={20} className="text-brand-primary" />
-                                <h2 className="text-sm font-bold uppercase tracking-widest">Master Security Clearance</h2>
+                        <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
+                            <div className="flex items-center gap-4">
+                                <Lock className="text-brand-primary" size={24} />
+                                <h2 className="text-lg font-[900] uppercase tracking-[0.2em] text-primary">Master Control Clearance</h2>
                             </div>
-                            <div className="flex items-center gap-2 text-[10px] text-muted font-black uppercase tracking-widest opacity-40">
-                                Secure Root Authentication
+                            <div className="flex items-center gap-3">
+                                <History size={16} className="text-muted" />
+                                <span className="text-[10px] font-black text-muted/40 uppercase tracking-[0.4em]">Infrastructure Audit Enabled</span>
                             </div>
                         </div>
 
                         <table className="glass-table">
                             <thead>
                                 <tr>
-                                    <th style={{ paddingLeft: 24 }}>Master Profile</th>
-                                    <th style={{ textAlign: 'center' }}>Permission</th>
-                                    <th style={{ textAlign: 'center' }}>Added Date</th>
-                                    <th style={{ textAlign: 'right', paddingRight: 24 }}>Actions</th>
+                                    <th style={{ paddingLeft: 32, width: '40%' }}>Master Protocol Info</th>
+                                    <th style={{ textAlign: 'center', width: '25%' }}>Privilege Grade</th>
+                                    <th style={{ textAlign: 'center', width: '25%' }}>Authorization Date</th>
+                                    <th style={{ textAlign: 'right', paddingRight: 32, width: '10%' }}>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {/* Root Admin */}
-                                <tr className="bg-brand-primary/5">
-                                    <td style={{ paddingLeft: 24 }}>
-                                        <div className="flex items-center gap-4 py-2">
-                                            <div className="w-10 h-10 rounded-xl bg-brand-primary/20 flex items-center justify-center text-brand-primary text-xs font-black border border-brand-primary/20">JS</div>
+                                {/* Root Admin – The Legend */}
+                                <tr className="bg-brand-primary/[0.08] relative">
+                                    <td style={{ paddingLeft: 32 }}>
+                                        <div className="flex items-center gap-5 py-5 group">
+                                            <div className="w-14 h-14 rounded-2xl bg-brand-primary flex items-center justify-center text-white text-sm font-black shadow-[0_0_20px_rgba(79,142,247,0.5)] border-2 border-white/20">
+                                                JS
+                                            </div>
                                             <div className="flex flex-col">
-                                                <span className="font-bold text-primary flex items-center gap-2">
-                                                    junsangsingh@gmail.com <CheckCircle2 size={14} className="text-brand-primary" />
+                                                <span className="text-base font-[950] text-primary flex items-center gap-2 group-hover:translate-x-1 transition-transform">
+                                                    junsangsingh@gmail.com <CheckCircle2 size={18} className="text-brand-primary shadow-glow" />
                                                 </span>
-                                                <span className="text-[9px] text-muted font-black uppercase tracking-widest">Primary System Owner</span>
+                                                <span className="text-[10px] text-brand-primary font-black uppercase tracking-[0.2em]">Genesis System Master</span>
                                             </div>
                                         </div>
                                     </td>
-                                    <td style={{ textAlign: 'center' }}><span className="badge badge-success">IMMUTABLE ROOT</span></td>
-                                    <td style={{ textAlign: 'center' }}><span className="text-xs font-bold text-muted opacity-50 uppercase">Genesis</span></td>
-                                    <td style={{ textAlign: 'right', paddingRight: 24 }}>
-                                        <div className="flex justify-end pr-3 opacity-20"><Lock size={16} /></div>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <span className="bg-brand-primary/20 text-brand-primary text-[10px] font-black px-4 py-2 rounded-xl border border-brand-primary/30 uppercase tracking-[0.1em] shadow-inner">
+                                            IMMUTABLE ROOT
+                                        </span>
+                                    </td>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <div className="flex flex-col items-center">
+                                            <span className="text-xs font-black text-primary uppercase tracking-tighter">System Epoch</span>
+                                            <span className="text-[9px] text-muted font-bold uppercase tracking-widest opacity-40">2026-02-MASTER</span>
+                                        </div>
+                                    </td>
+                                    <td style={{ textAlign: 'right', paddingRight: 32 }}>
+                                        <div className="flex justify-end pr-4 opacity-40 animate-pulse"><Lock size={20} /></div>
                                     </td>
                                 </tr>
 
                                 {initialAdmins.filter(a => a.email !== 'junsangsingh@gmail.com').map(admin => (
-                                    <tr key={admin.id}>
-                                        <td style={{ paddingLeft: 24 }}>
-                                            <div className="flex items-center gap-4 py-2">
-                                                <div className="w-10 h-10 rounded-xl bg-white/5 flex items-center justify-center text-muted text-xs font-black border border-white/10 uppercase">
+                                    <tr key={admin.id} className="hover:bg-white/[0.02] transition-colors group">
+                                        <td style={{ paddingLeft: 32 }}>
+                                            <div className="flex items-center gap-5 py-5">
+                                                <div className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center text-muted text-sm font-black border border-white/10 group-hover:border-brand-primary/40 transition-all uppercase">
                                                     {admin.email.substring(0, 2)}
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="font-bold text-primary">{admin.email}</span>
-                                                    <span className="text-[9px] text-muted font-black uppercase tracking-widest">Authorized Site Admin</span>
+                                                    <span className="text-base font-[900] text-primary tracking-tight">{admin.email}</span>
+                                                    <span className="text-[10px] text-muted font-black uppercase tracking-widest">Authorized Sub-Master</span>
                                                 </div>
                                             </div>
                                         </td>
-                                        <td style={{ textAlign: 'center' }}><span className="badge badge-info">AUTHORIZED</span></td>
                                         <td style={{ textAlign: 'center' }}>
-                                            <span className="text-xs font-black text-muted uppercase">
+                                            <span className="badge badge-info !px-4 !py-2 !rounded-xl !text-[10px] font-black uppercase tracking-widest">AUTHORIZED</span>
+                                        </td>
+                                        <td style={{ textAlign: 'center' }}>
+                                            <span className="text-xs font-black text-muted uppercase tracking-widest">
                                                 {new Date(admin.created_at).toLocaleDateString()}
                                             </span>
                                         </td>
-                                        <td style={{ textAlign: 'right', paddingRight: 24 }}>
+                                        <td style={{ textAlign: 'right', paddingRight: 32 }}>
                                             <button
                                                 onClick={() => handleRemoveMaster(admin.id, admin.email)}
-                                                className="glass-button h-10 w-10 !p-0 !border-red-500/10 text-red-500"
+                                                className="glass-button h-12 w-12 !p-0 !rounded-2xl !border-red-500/10 text-red-500 hover:bg-red-500/10 hover:scale-110 active:scale-95 transition-all"
                                                 disabled={masterLoading}
                                             >
-                                                <Trash2 size={16} />
+                                                <Trash2 size={20} />
                                             </button>
                                         </td>
                                     </tr>
@@ -393,55 +487,78 @@ export default function AdminDashboardClient({
                 )}
             </div>
 
-            {/* Grant Authorization Modal */}
+            {/* Grant Authorization Modal – Ultra Premium */}
             {showAddModal && (
-                <div className="glass-modal">
-                    <div className="glass-card glass-modal-card animate-scale-in" style={{ width: '100%', maxWidth: 440, padding: 32, position: 'relative' }}>
-                        <button onClick={() => setShowAddModal(false)} className="absolute top-6 right-6 text-muted hover:text-primary transition-colors">
-                            <X size={24} />
-                        </button>
+                <div className="glass-modal !p-0 items-center">
+                    <div className="glass-card glass-modal-card animate-scale-in !bg-bg-base overflow-hidden" style={{ width: '100%', maxWidth: 500, border: '1px solid rgba(79,142,247,0.2)' }}>
+                        <div className="h-2 w-full bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
 
-                        <div className="w-20 h-20 rounded-3xl bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/10 mx-auto mb-8 shadow-inner">
-                            <ShieldAlert size={40} />
-                        </div>
+                        <div className="p-10 relative">
+                            <button onClick={() => setShowAddModal(false)} className="absolute top-8 right-8 text-muted hover:text-primary transition-all hover:rotate-90">
+                                <X size={28} />
+                            </button>
 
-                        <h2 className="text-2xl font-black text-center mb-2">Elevate Permissions</h2>
-                        <p className="text-[10px] text-muted text-center mb-10 uppercase tracking-[0.3em] font-black">Authorize New Infrastructure Master</p>
+                            <div className="w-24 h-24 rounded-[32px] bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/10 mx-auto mb-10 shadow-[inner_0_0_20px_rgba(79,142,247,0.1)]">
+                                <ShieldAlert size={48} className="drop-shadow-[0_0_10px_rgba(79,142,247,0.5)]" />
+                            </div>
 
-                        <form onSubmit={handleAddMaster} className="flex flex-col gap-6">
-                            <div className="space-y-3">
-                                <label className="text-[10px] font-black text-muted uppercase tracking-widest block ml-1">Identity Endpoint</label>
-                                <div className="relative">
-                                    <input
-                                        type="email"
-                                        required
-                                        className="glass-input !pl-14 h-16 text-lg font-bold"
-                                        placeholder="user@gmail.com"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
-                                        autoFocus
-                                    />
-                                    <Mail className="absolute left-5 top-1/2 -translate-y-1/2 text-muted" size={20} />
+                            <h2 className="text-3xl font-[1000] text-center mb-2 tracking-tighter">Elevate Rights</h2>
+                            <p className="text-[10px] text-muted text-center mb-12 uppercase tracking-[0.4em] font-black">Authorize New Infrastructure Master</p>
+
+                            <form onSubmit={handleAddMaster} className="flex flex-col gap-8">
+                                <div className="space-y-4">
+                                    <label className="text-[11px] font-[1000] text-primary uppercase tracking-[0.2em] block ml-1">Identity Endpoint</label>
+                                    <div className="relative group">
+                                        <div className="absolute -inset-1 bg-brand-primary/20 rounded-[22px] blur opacity-0 group-focus-within:opacity-100 transition-all" />
+                                        <input
+                                            type="email"
+                                            required
+                                            className="glass-input !pl-16 h-20 text-xl font-[900] !rounded-[20px] bg-white/[0.02] relative z-10"
+                                            placeholder="administrator@gmail.com"
+                                            value={email}
+                                            onChange={(e) => setEmail(e.target.value)}
+                                            autoFocus
+                                        />
+                                        <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-brand-primary transition-all z-20" size={24} />
+                                    </div>
                                 </div>
-                            </div>
 
-                            <div className="p-5 rounded-2xl bg-amber-500/5 border border-amber-500/10 flex gap-4">
-                                <AlertCircle className="text-amber-500 shrink-0" size={22} />
-                                <p className="text-[10px] text-amber-500/70 leading-relaxed font-bold uppercase">
-                                    Caution: This account will gain full control over all system organizations and subscription billing protocols.
-                                </p>
-                            </div>
+                                <div className="p-6 rounded-[24px] bg-amber-500/[0.03] border border-amber-500/10 flex gap-5">
+                                    <AlertTriangle className="text-amber-500 shrink-0" size={24} />
+                                    <p className="text-[10px] text-amber-500/60 leading-relaxed font-black uppercase tracking-wider">
+                                        Caution: Authorized Masters gain immutable access to organizational protocols, billing control, and global security management.
+                                    </p>
+                                </div>
 
-                            <div className="flex gap-4 mt-4">
-                                <button type="button" onClick={() => setShowAddModal(false)} className="glass-button flex-1 h-16 font-black uppercase text-xs tracking-widest">Cancel</button>
-                                <button type="submit" className="glass-button glass-button-primary flex-1 h-16 font-black uppercase text-xs tracking-widest shadow-xl" disabled={masterLoading}>
-                                    {masterLoading ? 'Syncing...' : 'Grant Privilege'}
-                                </button>
-                            </div>
-                        </form>
+                                <div className="flex gap-4 mt-2">
+                                    <button type="button" onClick={() => setShowAddModal(false)} className="glass-button flex-1 h-16 font-[950] uppercase text-[11px] tracking-[0.2em] !rounded-2xl">Abort</button>
+                                    <button type="submit" className="glass-button glass-button-primary flex-1 h-16 font-[950] uppercase text-[11px] tracking-[0.2em] shadow-2xl !rounded-2xl" disabled={masterLoading}>
+                                        {masterLoading ? (
+                                            <div className="flex items-center gap-3">
+                                                <RefreshCw className="animate-spin" size={18} />
+                                                <span>Syncing...</span>
+                                            </div>
+                                        ) : 'Authorize Access'}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
                 </div>
             )}
+
+            <style jsx>{`
+                .shadow-glow {
+                    filter: drop-shadow(0 0 8px var(--brand-primary));
+                }
+                @keyframes scaleIn {
+                    from { opacity: 0; transform: scale(0.95); }
+                    to { opacity: 1; transform: scale(1); }
+                }
+                .animate-scale-in {
+                    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+                }
+            `}</style>
         </div>
     );
 }
