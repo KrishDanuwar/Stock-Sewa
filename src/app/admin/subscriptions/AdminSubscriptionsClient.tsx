@@ -3,7 +3,8 @@
 import { useState, useMemo } from 'react';
 import { activateSubscription, rejectSubscription } from '@/lib/actions/subscriptions';
 import { toast } from 'sonner';
-import { CheckCircle, XCircle, Shield, Search, RefreshCw, Filter, History } from 'lucide-react';
+import { CheckCircle, XCircle, Shield, Search, RefreshCw, Filter, History, ChevronDown } from 'lucide-react';
+import { PLANS } from '@/config/plans';
 
 interface Org {
     id: string;
@@ -22,6 +23,7 @@ export default function AdminSubscriptionsClient({ initialOrgs }: { initialOrgs:
     const [actionType, setActionType] = useState<'activate' | 'reject' | null>(null);
     const [search, setSearch] = useState('');
     const [showOnlyPending, setShowOnlyPending] = useState(true);
+    const [selectedPlans, setSelectedPlans] = useState<Record<string, string>>({});
 
     const handleActivate = async (id: string, plan: string) => {
         if (!confirm(`Verify and ACTIVATE ${plan} plan for this shop?`)) return;
@@ -140,10 +142,24 @@ export default function AdminSubscriptionsClient({ initialOrgs }: { initialOrgs:
                                         <div className="text-[10px] text-muted font-mono uppercase tracking-tighter mt-0.5">{org.id}</div>
                                     </td>
                                     <td>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                                            <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold uppercase tracking-widest ${org.subscription_plan === 'yearly' ? 'bg-indigo-500/20 text-indigo-400' : 'bg-white/10 text-neutral-400'}`}>
-                                                {org.subscription_plan || 'TRIAL'}
-                                            </span>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                                            <div className="relative group">
+                                                <select
+                                                    className="appearance-none bg-white/5 border border-white/10 rounded px-3 py-1.5 pr-8 text-[10px] font-extrabold uppercase tracking-widest text-primary focus:outline-none focus:border-brand-primary transition-colors cursor-pointer w-full"
+                                                    value={selectedPlans[org.id] || org.subscription_plan || 'monthly'}
+                                                    onChange={(e) => setSelectedPlans(prev => ({ ...prev, [org.id]: e.target.value }))}
+                                                >
+                                                    {Object.values(PLANS).filter(p => p.id !== 'trial').map(p => (
+                                                        <option key={p.id} value={p.id} className="bg-bg-secondary">{p.name}</option>
+                                                    ))}
+                                                </select>
+                                                <ChevronDown size={12} className="absolute right-2 top-1/2 -translate-y-1/2 text-muted pointer-events-none" />
+                                            </div>
+                                            {org.subscription_plan && (
+                                                <span className="text-[9px] text-brand-primary/60 font-medium uppercase tracking-tighter">
+                                                    Requested: {org.subscription_plan}
+                                                </span>
+                                            )}
                                         </div>
                                     </td>
                                     <td>
@@ -182,11 +198,11 @@ export default function AdminSubscriptionsClient({ initialOrgs }: { initialOrgs:
                                         <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
                                             <button
                                                 className={`glass-button ${isPending ? 'glass-button-primary' : ''} h-9 px-4 text-[10px] font-black tracking-tighter`}
-                                                onClick={() => handleActivate(org.id, org.subscription_plan || 'monthly')}
+                                                onClick={() => handleActivate(org.id, selectedPlans[org.id] || org.subscription_plan || 'monthly')}
                                                 disabled={loadingId === org.id}
                                             >
                                                 {loadingId === org.id && actionType === 'activate' ? <RefreshCw className="animate-spin" size={12} /> : <CheckCircle size={12} />}
-                                                ACTIVATE
+                                                VERIFY & ACTIVATE
                                             </button>
 
                                             {isPending && (

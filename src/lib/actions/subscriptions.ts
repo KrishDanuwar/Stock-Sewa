@@ -4,10 +4,11 @@ import { createAdminClient } from '@/lib/supabase/server';
 import { getOrgContext } from '@/lib/org-context';
 import { revalidatePath } from 'next/cache';
 import { currentUser } from '@clerk/nextjs/server';
+import { getPlanConfig } from '@/config/plans';
 
 const AUTHORIZED_ADMIN = 'junsangsingh@gmail.com';
 
-export async function submitTransactionId(transactionId: string, plan: 'monthly' | 'yearly') {
+export async function submitTransactionId(transactionId: string, plan: string) {
     const { organizationId } = await getOrgContext();
     const supabase = await createAdminClient();
 
@@ -29,7 +30,7 @@ export async function submitTransactionId(transactionId: string, plan: 'monthly'
     return { success: true };
 }
 
-export async function activateSubscription(orgId: string, plan: 'monthly' | 'yearly') {
+export async function activateSubscription(orgId: string, plan: string) {
     const user = await currentUser();
     const email = user?.emailAddresses[0]?.emailAddress;
 
@@ -39,10 +40,10 @@ export async function activateSubscription(orgId: string, plan: 'monthly' | 'yea
 
     const supabase = await createAdminClient();
 
-    // Add 30 days for monthly, 365 for yearly
-    const days = plan === 'monthly' ? 30 : 365;
+    // Use configuration for duration
+    const planConfig = getPlanConfig(plan);
     const expiryDate = new Date();
-    expiryDate.setDate(expiryDate.getDate() + days);
+    expiryDate.setDate(expiryDate.getDate() + planConfig.durationDays);
 
     const { error } = await supabase
         .from('organizations')

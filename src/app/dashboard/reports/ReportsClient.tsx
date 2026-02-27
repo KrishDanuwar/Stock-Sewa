@@ -1,6 +1,8 @@
 'use client';
 
-import { Download } from 'lucide-react';
+import { Download, Lock } from 'lucide-react';
+import { PlanConfig } from '@/config/plans';
+import { toast } from 'sonner';
 
 interface ProductSale {
     name: string;
@@ -29,6 +31,7 @@ interface ReportsClientProps {
     totalTax: number;
     totalSubtotal: number;
     totalSales: number;
+    plan: PlanConfig;
 }
 
 function generateCSV(invoiceRows: InvoiceRow[], topProducts: ProductSale[], totalRevenue: number, totalTax: number, totalSubtotal: number, totalSales: number): string {
@@ -62,8 +65,14 @@ function generateCSV(invoiceRows: InvoiceRow[], topProducts: ProductSale[], tota
     return lines.join('\n');
 }
 
-export default function ReportsClient({ topProducts, invoiceRows, totalRevenue, totalTax, totalSubtotal, totalSales }: ReportsClientProps) {
+export default function ReportsClient({ topProducts, invoiceRows, totalRevenue, totalTax, totalSubtotal, totalSales, plan }: ReportsClientProps) {
     const handleDownload = () => {
+        if (!plan.features.canExportCSV) {
+            toast.error('Advanced Data Export is only available on the Premium Yearly plan.', {
+                description: 'Upgrade your plan in Settings to unlock this feature.'
+            });
+            return;
+        }
         const csv = generateCSV(invoiceRows, topProducts, totalRevenue, totalTax, totalSubtotal, totalSales);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
@@ -74,10 +83,12 @@ export default function ReportsClient({ topProducts, invoiceRows, totalRevenue, 
         URL.revokeObjectURL(url);
     };
 
+    const isLocked = !plan.features.canExportCSV;
+
     return (
         <button
             onClick={handleDownload}
-            className="glass-button-primary"
+            className={isLocked ? "glass-button" : "glass-button-primary"}
             style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -85,10 +96,11 @@ export default function ReportsClient({ topProducts, invoiceRows, totalRevenue, 
                 padding: '10px 20px',
                 fontSize: '0.875rem',
                 fontWeight: 600,
+                opacity: isLocked ? 0.7 : 1,
             }}
         >
-            <Download size={16} />
-            Download CSV
+            {isLocked ? <Lock size={16} className="text-amber-500" /> : <Download size={16} />}
+            {isLocked ? "Export Locked" : "Download CSV"}
         </button>
     );
 }

@@ -14,6 +14,7 @@ export default async function SettingsPage() {
             subscriptionStatus={context.subscriptionStatus}
             trialEndsAt={context.trialEndsAt}
             subscriptionEndsAt={context.subscriptionEndsAt}
+            plan={context.plan}
         />
     );
 }

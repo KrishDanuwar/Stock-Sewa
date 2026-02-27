@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { updateOrganizationLogo, updateOrganizationDetails, removeOrganizationLogo } from '@/lib/actions/organizations';
 import { deleteAccount } from '@/lib/actions/user';
 import { toast } from 'sonner';
-import { Building2, Upload, Camera, Save, Trash2, Mail, Sun, Moon, Palette, UserCircle, CreditCard, ShieldCheck } from 'lucide-react';
+import { Building2, Upload, Camera, Save, Trash2, Mail, Sun, Moon, Palette, UserCircle, CreditCard, ShieldCheck, HeartPulse } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import Link from 'next/link';
+import { PlanConfig } from '@/config/plans';
 
 type Organization = {
     id: string;
@@ -27,14 +28,16 @@ export default function SettingsClient({
     subscriptionPlan,
     subscriptionStatus,
     trialEndsAt,
-    subscriptionEndsAt
+    subscriptionEndsAt,
+    plan
 }: {
     organization: Organization | null,
     userEmail: string,
     subscriptionPlan?: string,
     subscriptionStatus?: string,
     trialEndsAt?: string | null,
-    subscriptionEndsAt?: string | null
+    subscriptionEndsAt?: string | null,
+    plan: PlanConfig
 }) {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
@@ -396,11 +399,19 @@ export default function SettingsClient({
 
                 {/* Customer Support */}
                 <div className="glass-card" style={{ padding: 32, border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                        <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                            <Mail size={20} color="var(--brand-success)" />
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(16, 185, 129, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <Mail size={20} color="var(--brand-success)" />
+                            </div>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Technical Support</h2>
                         </div>
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Technical Support</h2>
+                        {plan.features.hasPrioritySupport && (
+                            <div className="badge badge-success animate-pulse shadow-[0_0_10px_rgba(16,185,129,0.3)] gap-2">
+                                <HeartPulse size={12} />
+                                <span className="font-extrabold tracking-tight">PRIORITY SUPPORT ACTIVE</span>
+                            </div>
+                        )}
                     </div>
                     <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginBottom: 24 }}>
                         Need help or want to request a feature? Contact us directly.

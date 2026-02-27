@@ -4,7 +4,7 @@ import { BarChart2 } from 'lucide-react';
 import ReportsClient from './ReportsClient';
 
 export default async function ReportsPage() {
-    const { organizationId } = await getOrgContext();
+    const { organizationId, plan } = await getOrgContext();
     const supabase = await createAdminClient();
 
     // Fetch all invoices with items for deep reporting
@@ -105,6 +105,7 @@ export default async function ReportsPage() {
                     totalTax={totalTax}
                     totalSubtotal={totalSubtotal}
                     totalSales={invoices?.length ?? 0}
+                    plan={plan}
                 />
             </div>
 
