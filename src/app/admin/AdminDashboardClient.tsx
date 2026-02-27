@@ -187,18 +187,10 @@ export default function AdminDashboardClient({
                                 <span className="bg-brand-primary/10 text-brand-primary text-[10px] font-bold px-2.5 py-1 rounded-lg border border-brand-primary/20 uppercase tracking-widest">Master</span>
                             </div>
                             <p className="page-subtitle !text-[13px] font-medium text-muted/80 mt-1">
-                                Infrastructure Protocol v2.5.0
+                                Core Infrastructure Protocol v2.5.0
                             </p>
                         </div>
                     </div>
-                    {activeTab === 'masters' && (
-                        <button
-                            onClick={() => setShowAddModal(true)}
-                            className="glass-button glass-button-primary !h-12 !px-8 shadow-lg hover:shadow-xl transition-all !text-[11px] font-bold uppercase tracking-widest"
-                        >
-                            <UserPlus size={16} /> Authorize Master
-                        </button>
-                    )}
                 </div>
             </div>
 
@@ -247,235 +239,268 @@ export default function AdminDashboardClient({
                 </div>
             </div>
 
-            {/* --- Premium Sliding Tab Switcher --- */}
-            <div className="flex gap-1.5 mb-8 p-1.5 bg-white/5 w-fit rounded-[20px] border border-white/10 glass-card">
-                <button
-                    onClick={() => setActiveTab('subscriptions')}
-                    className={`flex items-center gap-3 px-8 py-3 rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all duration-300 ${activeTab === 'subscriptions' ? 'bg-brand-primary text-white shadow-lg' : 'text-muted/60 hover:text-primary hover:bg-white/5'}`}
-                >
-                    <CreditCard size={16} /> Subscriptions
-                </button>
-                <button
-                    onClick={() => setActiveTab('masters')}
-                    className={`flex items-center gap-3 px-8 py-3 rounded-2xl text-[11px] font-bold uppercase tracking-widest transition-all duration-300 ${activeTab === 'masters' ? 'bg-brand-primary text-white shadow-lg' : 'text-muted/60 hover:text-primary hover:bg-white/5'}`}
-                >
-                    <Lock size={16} /> Master Access
-                </button>
-            </div>
+
 
             {/* --- Main High-Octane Content --- */}
-            <div className="glass-card min-h-[500px] border-t-4 border-t-brand-primary/50" style={{ padding: 0, overflow: 'hidden' }}>
-                {activeTab === 'subscriptions' ? (
-                    <>
-                        <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                            <div className="flex items-center gap-6 flex-1">
-                                <div className="relative flex-1 max-w-md group">
-                                    <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-brand-primary transition-colors" size={18} />
-                                    <input
-                                        className="glass-input !pl-14 !h-14 !text-sm !font-semibold !rounded-2xl border-white/5 focus:border-brand-primary/50"
-                                        placeholder="Find shop or transaction ID..."
-                                        value={subSearch}
-                                        onChange={(e) => setSubSearch(e.target.value)}
-                                    />
-                                </div>
-                                <button
-                                    onClick={() => setShowOnlyPending(!showOnlyPending)}
-                                    className={`glass-button h-14 px-8 !rounded-2xl !text-[10px] font-black tracking-[0.2em] transition-all ${showOnlyPending ? 'glass-button-primary' : 'bg-white/5 text-muted hover:text-primary'}`}
-                                >
-                                    <Filter size={16} /> {showOnlyPending ? 'PENDING SYNC' : 'ALL ENTRIES'}
-                                </button>
-                            </div>
-                            <div className="flex items-center gap-3 pl-8 border-l border-white/5">
-                                <Activity className="text-brand-primary/50" size={16} />
-                                <span className="text-[10px] font-bold text-muted/40 uppercase tracking-widest">Live Telemetry</span>
-                            </div>
+            <div className="glass-card min-h-[600px] border-t-0 p-0 overflow-hidden flex" style={{ padding: 0 }}>
+                {/* --- Vertical Navigation Rail --- */}
+                <div className="w-[280px] bg-white/[0.02] border-r border-white/5 p-6 flex flex-col gap-2">
+                    <div className="text-[10px] font-bold text-muted/40 uppercase tracking-[0.2em] mb-4 px-3">Command Modules</div>
+                    <button
+                        onClick={() => setActiveTab('subscriptions')}
+                        className={`group flex flex-col gap-1 px-5 py-4 rounded-2xl transition-all duration-300 text-left ${activeTab === 'subscriptions' ? 'bg-brand-primary text-white shadow-lg' : 'text-muted/60 hover:text-primary hover:bg-white/5'}`}
+                    >
+                        <div className="flex items-center gap-3">
+                            <CreditCard size={18} />
+                            <span className="text-[12px] font-bold uppercase tracking-wider">Financials</span>
                         </div>
+                        <span className={`text-[9px] uppercase tracking-widest opacity-40 ml-7 ${activeTab === 'subscriptions' ? 'text-white' : ''}`}>Subscription Sync</span>
+                    </button>
+                    <button
+                        onClick={() => setActiveTab('masters')}
+                        className={`group flex flex-col gap-1 px-5 py-4 rounded-2xl transition-all duration-300 text-left ${activeTab === 'masters' ? 'bg-brand-primary text-white shadow-lg' : 'text-muted/60 hover:text-primary hover:bg-white/5'}`}
+                    >
+                        <div className="flex items-center gap-3">
+                            <Lock size={18} />
+                            <span className="text-[12px] font-bold uppercase tracking-wider">Security</span>
+                        </div>
+                        <span className={`text-[9px] uppercase tracking-widest opacity-40 ml-7 ${activeTab === 'masters' ? 'text-white' : ''}`}>Master Access</span>
+                    </button>
 
-                        <table className="glass-table !table-fixed">
-                            <thead>
-                                <tr>
-                                    <th style={{ paddingLeft: 32, width: '30%' }}>Organization / Shop</th>
-                                    <th style={{ width: '25%' }}>Transaction ID</th>
-                                    <th style={{ width: '15%' }}>Status Details</th>
-                                    <th style={{ textAlign: 'right', paddingRight: 32, width: '30%' }}>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {filteredOrgs.length > 0 ? filteredOrgs.map(org => {
-                                    const isPending = org.last_transaction_id && org.subscription_status !== 'active';
-                                    const planOptions = Object.values(PLANS).filter(p => p.id !== 'trial').map(p => ({ id: p.id, name: p.name.toUpperCase() }));
+                    <div className="mt-auto p-4 rounded-2xl bg-white/[0.02] border border-white/5">
+                        <div className="flex items-center gap-2 mb-2">
+                            <ShieldAlert size={14} className="text-brand-primary/50" />
+                            <span className="text-[10px] font-bold text-muted/60 uppercase tracking-widest">Master Mode</span>
+                        </div>
+                        <p className="text-[9px] text-muted/40 leading-relaxed uppercase tracking-wider">
+                            Genesis access confirmed. All protocols authorized.
+                        </p>
+                    </div>
+                </div>
 
-                                    return (
-                                        <tr key={org.id} className={`group transition-all ${isPending ? 'bg-brand-primary/[0.04]' : 'hover:bg-white/[0.01]'}`}>
-                                            <td style={{ paddingLeft: 32 }}>
-                                                <div className="flex flex-col gap-1 py-4 group-hover:translate-x-1 transition-transform">
-                                                    <span className="text-[14px] font-bold text-primary tracking-tight">{org.name}</span>
-                                                    <span className="text-[10px] text-muted/60 font-mono">{org.id}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                {org.last_transaction_id ? (
-                                                    <div className="flex flex-col gap-1.5 py-4">
-                                                        <code className="bg-brand-primary/5 border border-brand-primary/10 px-3 py-1.5 rounded-lg text-brand-primary/90 font-bold tracking-wider text-[11px] w-fit shadow-sm">
-                                                            {org.last_transaction_id}
-                                                        </code>
-                                                        <div className="flex items-center gap-2">
-                                                            <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                                                            <span className="text-[10px] text-amber-500/80 font-bold uppercase tracking-wider leading-none">Manual Verification Required</span>
-                                                        </div>
+                {/* --- Content Area --- */}
+                <div className="flex-1 flex flex-col min-w-0">
+                    {activeTab === 'subscriptions' ? (
+                        <>
+                            <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+                                <div className="flex flex-col gap-1">
+                                    <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Financial Protocols</h2>
+                                    <p className="text-[10px] text-muted/60 uppercase tracking-widest font-bold">Manual Subscription Synchronization</p>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <Activity className="text-brand-primary/50" size={16} />
+                                    <span className="text-[10px] font-bold text-muted/40 uppercase tracking-widest">Live Telemetry</span>
+                                </div>
+                            </div>
+
+                            <div className="p-8 border-b border-white/5 bg-white/[0.005]">
+                                <div className="flex items-center gap-6">
+                                    <div className="relative flex-1 max-w-md group">
+                                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-brand-primary transition-colors" size={18} />
+                                        <input
+                                            className="glass-input !pl-14 !h-14 !text-sm !font-semibold !rounded-2xl border-white/5 focus:border-brand-primary/50"
+                                            placeholder="Find shop or transaction ID..."
+                                            value={subSearch}
+                                            onChange={(e) => setSubSearch(e.target.value)}
+                                        />
+                                    </div>
+                                    <button
+                                        onClick={() => setShowOnlyPending(!showOnlyPending)}
+                                        className={`glass-button h-14 px-8 !rounded-2xl !text-[10px] font-black tracking-[0.2em] transition-all ${showOnlyPending ? 'glass-button-primary' : 'bg-white/5 text-muted hover:text-primary'}`}
+                                    >
+                                        <Filter size={16} /> {showOnlyPending ? 'PENDING SYNC' : 'ALL ENTRIES'}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <table className="glass-table !table-fixed">
+                                <thead>
+                                    <tr>
+                                        <th style={{ paddingLeft: 32, width: '30%' }}>Organization / Shop</th>
+                                        <th style={{ width: '25%' }}>Transaction ID</th>
+                                        <th style={{ width: '15%' }}>Status Details</th>
+                                        <th style={{ textAlign: 'right', paddingRight: 32, width: '30%' }}>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {filteredOrgs.length > 0 ? filteredOrgs.map(org => {
+                                        const isPending = org.last_transaction_id && org.subscription_status !== 'active';
+                                        const planOptions = Object.values(PLANS).filter(p => p.id !== 'trial').map(p => ({ id: p.id, name: p.name.toUpperCase() }));
+
+                                        return (
+                                            <tr key={org.id} className={`group transition-all ${isPending ? 'bg-brand-primary/[0.04]' : 'hover:bg-white/[0.01]'}`}>
+                                                <td style={{ paddingLeft: 32 }}>
+                                                    <div className="flex flex-col gap-1 py-4 group-hover:translate-x-1 transition-transform">
+                                                        <span className="text-[14px] font-bold text-primary tracking-tight">{org.name}</span>
+                                                        <span className="text-[10px] text-muted/60 font-mono">{org.id}</span>
                                                     </div>
-                                                ) : <span className="text-[10px] text-muted/20 font-bold uppercase tracking-widest">—</span>}
-                                            </td>
-                                            <td>
-                                                <div className="flex flex-col gap-1 py-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <div className={`h-2 w-2 rounded-full ${org.subscription_status === 'active' ? 'bg-brand-success shadow-[0_0_10px_var(--brand-success)]' : 'bg-brand-warning shadow-[0_0_10px_#f59e0b]'}`} />
-                                                        <span className={`text-[11px] font-bold uppercase tracking-wider ${org.subscription_status === 'active' ? 'text-emerald-400' : 'text-brand-warning'}`}>
-                                                            {org.subscription_status}
+                                                </td>
+                                                <td>
+                                                    {org.last_transaction_id ? (
+                                                        <div className="flex flex-col gap-1.5 py-4">
+                                                            <code className="bg-brand-primary/5 border border-brand-primary/10 px-3 py-1.5 rounded-lg text-brand-primary/90 font-bold tracking-wider text-[11px] w-fit shadow-sm">
+                                                                {org.last_transaction_id}
+                                                            </code>
+                                                            <div className="flex items-center gap-2">
+                                                                <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
+                                                                <span className="text-[10px] text-amber-500/80 font-bold uppercase tracking-wider leading-none">Manual Verification Required</span>
+                                                            </div>
+                                                        </div>
+                                                    ) : <span className="text-[10px] text-muted/20 font-bold uppercase tracking-widest">—</span>}
+                                                </td>
+                                                <td>
+                                                    <div className="flex flex-col gap-1 py-4">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className={`h-2 w-2 rounded-full ${org.subscription_status === 'active' ? 'bg-brand-success shadow-[0_0_10px_var(--brand-success)]' : 'bg-brand-warning shadow-[0_0_10px_#f59e0b]'}`} />
+                                                            <span className={`text-[11px] font-bold uppercase tracking-wider ${org.subscription_status === 'active' ? 'text-emerald-400' : 'text-brand-warning'}`}>
+                                                                {org.subscription_status}
+                                                            </span>
+                                                        </div>
+                                                        <span className="text-[10px] text-muted font-semibold uppercase tracking-tight opacity-70">
+                                                            {org.subscription_ends_at ? `Exp: ${new Date(org.subscription_ends_at).toLocaleDateString()}` : org.trial_ends_at ? `Trial: ${new Date(org.trial_ends_at).toLocaleDateString()}` : 'Indefinite'}
                                                         </span>
                                                     </div>
-                                                    <span className="text-[10px] text-muted font-semibold uppercase tracking-tight opacity-70">
-                                                        {org.subscription_ends_at ? `Exp: ${new Date(org.subscription_ends_at).toLocaleDateString()}` : org.trial_ends_at ? `Trial: ${new Date(org.trial_ends_at).toLocaleDateString()}` : 'Indefinite'}
-                                                    </span>
-                                                </div>
-                                            </td>
-                                            <td style={{ textAlign: 'right', paddingRight: 32 }}>
-                                                <div className="flex justify-end items-center gap-4 py-3">
-                                                    <div className="w-40">
-                                                        <GlassDropdown
-                                                            label="Selected Tier"
-                                                            value={selectedPlans[org.id] || org.subscription_plan || 'monthly'}
-                                                            options={planOptions}
-                                                            onChange={(val) => setSelectedPlans(prev => ({ ...prev, [org.id]: val }))}
-                                                        />
-                                                    </div>
-                                                    <div className="flex gap-2">
-                                                        <button
-                                                            onClick={() => handleActivate(org.id, selectedPlans[org.id] || org.subscription_plan || 'monthly')}
-                                                            className={`glass-button !h-10 !px-5 !rounded-lg !text-[10px] font-bold tracking-wider transition-all ${isPending ? 'glass-button-primary shadow-md hover:shadow-lg' : 'hover:bg-brand-primary/10'}`}
-                                                            disabled={loadingId === org.id}
-                                                        >
-                                                            {loadingId === org.id && actionType === 'activate' ? <RefreshCw className="animate-spin" size={14} /> : <CheckCircle2 size={16} />}
-                                                            ACTIVATE
-                                                        </button>
-                                                        {isPending && (
+                                                </td>
+                                                <td style={{ textAlign: 'right', paddingRight: 32 }}>
+                                                    <div className="flex justify-end items-center gap-4 py-3">
+                                                        <div className="w-40">
+                                                            <GlassDropdown
+                                                                label="Selected Tier"
+                                                                value={selectedPlans[org.id] || org.subscription_plan || 'monthly'}
+                                                                options={planOptions}
+                                                                onChange={(val) => setSelectedPlans(prev => ({ ...prev, [org.id]: val }))}
+                                                            />
+                                                        </div>
+                                                        <div className="flex gap-2">
                                                             <button
-                                                                onClick={() => handleReject(org.id)}
-                                                                className="glass-button !h-10 !px-5 !rounded-lg !text-[10px] font-bold tracking-wider border-red-500/10 text-red-500 hover:bg-red-500/10"
+                                                                onClick={() => handleActivate(org.id, selectedPlans[org.id] || org.subscription_plan || 'monthly')}
+                                                                className={`glass-button !h-10 !px-5 !rounded-lg !text-[10px] font-bold tracking-wider transition-all ${isPending ? 'glass-button-primary shadow-md hover:shadow-lg' : 'hover:bg-brand-primary/10'}`}
                                                                 disabled={loadingId === org.id}
                                                             >
-                                                                {loadingId === org.id && actionType === 'reject' ? <RefreshCw className="animate-spin" size={14} /> : <XCircle size={16} />}
-                                                                REJECT
+                                                                {loadingId === org.id && actionType === 'activate' ? <RefreshCw className="animate-spin" size={14} /> : <CheckCircle2 size={16} />}
+                                                                ACTIVATE
                                                             </button>
-                                                        )}
+                                                            {isPending && (
+                                                                <button
+                                                                    onClick={() => handleReject(org.id)}
+                                                                    className="glass-button !h-10 !px-5 !rounded-lg !text-[10px] font-bold tracking-wider border-red-500/10 text-red-500 hover:bg-red-500/10"
+                                                                    disabled={loadingId === org.id}
+                                                                >
+                                                                    {loadingId === org.id && actionType === 'reject' ? <RefreshCw className="animate-spin" size={14} /> : <XCircle size={16} />}
+                                                                    REJECT
+                                                                </button>
+                                                            )}
+                                                        </div>
                                                     </div>
+                                                </td>
+                                            </tr>
+                                        );
+                                    }) : (
+                                        <tr>
+                                            <td colSpan={4} className="py-48 text-center bg-white/[0.01]">
+                                                <div className="flex flex-col items-center gap-4 opacity-10 scale-150 grayscale">
+                                                    <Activity size={80} />
+                                                    <p className="text-xl font-black uppercase tracking-[0.5em]">No Data Flow</p>
                                                 </div>
                                             </td>
                                         </tr>
-                                    );
-                                }) : (
+                                    )}
+                                </tbody>
+                            </table>
+                        </>
+                    ) : (
+                        <>
+                            <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+                                <div className="flex flex-col gap-1">
+                                    <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Security Protocols</h2>
+                                    <p className="text-[10px] text-muted/60 uppercase tracking-widest font-bold">Infrastructure Master Access Management</p>
+                                </div>
+                                <button
+                                    onClick={() => setShowAddModal(true)}
+                                    className="glass-button glass-button-primary !h-12 !px-8 shadow-lg hover:shadow-xl transition-all !text-[11px] font-bold uppercase tracking-widest"
+                                >
+                                    <UserPlus size={16} /> Authorize Master
+                                </button>
+                            </div>
+
+                            <table className="glass-table">
+                                <thead>
                                     <tr>
-                                        <td colSpan={4} className="py-48 text-center bg-white/[0.01]">
-                                            <div className="flex flex-col items-center gap-4 opacity-10 scale-150 grayscale">
-                                                <Activity size={80} />
-                                                <p className="text-xl font-black uppercase tracking-[0.5em]">No Data Flow</p>
-                                            </div>
-                                        </td>
+                                        <th style={{ paddingLeft: 32, width: '40%' }}>Administrator / Master</th>
+                                        <th style={{ textAlign: 'center', width: '25%' }}>Access Level</th>
+                                        <th style={{ textAlign: 'center', width: '25%' }}>Authorized On</th>
+                                        <th style={{ textAlign: 'right', paddingRight: 32, width: '10%' }}>Actions</th>
                                     </tr>
-                                )}
-                            </tbody>
-                        </table>
-                    </>
-                ) : (
-                    <>
-                        <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.02]">
-                            <div className="flex items-center gap-4">
-                                <Lock className="text-brand-primary" size={24} />
-                                <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Master Access Management</h2>
-                            </div>
-                            <div className="flex items-center gap-3">
-                                <History size={16} className="text-muted/60" />
-                                <span className="text-[10px] font-bold text-muted/40 uppercase tracking-widest">System Audit Enabled</span>
-                            </div>
-                        </div>
-
-                        <table className="glass-table">
-                            <thead>
-                                <tr>
-                                    <th style={{ paddingLeft: 32, width: '40%' }}>Administrator / Master</th>
-                                    <th style={{ textAlign: 'center', width: '25%' }}>Access Level</th>
-                                    <th style={{ textAlign: 'center', width: '25%' }}>Authorized On</th>
-                                    <th style={{ textAlign: 'right', paddingRight: 32, width: '10%' }}>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {/* Root Admin – The Legend */}
-                                <tr className="bg-brand-primary/[0.08] relative">
-                                    <td style={{ paddingLeft: 32 }}>
-                                        <div className="flex items-center gap-5 py-5 group">
-                                            <div className="w-14 h-14 rounded-2xl bg-brand-primary flex items-center justify-center text-white text-sm font-black shadow-[0_0_20px_rgba(79,142,247,0.5)] border-2 border-white/20">
-                                                JS
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-base font-[950] text-primary flex items-center gap-2 group-hover:translate-x-1 transition-transform">
-                                                    junsangsingh@gmail.com <CheckCircle2 size={18} className="text-brand-primary shadow-glow" />
-                                                </span>
-                                                <span className="text-[10px] text-brand-primary font-black uppercase tracking-[0.2em]">Genesis System Master</span>
-                                            </div>
-                                        </div>
-                                    </td>
-                                    <td style={{ textAlign: 'center' }}>
-                                        <span className="bg-brand-primary/10 text-brand-primary text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-primary/20 uppercase tracking-widest shadow-sm">
-                                            ROOT ADMIN
-                                        </span>
-                                    </td>
-                                    <td style={{ textAlign: 'center' }}>
-                                        <div className="flex flex-col items-center">
-                                            <span className="text-[11px] font-bold text-primary uppercase tracking-tight">System Launch</span>
-                                            <span className="text-[10px] text-muted font-medium uppercase tracking-wider opacity-60">FEB 2026</span>
-                                        </div>
-                                    </td>
-                                    <td style={{ textAlign: 'right', paddingRight: 32 }}>
-                                        <div className="flex justify-end pr-4 opacity-40 animate-pulse"><Lock size={20} /></div>
-                                    </td>
-                                </tr>
-
-                                {initialAdmins.filter(a => a.email !== 'junsangsingh@gmail.com').map(admin => (
-                                    <tr key={admin.id} className="hover:bg-white/[0.02] transition-colors group">
+                                </thead>
+                                <tbody>
+                                    {/* Root Admin – The Legend */}
+                                    <tr className="bg-brand-primary/[0.04] relative">
                                         <td style={{ paddingLeft: 32 }}>
-                                            <div className="flex items-center gap-5 py-5">
-                                                <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-muted text-sm font-bold border border-white/10 group-hover:border-brand-primary/40 transition-all uppercase">
-                                                    {admin.email.substring(0, 2)}
+                                            <div className="flex items-center gap-5 py-5 group">
+                                                <div className="w-12 h-12 rounded-2xl bg-brand-primary flex items-center justify-center text-white text-sm font-bold shadow-lg border border-white/10">
+                                                    JS
                                                 </div>
                                                 <div className="flex flex-col">
-                                                    <span className="text-base font-bold text-primary tracking-tight">{admin.email}</span>
-                                                    <span className="text-[10px] text-muted font-bold uppercase tracking-widest">Authorized Master</span>
+                                                    <span className="text-base font-bold text-primary flex items-center gap-2 group-hover:translate-x-1 transition-transform">
+                                                        junsangsingh@gmail.com <CheckCircle2 size={16} className="text-brand-primary" />
+                                                    </span>
+                                                    <span className="text-[10px] text-brand-primary font-bold uppercase tracking-wider">System Owner</span>
                                                 </div>
                                             </div>
                                         </td>
                                         <td style={{ textAlign: 'center' }}>
-                                            <span className="badge badge-info !px-3 !py-1.5 !rounded-lg !text-[10px] font-bold uppercase tracking-wider">AUTHORIZED</span>
-                                        </td>
-                                        <td style={{ textAlign: 'center' }}>
-                                            <span className="text-[11px] font-bold text-muted uppercase tracking-wider">
-                                                {new Date(admin.created_at).toLocaleDateString()}
+                                            <span className="bg-brand-primary/10 text-brand-primary text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-primary/20 uppercase tracking-widest shadow-sm">
+                                                ROOT ADMIN
                                             </span>
                                         </td>
+                                        <td style={{ textAlign: 'center' }}>
+                                            <div className="flex flex-col items-center">
+                                                <span className="text-[11px] font-bold text-primary uppercase tracking-tight">System Launch</span>
+                                                <span className="text-[10px] text-muted font-medium uppercase tracking-wider opacity-60">FEB 2026</span>
+                                            </div>
+                                        </td>
                                         <td style={{ textAlign: 'right', paddingRight: 32 }}>
-                                            <button
-                                                onClick={() => handleRemoveMaster(admin.id, admin.email)}
-                                                className="glass-button h-12 w-12 !p-0 !rounded-2xl !border-red-500/10 text-red-500 hover:bg-red-500/10 hover:scale-110 active:scale-95 transition-all"
-                                                disabled={masterLoading}
-                                            >
-                                                <Trash2 size={20} />
-                                            </button>
+                                            <div className="flex justify-end pr-4 opacity-40"><Lock size={20} /></div>
                                         </td>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </>
-                )}
+
+                                    {initialAdmins.filter(a => a.email !== 'junsangsingh@gmail.com').map(admin => (
+                                        <tr key={admin.id} className="hover:bg-white/[0.02] transition-colors group">
+                                            <td style={{ paddingLeft: 32 }}>
+                                                <div className="flex items-center gap-5 py-5">
+                                                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-muted text-sm font-bold border border-white/10 group-hover:border-brand-primary/40 transition-all uppercase">
+                                                        {admin.email.substring(0, 2)}
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <span className="text-base font-bold text-primary tracking-tight">{admin.email}</span>
+                                                        <span className="text-[10px] text-muted font-bold uppercase tracking-widest">Authorized Master</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td style={{ textAlign: 'center' }}>
+                                                <span className="badge badge-info !px-3 !py-1.5 !rounded-lg !text-[10px] font-bold uppercase tracking-wider">AUTHORIZED</span>
+                                            </td>
+                                            <td style={{ textAlign: 'center' }}>
+                                                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">
+                                                    {new Date(admin.created_at).toLocaleDateString()}
+                                                </span>
+                                            </td>
+                                            <td style={{ textAlign: 'right', paddingRight: 32 }}>
+                                                <button
+                                                    onClick={() => handleRemoveMaster(admin.id, admin.email)}
+                                                    className="glass-button h-12 w-12 !p-0 !rounded-2xl !border-red-500/10 text-red-500 hover:bg-red-500/10 hover:scale-110 active:scale-95 transition-all"
+                                                    disabled={masterLoading}
+                                                >
+                                                    <Trash2 size={20} />
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </>
+                    )}
+                </div>
             </div>
 
             {/* Grant Authorization Modal – Ultra Premium */}
@@ -538,17 +563,17 @@ export default function AdminDashboardClient({
             )}
 
             <style jsx>{`
-                .shadow-glow {
-                    filter: drop-shadow(0 0 8px var(--brand-primary));
-                }
-                @keyframes scaleIn {
-                    from { opacity: 0; transform: scale(0.95); }
-                    to { opacity: 1; transform: scale(1); }
-                }
-                .animate-scale-in {
-                    animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-                }
-            `}</style>
+            .shadow-glow {
+                filter: drop-shadow(0 0 8px var(--brand-primary));
+            }
+            @keyframes scaleIn {
+                from { opacity: 0; transform: scale(0.95); }
+                to { opacity: 1; transform: scale(1); }
+            }
+            .animate-scale-in {
+                animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            }
+        `}</style>
         </div>
     );
 }
