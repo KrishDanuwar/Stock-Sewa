@@ -1,18 +1,20 @@
 import React from 'react';
 import { createAdminClient } from '@/lib/supabase/server';
-import { CheckCircle, XCircle, ShieldCheck } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 import { redirect } from 'next/navigation';
 import { auth, currentUser } from '@clerk/nextjs/server';
+import { SubscriptionActionButtons } from '@/components/SubscriptionActionButtons';
 
 export default async function AdminSubscriptionsPage() {
     const { userId } = await auth();
     const user = await currentUser();
 
-    // Protection: Only the lead admin can access this
-    // In production, this should be a list or a DB flag
-    const ADMIN_EMAILS = ['krishdanuwar@gmail.com']; // Replace with your admin email
+    // Protection: Only junsangsingh@gmail.com can access this
+    const ADMIN_EMAILS = ['junsangsingh@gmail.com'];
 
-    if (!user || !ADMIN_EMAILS.includes(user.emailAddresses[0]?.emailAddress || '')) {
+    const userEmail = user?.emailAddresses[0]?.emailAddress || '';
+    if (!user || !ADMIN_EMAILS.includes(userEmail)) {
+        console.warn(`Unauthorized admin access attempt by: ${userEmail}`);
         redirect('/dashboard');
     }
 
@@ -39,7 +41,7 @@ export default async function AdminSubscriptionsPage() {
                 </div>
                 <div className="flex items-center gap-4">
                     <div className="px-4 py-2 rounded-lg bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-sm font-medium">
-                        Admin: {user?.emailAddresses[0]?.emailAddress}
+                        Admin: {userEmail}
                     </div>
                 </div>
             </header>
@@ -90,16 +92,12 @@ export default async function AdminSubscriptionsPage() {
                                         )}
                                     </td>
                                     <td className="p-4">
-                                        <div className="flex items-center gap-2">
-                                            <button className="glass-button glass-button-primary h-8 px-3 text-[10px] font-bold">
-                                                <CheckCircle className="w-3 h-3 mr-1" />
-                                                ACTIVATE
-                                            </button>
-                                            <button className="glass-button h-8 px-3 text-[10px] font-bold text-red-400 border-red-500/20 hover:bg-red-500/10">
-                                                <XCircle className="w-3 h-3 mr-1" />
-                                                REJECT
-                                            </button>
-                                        </div>
+                                        <SubscriptionActionButtons
+                                            orgId={org.id}
+                                            orgName={org.name}
+                                            plan={org.subscription_plan as any || 'monthly'}
+                                            status={org.subscription_status}
+                                        />
                                     </td>
                                 </tr>
                             ))}
