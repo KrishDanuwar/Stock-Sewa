@@ -16,6 +16,11 @@ CREATE TABLE IF NOT EXISTS organizations (
     address    TEXT,
     phone      TEXT,
     logo_url   TEXT,
+    subscription_plan TEXT DEFAULT 'trial',
+    subscription_status TEXT DEFAULT 'active' CHECK (subscription_status IN ('active', 'pending', 'expired')),
+    trial_ends_at TIMESTAMPTZ,
+    subscription_ends_at TIMESTAMPTZ,
+    last_transaction_id TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -127,8 +132,8 @@ BEGIN
     username_val := COALESCE(NEW.raw_user_meta_data->>'username', split_part(NEW.email, '@', 1));
 
     -- Create the organization
-    INSERT INTO public.organizations (name)
-    VALUES (org_name)
+    INSERT INTO public.organizations (name, trial_ends_at)
+    VALUES (org_name, NOW() + INTERVAL '3 days')
     RETURNING id INTO new_org_id;
 
     -- Create the profile linking user to organization

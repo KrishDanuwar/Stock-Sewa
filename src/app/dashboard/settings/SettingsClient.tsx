@@ -4,8 +4,9 @@ import { useState } from 'react';
 import { updateOrganizationLogo, updateOrganizationDetails, removeOrganizationLogo } from '@/lib/actions/organizations';
 import { deleteAccount } from '@/lib/actions/user';
 import { toast } from 'sonner';
-import { Building2, Upload, Camera, Save, Trash2, Mail, Sun, Moon, Palette, UserCircle } from 'lucide-react';
+import { Building2, Upload, Camera, Save, Trash2, Mail, Sun, Moon, Palette, UserCircle, CreditCard } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
+import Link from 'next/link';
 
 type Organization = {
     id: string;
@@ -14,6 +15,10 @@ type Organization = {
     pan_vat: string | null;
     address: string | null;
     phone: string | null;
+    subscription_plan?: string;
+    subscription_status?: string;
+    trial_ends_at?: string | null;
+    subscription_ends_at?: string | null;
 };
 
 export default function SettingsClient({ organization, userEmail }: { organization: Organization | null, userEmail: string }) {
@@ -248,6 +253,51 @@ export default function SettingsClient({ organization, userEmail }: { organizati
                             >
                                 <Save size={16} /> {saving ? 'Saving...' : 'Save Changes'}
                             </button>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Billing & Subscriptions */}
+                <div className="glass-card" style={{ padding: 32, border: '1px solid var(--brand-primary)', background: 'rgba(79, 142, 247, 0.05)' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                            <CreditCard size={24} color="var(--brand-primary)" />
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Billing & Subscriptions</h2>
+                        </div>
+                        <div style={{
+                            padding: '4px 12px',
+                            borderRadius: '20px',
+                            fontSize: '0.75rem',
+                            fontWeight: 700,
+                            textTransform: 'uppercase',
+                            background: organization?.subscription_status === 'active' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                            color: organization?.subscription_status === 'active' ? 'var(--brand-success)' : 'var(--brand-danger)',
+                            border: `1px solid ${organization?.subscription_status === 'active' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`
+                        }}>
+                            {organization?.subscription_status || 'Inactive'}
+                        </div>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32 }}>
+                        <div style={{ flex: 1 }}>
+                            <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 8 }}>Current Plan</h3>
+                            <p style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
+                                {organization?.subscription_plan === 'trial' ? '3-Day Free Trial' : organization?.subscription_plan || 'No Active Plan'}
+                            </p>
+                            {organization?.subscription_plan === 'trial' && organization?.trial_ends_at && (
+                                <p style={{ fontSize: '0.875rem', color: 'var(--brand-primary)', fontWeight: 500 }}>
+                                    Ends on: {new Date(organization.trial_ends_at).toLocaleDateString()}
+                                </p>
+                            )}
+                        </div>
+
+                        <div style={{ borderLeft: '1px solid var(--glass-border)', paddingLeft: 32 }}>
+                            <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 12 }}>Need to upgrade or renew?</h3>
+                            <Link href="/trial-expired">
+                                <button className="glass-button glass-button-primary" style={{ width: '100%', justifyContent: 'center' }}>
+                                    View Pricing Plans
+                                </button>
+                            </Link>
                         </div>
                     </div>
                 </div>
