@@ -244,35 +244,36 @@ export default function AdminDashboardClient({
             {/* --- Main High-Octane Content --- */}
             <div className="glass-card min-h-[600px] border-t-0 p-0 overflow-hidden flex" style={{ padding: 0 }}>
                 {/* --- Vertical Navigation Rail --- */}
-                <div className="w-[280px] bg-white/[0.02] border-r border-white/5 p-6 flex flex-col gap-2">
-                    <div className="text-[10px] font-bold text-muted/40 uppercase tracking-[0.2em] mb-4 px-3">Command Modules</div>
+                <div className="w-[300px] bg-white/[0.015] border-r border-white/5 p-8 flex flex-col gap-2">
+                    <div className="text-[10px] font-bold text-muted/40 uppercase tracking-[0.3em] mb-6 px-2">Command Modules</div>
                     <button
                         onClick={() => setActiveTab('subscriptions')}
-                        className={`group flex flex-col gap-1 px-5 py-4 rounded-2xl transition-all duration-300 text-left ${activeTab === 'subscriptions' ? 'bg-brand-primary text-white shadow-lg' : 'text-muted/60 hover:text-primary hover:bg-white/5'}`}
+                        className={`group flex flex-col gap-1 px-6 py-5 rounded-2xl transition-all duration-500 text-left border ${activeTab === 'subscriptions' ? 'bg-brand-primary/10 border-brand-primary/30 text-white shadow-[0_0_20px_rgba(79,142,247,0.15)]' : 'border-transparent text-muted/60 hover:text-primary hover:bg-white/5'}`}
                     >
-                        <div className="flex items-center gap-3">
-                            <CreditCard size={18} />
-                            <span className="text-[12px] font-bold uppercase tracking-wider">Financials</span>
+                        <div className="flex items-center gap-4">
+                            <CreditCard size={20} className={activeTab === 'subscriptions' ? 'text-brand-primary' : 'text-muted/40 group-hover:text-primary'} />
+                            <span className="text-[13px] font-bold uppercase tracking-wider">Financials</span>
                         </div>
-                        <span className={`text-[9px] uppercase tracking-widest opacity-40 ml-7 ${activeTab === 'subscriptions' ? 'text-white' : ''}`}>Subscription Sync</span>
+                        <span className={`text-[10px] uppercase tracking-widest opacity-40 ml-9 font-medium transition-opacity ${activeTab === 'subscriptions' ? 'opacity-70 text-brand-primary' : ''}`}>Subscription Sync</span>
                     </button>
                     <button
                         onClick={() => setActiveTab('masters')}
-                        className={`group flex flex-col gap-1 px-5 py-4 rounded-2xl transition-all duration-300 text-left ${activeTab === 'masters' ? 'bg-brand-primary text-white shadow-lg' : 'text-muted/60 hover:text-primary hover:bg-white/5'}`}
+                        className={`group flex flex-col gap-1 px-6 py-5 rounded-2xl transition-all duration-500 text-left border ${activeTab === 'masters' ? 'bg-brand-primary/10 border-brand-primary/30 text-white shadow-[0_0_20px_rgba(79,142,247,0.15)]' : 'border-transparent text-muted/60 hover:text-primary hover:bg-white/5'}`}
                     >
-                        <div className="flex items-center gap-3">
-                            <Lock size={18} />
-                            <span className="text-[12px] font-bold uppercase tracking-wider">Security</span>
+                        <div className="flex items-center gap-4">
+                            <Lock size={20} className={activeTab === 'masters' ? 'text-brand-primary' : 'text-muted/40 group-hover:text-primary'} />
+                            <span className="text-[13px] font-bold uppercase tracking-wider">Security</span>
                         </div>
-                        <span className={`text-[9px] uppercase tracking-widest opacity-40 ml-7 ${activeTab === 'masters' ? 'text-white' : ''}`}>Master Access</span>
+                        <span className={`text-[10px] uppercase tracking-widest opacity-40 ml-9 font-medium transition-opacity ${activeTab === 'masters' ? 'opacity-70 text-brand-primary' : ''}`}>Master Access</span>
                     </button>
 
-                    <div className="mt-auto p-4 rounded-2xl bg-white/[0.02] border border-white/5">
-                        <div className="flex items-center gap-2 mb-2">
-                            <ShieldAlert size={14} className="text-brand-primary/50" />
-                            <span className="text-[10px] font-bold text-muted/60 uppercase tracking-widest">Master Mode</span>
+                    <div className="mt-auto p-5 rounded-2xl bg-white/[0.02] border border-white/5 relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-1 h-full bg-brand-primary/20" />
+                        <div className="flex items-center gap-2 mb-2.5">
+                            <ShieldAlert size={14} className="text-brand-primary/60" />
+                            <span className="text-[11px] font-bold text-muted/60 uppercase tracking-widest">Master Mode</span>
                         </div>
-                        <p className="text-[9px] text-muted/40 leading-relaxed uppercase tracking-wider">
+                        <p className="text-[10px] text-muted/40 leading-relaxed uppercase tracking-widest font-medium">
                             Genesis access confirmed. All protocols authorized.
                         </p>
                     </div>
@@ -283,9 +284,9 @@ export default function AdminDashboardClient({
                     {activeTab === 'subscriptions' ? (
                         <>
                             <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
-                                <div className="flex flex-col gap-1">
-                                    <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Financial Protocols</h2>
-                                    <p className="text-[10px] text-muted/60 uppercase tracking-widest font-bold">Manual Subscription Synchronization</p>
+                                <div className="flex flex-col gap-1.5">
+                                    <h2 className="text-xl font-bold uppercase tracking-[0.15em] text-primary">Financial Protocols</h2>
+                                    <p className="text-[11px] text-muted/40 uppercase tracking-widest font-bold">Manual Subscription Synchronization</p>
                                 </div>
                                 <div className="flex items-center gap-3">
                                     <Activity className="text-brand-primary/50" size={16} />
@@ -397,10 +398,10 @@ export default function AdminDashboardClient({
                                         );
                                     }) : (
                                         <tr>
-                                            <td colSpan={4} className="py-48 text-center bg-white/[0.01]">
-                                                <div className="flex flex-col items-center gap-4 opacity-10 scale-150 grayscale">
-                                                    <Activity size={80} />
-                                                    <p className="text-xl font-black uppercase tracking-[0.5em]">No Data Flow</p>
+                                            <td colSpan={4} className="py-32 text-center bg-white/[0.005]">
+                                                <div className="flex flex-col items-center gap-4 opacity-10">
+                                                    <Activity size={48} className="text-brand-primary" />
+                                                    <p className="text-sm font-bold uppercase tracking-[0.4em]">No Data Flow</p>
                                                 </div>
                                             </td>
                                         </tr>
@@ -411,9 +412,9 @@ export default function AdminDashboardClient({
                     ) : (
                         <>
                             <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
-                                <div className="flex flex-col gap-1">
-                                    <h2 className="text-lg font-bold uppercase tracking-wider text-primary">Security Protocols</h2>
-                                    <p className="text-[10px] text-muted/60 uppercase tracking-widest font-bold">Infrastructure Master Access Management</p>
+                                <div className="flex flex-col gap-1.5">
+                                    <h2 className="text-xl font-bold uppercase tracking-[0.15em] text-primary">Security Protocols</h2>
+                                    <p className="text-[11px] text-muted/40 uppercase tracking-widest font-bold">Infrastructure Master Access Management</p>
                                 </div>
                                 <button
                                     onClick={() => setShowAddModal(true)}
