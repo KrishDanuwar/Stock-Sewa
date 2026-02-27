@@ -198,7 +198,7 @@ export default function AdminDashboardClient({
             <div className="grid-stats">
                 <div className="glass-card !rounded-none relative overflow-hidden group border-white/5 hover:border-brand-primary/30 transition-all duration-300" style={{ padding: '24px' }}>
                     <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-none bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/10">
+                        <div className="w-14 h-14 rounded-none bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/20">
                             <Zap size={28} />
                         </div>
                         <div>
@@ -212,7 +212,7 @@ export default function AdminDashboardClient({
 
                 <div className="glass-card !rounded-none relative overflow-hidden group border-white/5 hover:border-purple-500/30 transition-all duration-300" style={{ padding: '24px' }}>
                     <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-none bg-purple-500/10 flex items-center justify-center text-purple-500 border border-purple-500/10">
+                        <div className="w-14 h-14 rounded-none bg-purple-500/10 flex items-center justify-center text-purple-500 border border-purple-500/20">
                             <Crown size={28} />
                         </div>
                         <div>
@@ -226,7 +226,7 @@ export default function AdminDashboardClient({
 
                 <div className="glass-card !rounded-none relative overflow-hidden group border-white/5 hover:border-emerald-500/30 transition-all duration-300" style={{ padding: '24px' }}>
                     <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-none bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/10">
+                        <div className="w-14 h-14 rounded-none bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20">
                             <ShieldCheck size={28} />
                         </div>
                         <div>
@@ -245,40 +245,41 @@ export default function AdminDashboardClient({
             <div className="glass-card min-h-[600px] border-t-0 p-0 overflow-hidden flex" style={{ padding: 0 }}>
                 {/* --- Vertical Navigation Rail --- */}
                 <div className="w-[300px] bg-white/[0.015] border-r border-white/5 flex flex-col">
-                    <div className="p-8 border-b border-white/5">
-                        <div className="text-[10px] font-bold text-muted uppercase tracking-[0.3em]">System Modules</div>
+                    <div className="px-8 py-10 border-b border-white/5">
+                        <div className="text-[10px] font-bold text-muted uppercase tracking-[0.4em]">System Modules</div>
                     </div>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col py-4">
                         <button
                             onClick={() => setActiveTab('subscriptions')}
-                            className={`group flex flex-col gap-1 px-8 py-6 transition-all duration-300 text-left border-l-4 ${activeTab === 'subscriptions' ? 'bg-brand-primary/[0.08] border-brand-primary text-primary shadow-[inset_0_0_20px_rgba(79,142,247,0.05)]' : 'border-transparent text-muted hover:text-primary hover:bg-white/[0.02]'}`}
+                            className={`group flex flex-col gap-1.5 px-8 py-7 transition-all duration-300 text-left border-l-4 ${activeTab === 'subscriptions' ? 'bg-brand-primary/[0.08] border-brand-primary text-primary shadow-[inset_10px_0_30px_rgba(79,142,247,0.03)]' : 'border-transparent text-muted hover:text-primary hover:bg-white/[0.02]'}`}
                         >
-                            <div className="flex items-center gap-4">
-                                <CreditCard size={18} className={activeTab === 'subscriptions' ? 'text-brand-primary' : 'text-muted group-hover:text-primary'} />
-                                <span className={`text-[13px] font-bold uppercase tracking-wider ${activeTab === 'subscriptions' ? 'text-primary' : ''}`}>Financials</span>
+                            <div className="flex items-center gap-5">
+                                <CreditCard size={18} className={activeTab === 'subscriptions' ? 'text-brand-primary scale-110 transition-transform' : 'text-muted group-hover:text-primary'} />
+                                <span className={`text-[13px] font-bold uppercase tracking-[0.1em] ${activeTab === 'subscriptions' ? 'text-primary' : ''}`}>Financials</span>
                             </div>
-                            <span className={`text-[10px] uppercase tracking-widest ml-[34px] font-bold opacity-40 ${activeTab === 'subscriptions' ? 'text-brand-primary' : ''}`}>Sync Protocols</span>
+                            <span className={`text-[10px] uppercase tracking-widest ml-[36px] font-bold opacity-30 ${activeTab === 'subscriptions' ? 'text-brand-primary opacity-80' : ''}`}>Sync Protocols</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('masters')}
-                            className={`group flex flex-col gap-1 px-8 py-6 transition-all duration-300 text-left border-l-4 ${activeTab === 'masters' ? 'bg-brand-primary/[0.08] border-brand-primary text-primary shadow-[inset_0_0_20px_rgba(79,142,247,0.05)]' : 'border-transparent text-muted hover:text-primary hover:bg-white/[0.02]'}`}
+                            className={`group flex flex-col gap-1.5 px-8 py-7 transition-all duration-300 text-left border-l-4 ${activeTab === 'masters' ? 'bg-brand-primary/[0.08] border-brand-primary text-primary shadow-[inset_10px_0_30px_rgba(79,142,247,0.03)]' : 'border-transparent text-muted hover:text-primary hover:bg-white/[0.02]'}`}
                         >
-                            <div className="flex items-center gap-4">
-                                <Lock size={18} className={activeTab === 'masters' ? 'text-brand-primary' : 'text-muted group-hover:text-primary'} />
-                                <span className={`text-[13px] font-bold uppercase tracking-wider ${activeTab === 'masters' ? 'text-primary' : ''}`}>Security</span>
+                            <div className="flex items-center gap-5">
+                                <Lock size={18} className={activeTab === 'masters' ? 'text-brand-primary scale-110 transition-transform' : 'text-muted group-hover:text-primary'} />
+                                <span className={`text-[13px] font-bold uppercase tracking-[0.1em] ${activeTab === 'masters' ? 'text-primary' : ''}`}>Security</span>
                             </div>
-                            <span className={`text-[10px] uppercase tracking-widest ml-[34px] font-bold opacity-40 ${activeTab === 'masters' ? 'text-brand-primary' : ''}`}>Access Control</span>
+                            <span className={`text-[10px] uppercase tracking-widest ml-[34px] font-bold opacity-30 ${activeTab === 'masters' ? 'text-brand-primary opacity-80' : ''}`}>Access Control</span>
                         </button>
                     </div>
 
-                    <div className="mt-auto p-8 border-t border-white/5 bg-white/[0.005]">
-                        <div className="flex flex-col gap-3">
-                            <div className="flex items-center gap-3">
-                                <ShieldAlert size={14} className="text-brand-primary/50" />
-                                <span className="text-[10px] font-bold text-muted uppercase tracking-[0.2em]">Genesis Active</span>
+                    <div className="mt-auto p-10 border-t border-white/5 bg-white/[0.01]">
+                        <div className="flex flex-col gap-5">
+                            <div className="flex items-center gap-4">
+                                <ShieldAlert size={16} className="text-brand-primary/60" />
+                                <span className="text-[11px] font-bold text-muted uppercase tracking-[0.2em]">Genesis Active</span>
                             </div>
-                            <p className="text-[10px] text-muted/40 leading-relaxed uppercase tracking-wider font-bold">
-                                Root access authorized. System integrity verified.
+                            <p className="text-[11px] text-muted/40 leading-relaxed uppercase tracking-[0.2em] font-bold">
+                                Root access authorized. <br />
+                                System integrity verified.
                             </p>
                         </div>
                     </div>
