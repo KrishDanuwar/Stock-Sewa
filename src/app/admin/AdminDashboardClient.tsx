@@ -34,8 +34,8 @@ const GlassDropdown = ({ value, options, onChange, label }: { value: string, opt
         <div className="relative">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="glass-input h-10 flex items-center justify-between gap-2 !px-4 hover:border-brand-primary/50 transition-all cursor-pointer group"
-                style={{ background: 'rgba(255,255,255,0.03)' }}
+                className="glass-input h-10 flex items-center justify-between gap-2 !px-4 hover:border-brand-primary/50 transition-all cursor-pointer group !rounded-none"
+                style={{ background: 'var(--glass-input-bg)' }}
             >
                 <div className="flex flex-col items-start">
                     {label && <span className="text-[10px] font-bold text-muted uppercase tracking-wider leading-none mb-1.5">{label}</span>}
@@ -47,12 +47,12 @@ const GlassDropdown = ({ value, options, onChange, label }: { value: string, opt
             {isOpen && (
                 <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-                    <div className="absolute top-12 left-0 right-0 z-50 glass-card !bg-bg-secondary border border-white/10 shadow-2xl p-1 animate-fade-in-up">
+                    <div className="absolute top-12 left-0 right-0 z-50 glass-card !bg-bg-secondary border border-white/10 shadow-2xl p-1 animate-fade-in-up !rounded-none">
                         {options.map((opt) => (
                             <button
                                 key={opt.id}
                                 onClick={() => { onChange(opt.id); setIsOpen(false); }}
-                                className={`w-full text-left px-4 py-2.5 rounded-lg text-[11px] font-bold uppercase tracking-wider transition-all mb-0.5 last:mb-0 ${value === opt.id ? 'bg-brand-primary text-white' : 'text-muted hover:bg-white/5 hover:text-primary'}`}
+                                className={`w-full text-left px-4 py-2.5 rounded-none text-[11px] font-bold uppercase tracking-wider transition-all mb-0.5 last:mb-0 ${value === opt.id ? 'bg-brand-primary/20 text-brand-primary' : 'text-muted hover:bg-white/5 hover:text-primary'}`}
                             >
                                 {opt.name}
                             </button>
@@ -177,7 +177,7 @@ export default function AdminDashboardClient({
                     <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
                         <button
                             onClick={() => router.back()}
-                            className="glass-button h-12 w-12 !p-0 !rounded-2xl shadow-xl hover:scale-110 active:scale-95 transition-all"
+                            className="glass-button h-12 w-12 !p-0 !rounded-none shadow-xl hover:scale-110 active:scale-95 transition-all"
                         >
                             <ArrowLeft size={22} />
                         </button>
@@ -196,23 +196,23 @@ export default function AdminDashboardClient({
 
             {/* --- Premium Stats Architecture --- */}
             <div className="grid-stats">
-                <div className="glass-card relative overflow-hidden group border-white/5 hover:border-brand-primary/30 transition-all duration-300" style={{ padding: '24px' }}>
+                <div className="glass-card !rounded-none relative overflow-hidden group border-white/5 hover:border-brand-primary/30 transition-all duration-300" style={{ padding: '24px' }}>
                     <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-2xl bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/10">
+                        <div className="w-14 h-14 rounded-none bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/10">
                             <Zap size={28} />
                         </div>
                         <div>
                             <div className="text-[12px] font-semibold text-muted uppercase tracking-wider mb-1">Pending Syncs</div>
-                            <div className={`text-2xl font-bold ${pendingCount > 0 ? 'text-amber-500' : 'text-primary'}`}>
+                            <div className={`text-2xl font-bold ${pendingCount > 0 ? 'text-brand-warning' : 'text-primary'}`}>
                                 {pendingCount.toString().padStart(2, '0')}
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="glass-card relative overflow-hidden group border-white/5 hover:border-purple-500/30 transition-all duration-300" style={{ padding: '24px' }}>
+                <div className="glass-card !rounded-none relative overflow-hidden group border-white/5 hover:border-purple-500/30 transition-all duration-300" style={{ padding: '24px' }}>
                     <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-2xl bg-purple-500/10 flex items-center justify-center text-purple-500 border border-purple-500/10">
+                        <div className="w-14 h-14 rounded-none bg-purple-500/10 flex items-center justify-center text-purple-500 border border-purple-500/10">
                             <Crown size={28} />
                         </div>
                         <div>
@@ -224,9 +224,9 @@ export default function AdminDashboardClient({
                     </div>
                 </div>
 
-                <div className="glass-card relative overflow-hidden group border-white/5 hover:border-emerald-500/30 transition-all duration-300" style={{ padding: '24px' }}>
+                <div className="glass-card !rounded-none relative overflow-hidden group border-white/5 hover:border-emerald-500/30 transition-all duration-300" style={{ padding: '24px' }}>
                     <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-2xl bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/10">
+                        <div className="w-14 h-14 rounded-none bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/10">
                             <ShieldCheck size={28} />
                         </div>
                         <div>
@@ -244,42 +244,41 @@ export default function AdminDashboardClient({
             {/* --- Main High-Octane Content --- */}
             <div className="glass-card min-h-[600px] border-t-0 p-0 overflow-hidden flex" style={{ padding: 0 }}>
                 {/* --- Vertical Navigation Rail --- */}
-                <div className="w-[320px] bg-white/[0.01] border-r border-white/5 flex flex-col">
+                <div className="w-[300px] bg-white/[0.015] border-r border-white/5 flex flex-col">
                     <div className="p-8 border-b border-white/5">
-                        <div className="text-[10px] font-black text-muted/30 uppercase tracking-[0.4em]">Command Modules</div>
+                        <div className="text-[10px] font-bold text-muted uppercase tracking-[0.3em]">System Modules</div>
                     </div>
                     <div className="flex flex-col">
                         <button
                             onClick={() => setActiveTab('subscriptions')}
-                            className={`group flex flex-col gap-1 px-8 py-5 transition-all duration-300 text-left border-l-4 ${activeTab === 'subscriptions' ? 'bg-brand-primary/[0.07] border-brand-primary text-white shadow-[inset_0_0_20px_rgba(79,142,247,0.05)]' : 'border-transparent text-muted/50 hover:text-primary hover:bg-white/[0.03]'}`}
+                            className={`group flex flex-col gap-1 px-8 py-6 transition-all duration-300 text-left border-l-4 ${activeTab === 'subscriptions' ? 'bg-brand-primary/[0.08] border-brand-primary text-primary shadow-[inset_0_0_20px_rgba(79,142,247,0.05)]' : 'border-transparent text-muted hover:text-primary hover:bg-white/[0.02]'}`}
                         >
                             <div className="flex items-center gap-4">
-                                <CreditCard size={20} className={activeTab === 'subscriptions' ? 'text-brand-primary' : 'text-muted/40 group-hover:text-primary'} />
-                                <span className="text-[13px] font-bold uppercase tracking-widest">Financials</span>
+                                <CreditCard size={18} className={activeTab === 'subscriptions' ? 'text-brand-primary' : 'text-muted group-hover:text-primary'} />
+                                <span className={`text-[13px] font-bold uppercase tracking-wider ${activeTab === 'subscriptions' ? 'text-primary' : ''}`}>Financials</span>
                             </div>
-                            <span className={`text-[10px] uppercase tracking-widest opacity-40 ml-9 font-bold transition-all ${activeTab === 'subscriptions' ? 'opacity-90 text-brand-primary translate-x-1' : 'group-hover:translate-x-1'}`}>Subscription Sync</span>
+                            <span className={`text-[10px] uppercase tracking-widest ml-[34px] font-bold opacity-40 ${activeTab === 'subscriptions' ? 'text-brand-primary' : ''}`}>Sync Protocols</span>
                         </button>
                         <button
                             onClick={() => setActiveTab('masters')}
-                            className={`group flex flex-col gap-1 px-8 py-5 transition-all duration-300 text-left border-l-4 ${activeTab === 'masters' ? 'bg-brand-primary/[0.07] border-brand-primary text-white shadow-[inset_0_0_20px_rgba(79,142,247,0.05)]' : 'border-transparent text-muted/50 hover:text-primary hover:bg-white/[0.03]'}`}
+                            className={`group flex flex-col gap-1 px-8 py-6 transition-all duration-300 text-left border-l-4 ${activeTab === 'masters' ? 'bg-brand-primary/[0.08] border-brand-primary text-primary shadow-[inset_0_0_20px_rgba(79,142,247,0.05)]' : 'border-transparent text-muted hover:text-primary hover:bg-white/[0.02]'}`}
                         >
                             <div className="flex items-center gap-4">
-                                <Lock size={20} className={activeTab === 'masters' ? 'text-brand-primary' : 'text-muted/40 group-hover:text-primary'} />
-                                <span className="text-[13px] font-bold uppercase tracking-widest">Security</span>
+                                <Lock size={18} className={activeTab === 'masters' ? 'text-brand-primary' : 'text-muted group-hover:text-primary'} />
+                                <span className={`text-[13px] font-bold uppercase tracking-wider ${activeTab === 'masters' ? 'text-primary' : ''}`}>Security</span>
                             </div>
-                            <span className={`text-[10px] uppercase tracking-widest opacity-40 ml-9 font-bold transition-all ${activeTab === 'masters' ? 'opacity-90 text-brand-primary translate-x-1' : 'group-hover:translate-x-1'}`}>Master Access</span>
+                            <span className={`text-[10px] uppercase tracking-widest ml-[34px] font-bold opacity-40 ${activeTab === 'masters' ? 'text-brand-primary' : ''}`}>Access Control</span>
                         </button>
-
                     </div>
 
                     <div className="mt-auto p-8 border-t border-white/5 bg-white/[0.005]">
-                        <div className="flex flex-col gap-4">
+                        <div className="flex flex-col gap-3">
                             <div className="flex items-center gap-3">
-                                <ShieldAlert size={16} className="text-brand-primary/40" />
-                                <span className="text-[11px] font-black text-muted/40 uppercase tracking-[0.2em]">Genesis Active</span>
+                                <ShieldAlert size={14} className="text-brand-primary/50" />
+                                <span className="text-[10px] font-bold text-muted uppercase tracking-[0.2em]">Genesis Active</span>
                             </div>
-                            <p className="text-[10px] text-muted/30 leading-relaxed uppercase tracking-widest font-bold">
-                                Root-level encryption protocol initialized. All systems authorized.
+                            <p className="text-[10px] text-muted/40 leading-relaxed uppercase tracking-wider font-bold">
+                                Root access authorized. System integrity verified.
                             </p>
                         </div>
                     </div>
@@ -292,11 +291,7 @@ export default function AdminDashboardClient({
                             <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
                                 <div className="flex flex-col gap-1.5">
                                     <h2 className="text-xl font-bold uppercase tracking-[0.15em] text-primary">Financial Protocols</h2>
-                                    <p className="text-[11px] text-muted/40 uppercase tracking-widest font-bold">Manual Subscription Synchronization</p>
-                                </div>
-                                <div className="flex items-center gap-3">
-                                    <Activity className="text-brand-primary/50" size={16} />
-                                    <span className="text-[10px] font-bold text-muted/40 uppercase tracking-widest">Live Telemetry</span>
+                                    <p className="text-[11px] text-muted uppercase tracking-[0.2em] font-bold opacity-40">Manual Subscription Synchronization</p>
                                 </div>
                             </div>
 
@@ -305,7 +300,7 @@ export default function AdminDashboardClient({
                                     <div className="relative flex-1 max-w-md group">
                                         <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-brand-primary transition-colors" size={18} />
                                         <input
-                                            className="glass-input !pl-14 !h-14 !text-sm !font-semibold !rounded-2xl border-white/5 focus:border-brand-primary/50"
+                                            className="glass-input !pl-14 !h-14 !text-sm !font-semibold !rounded-none border-white/5 focus:border-brand-primary/50"
                                             placeholder="Find shop or transaction ID..."
                                             value={subSearch}
                                             onChange={(e) => setSubSearch(e.target.value)}
@@ -313,7 +308,7 @@ export default function AdminDashboardClient({
                                     </div>
                                     <button
                                         onClick={() => setShowOnlyPending(!showOnlyPending)}
-                                        className={`glass-button h-14 px-8 !rounded-2xl !text-[10px] font-black tracking-[0.2em] transition-all ${showOnlyPending ? 'glass-button-primary' : 'bg-white/5 text-muted hover:text-primary'}`}
+                                        className={`glass-button h-14 px-8 !rounded-none !text-[10px] font-black tracking-[0.2em] transition-all ${showOnlyPending ? 'glass-button-primary' : 'bg-white/5 text-muted hover:text-primary'}`}
                                     >
                                         <Filter size={16} /> {showOnlyPending ? 'PENDING SYNC' : 'ALL ENTRIES'}
                                     </button>
@@ -335,7 +330,7 @@ export default function AdminDashboardClient({
                                         const planOptions = Object.values(PLANS).filter(p => p.id !== 'trial').map(p => ({ id: p.id, name: p.name.toUpperCase() }));
 
                                         return (
-                                            <tr key={org.id} className={`group transition-all ${isPending ? 'bg-brand-primary/[0.04]' : 'hover:bg-white/[0.01]'}`}>
+                                            <tr key={org.id} className="group transition-all hover:bg-white/[0.02]">
                                                 <td style={{ paddingLeft: 32 }}>
                                                     <div className="flex flex-col gap-1 py-4 group-hover:translate-x-1 transition-transform">
                                                         <span className="text-[14px] font-bold text-primary tracking-tight">{org.name}</span>
@@ -381,7 +376,7 @@ export default function AdminDashboardClient({
                                                         <div className="flex gap-2">
                                                             <button
                                                                 onClick={() => handleActivate(org.id, selectedPlans[org.id] || org.subscription_plan || 'monthly')}
-                                                                className={`glass-button !h-10 !px-5 !rounded-lg !text-[10px] font-bold tracking-wider transition-all ${isPending ? 'glass-button-primary shadow-md hover:shadow-lg' : 'hover:bg-brand-primary/10'}`}
+                                                                className={`glass-button !h-10 !px-5 !rounded-none !text-[10px] font-bold tracking-wider transition-all ${isPending ? 'glass-button-primary shadow-md hover:shadow-lg' : 'hover:bg-brand-primary/10'}`}
                                                                 disabled={loadingId === org.id}
                                                             >
                                                                 {loadingId === org.id && actionType === 'activate' ? <RefreshCw className="animate-spin" size={14} /> : <CheckCircle2 size={16} />}
@@ -390,7 +385,7 @@ export default function AdminDashboardClient({
                                                             {isPending && (
                                                                 <button
                                                                     onClick={() => handleReject(org.id)}
-                                                                    className="glass-button !h-10 !px-5 !rounded-lg !text-[10px] font-bold tracking-wider border-red-500/10 text-red-500 hover:bg-red-500/10"
+                                                                    className="glass-button !h-10 !px-5 !rounded-none !text-[10px] font-bold tracking-wider border-red-500/10 text-red-500 hover:bg-red-500/10"
                                                                     disabled={loadingId === org.id}
                                                                 >
                                                                     {loadingId === org.id && actionType === 'reject' ? <RefreshCw className="animate-spin" size={14} /> : <XCircle size={16} />}
@@ -424,7 +419,7 @@ export default function AdminDashboardClient({
                                 </div>
                                 <button
                                     onClick={() => setShowAddModal(true)}
-                                    className="glass-button glass-button-primary !h-12 !px-8 shadow-lg hover:shadow-xl transition-all !text-[11px] font-bold uppercase tracking-widest"
+                                    className="glass-button glass-button-primary !h-12 !px-8 shadow-lg hover:shadow-xl transition-all !text-[11px] font-bold uppercase tracking-widest !rounded-none"
                                 >
                                     <UserPlus size={16} /> Authorize Master
                                 </button>
@@ -441,8 +436,8 @@ export default function AdminDashboardClient({
                                 </thead>
                                 <tbody>
                                     {/* Root Admin – The Legend */}
-                                    <tr className="bg-brand-primary/[0.04] relative">
-                                        <td style={{ paddingLeft: 32 }}>
+                                    <tr className="bg-brand-primary/[0.03] border-l-4 border-brand-primary">
+                                        <td style={{ paddingLeft: 28 }}>
                                             <div className="flex items-center gap-5 py-5 group">
                                                 <div className="w-12 h-12 rounded-2xl bg-brand-primary flex items-center justify-center text-white text-sm font-bold shadow-lg border border-white/10">
                                                     JS
@@ -513,7 +508,7 @@ export default function AdminDashboardClient({
             {/* Grant Authorization Modal – Ultra Premium */}
             {showAddModal && (
                 <div className="glass-modal !p-0 items-center">
-                    <div className="glass-card glass-modal-card animate-scale-in !bg-bg-base overflow-hidden" style={{ width: '100%', maxWidth: 500, border: '1px solid rgba(79,142,247,0.2)' }}>
+                    <div className="glass-card glass-modal-card animate-scale-in !bg-bg-base overflow-hidden !rounded-none" style={{ width: '100%', maxWidth: 500, border: '1px solid rgba(79,142,247,0.2)' }}>
                         <div className="h-2 w-full bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
 
                         <div className="p-10 relative">
@@ -535,7 +530,7 @@ export default function AdminDashboardClient({
                                         <input
                                             type="email"
                                             required
-                                            className="glass-input !pl-16 h-16 text-lg font-bold !rounded-2xl bg-white/[0.02] relative z-10"
+                                            className="glass-input !pl-16 h-16 text-lg font-bold !rounded-none bg-white/[0.02] relative z-10"
                                             placeholder="admin@example.com"
                                             value={email}
                                             onChange={(e) => setEmail(e.target.value)}
@@ -545,16 +540,16 @@ export default function AdminDashboardClient({
                                     </div>
                                 </div>
 
-                                <div className="p-5 rounded-[20px] bg-amber-500/[0.03] border border-amber-500/10 flex gap-4">
-                                    <AlertTriangle className="text-amber-500 shrink-0" size={20} />
-                                    <p className="text-[10px] text-amber-500/80 leading-relaxed font-bold uppercase tracking-wider">
+                                <div className="p-5 rounded-none bg-brand-warning/[0.03] border border-brand-warning/10 flex gap-4">
+                                    <AlertTriangle className="text-brand-warning shrink-0" size={20} />
+                                    <p className="text-[10px] text-brand-warning/80 leading-relaxed font-bold uppercase tracking-wider">
                                         Warning: Authorized Masters gain control over organizational settings, billing, and system security protocols.
                                     </p>
                                 </div>
 
                                 <div className="flex gap-4 mt-2">
-                                    <button type="button" onClick={() => setShowAddModal(false)} className="glass-button flex-1 h-14 font-bold uppercase text-[11px] tracking-widest !rounded-xl">Abort</button>
-                                    <button type="submit" className="glass-button glass-button-primary flex-1 h-14 font-bold uppercase text-[11px] tracking-widest shadow-lg !rounded-xl" disabled={masterLoading}>
+                                    <button type="button" onClick={() => setShowAddModal(false)} className="glass-button flex-1 h-14 font-bold uppercase text-[11px] tracking-widest !rounded-none">Abort</button>
+                                    <button type="submit" className="glass-button glass-button-primary flex-1 h-14 font-bold uppercase text-[11px] tracking-widest shadow-lg !rounded-none" disabled={masterLoading}>
                                         {masterLoading ? (
                                             <div className="flex items-center gap-3">
                                                 <RefreshCw className="animate-spin" size={16} />
