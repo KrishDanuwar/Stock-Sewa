@@ -47,13 +47,13 @@ const GlassDropdown = ({ value, options, onChange, label }: { value: string, opt
             {isOpen && (
                 <>
                     <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
-                    <div className="absolute top-[62px] left-0 right-0 z-[70] glass-card !bg-[#0a0f1d]/90 backdrop-blur-3xl border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.6)] p-1.5 animate-fade-in-up !rounded-none min-w-[200px]">
+                    <div className="absolute top-[62px] left-0 right-0 z-[70] glass-card !bg-white/70 backdrop-blur-3xl border border-black/5 shadow-[0_25px_60px_rgba(0,0,0,0.15)] p-1.5 animate-fade-in-up !rounded-none min-w-[200px]">
                         <div className="flex flex-col gap-1">
                             {options.map((opt) => (
                                 <button
                                     key={opt.id}
                                     onClick={() => { onChange(opt.id); setIsOpen(false); }}
-                                    className={`w-full text-left px-5 py-3.5 rounded-none text-[11px] font-bold uppercase tracking-[0.2em] transition-all border-l-4 ${value === opt.id ? 'bg-brand-primary/20 border-brand-primary text-primary' : 'border-transparent text-muted/50 hover:bg-white/[0.04] hover:text-primary hover:border-white/20'}`}
+                                    className={`w-full text-left px-5 py-3.5 rounded-none text-[11px] font-bold uppercase tracking-[0.2em] transition-all border-l-4 ${value === opt.id ? 'bg-brand-primary/10 border-brand-primary text-brand-primary' : 'border-transparent text-black/60 hover:bg-black/[0.03] hover:text-black hover:border-black/5'}`}
                                 >
                                     {opt.name}
                                 </button>
