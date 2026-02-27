@@ -30,7 +30,11 @@ export async function getOrganization() {
         pan_vat: org.pan_vat || null,
         address: org.address || null,
         phone: org.phone || null,
-        logo_url: org.logo_url || null
+        logo_url: org.logo_url || null,
+        subscription_plan: org.subscription_plan,
+        subscription_status: org.subscription_status,
+        trial_ends_at: org.trial_ends_at,
+        subscription_ends_at: org.subscription_ends_at
     };
 }
 

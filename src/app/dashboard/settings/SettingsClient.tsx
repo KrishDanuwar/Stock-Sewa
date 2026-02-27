@@ -21,7 +21,21 @@ type Organization = {
     subscription_ends_at?: string | null;
 };
 
-export default function SettingsClient({ organization, userEmail }: { organization: Organization | null, userEmail: string }) {
+export default function SettingsClient({
+    organization,
+    userEmail,
+    subscriptionPlan,
+    subscriptionStatus,
+    trialEndsAt,
+    subscriptionEndsAt
+}: {
+    organization: Organization | null,
+    userEmail: string,
+    subscriptionPlan?: string,
+    subscriptionStatus?: string,
+    trialEndsAt?: string | null,
+    subscriptionEndsAt?: string | null
+}) {
     const [loading, setLoading] = useState(false);
     const [saving, setSaving] = useState(false);
     const [logoPreview, setLogoPreview] = useState<string | null>(organization?.logo_url || null);
@@ -270,11 +284,11 @@ export default function SettingsClient({ organization, userEmail }: { organizati
                             fontSize: '0.75rem',
                             fontWeight: 700,
                             textTransform: 'uppercase',
-                            background: organization?.subscription_status === 'active' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                            color: organization?.subscription_status === 'active' ? 'var(--brand-success)' : 'var(--brand-danger)',
-                            border: `1px solid ${organization?.subscription_status === 'active' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`
+                            background: (subscriptionStatus || organization?.subscription_status) === 'active' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                            color: (subscriptionStatus || organization?.subscription_status) === 'active' ? 'var(--brand-success)' : 'var(--brand-danger)',
+                            border: `1px solid ${(subscriptionStatus || organization?.subscription_status) === 'active' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}`
                         }}>
-                            {organization?.subscription_status || 'Inactive'}
+                            {subscriptionStatus || organization?.subscription_status || 'Inactive'}
                         </div>
                     </div>
 
@@ -282,11 +296,11 @@ export default function SettingsClient({ organization, userEmail }: { organizati
                         <div style={{ flex: 1 }}>
                             <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 8 }}>Current Plan</h3>
                             <p style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', marginBottom: 4 }}>
-                                {organization?.subscription_plan === 'trial' ? '3-Day Free Trial' : organization?.subscription_plan || 'No Active Plan'}
+                                {(subscriptionPlan || organization?.subscription_plan) === 'trial' ? '3-Day Free Trial' : (subscriptionPlan || organization?.subscription_plan) || 'No Active Plan'}
                             </p>
-                            {organization?.subscription_plan === 'trial' && organization?.trial_ends_at && (
+                            {((subscriptionPlan || organization?.subscription_plan) === 'trial') && (trialEndsAt || organization?.trial_ends_at) && (
                                 <p style={{ fontSize: '0.875rem', color: 'var(--brand-primary)', fontWeight: 500 }}>
-                                    Ends on: {new Date(organization.trial_ends_at).toLocaleDateString()}
+                                    Ends on: {new Date(trialEndsAt || organization!.trial_ends_at!).toLocaleDateString()}
                                 </p>
                             )}
                         </div>
