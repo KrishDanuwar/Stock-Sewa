@@ -51,14 +51,9 @@ export default function SidebarNav() {
     // Admin Section
     if (isAdmin) {
         navItems.push({
-            href: '/admin/management',
+            href: '/admin',
             icon: ShieldCheck,
-            label: 'Admin Panel'
-        });
-        navItems.push({
-            href: '/admin/subscriptions',
-            icon: Lock,
-            label: 'Subscriptions'
+            label: 'System Control'
         });
     }
 
