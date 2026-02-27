@@ -47,16 +47,18 @@ const GlassDropdown = ({ value, options, onChange, label }: { value: string, opt
             {isOpen && (
                 <>
                     <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
-                    <div className="absolute top-[64px] left-0 right-0 z-[70] glass-card !bg-[#0a0f1d]/95 backdrop-blur-2xl border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] p-1.5 animate-fade-in-up !rounded-none min-w-[200px]">
-                        {options.map((opt) => (
-                            <button
-                                key={opt.id}
-                                onClick={() => { onChange(opt.id); setIsOpen(false); }}
-                                className={`w-full text-left px-5 py-4 rounded-none text-[11px] font-bold uppercase tracking-[0.2em] transition-all mb-1 last:mb-0 border-l-4 ${value === opt.id ? 'bg-brand-primary/10 border-brand-primary text-primary' : 'border-transparent text-muted/60 hover:bg-white/[0.03] hover:text-primary hover:border-white/20'}`}
-                            >
-                                {opt.name}
-                            </button>
-                        ))}
+                    <div className="absolute top-[62px] left-0 right-0 z-[70] glass-card !bg-[#0a0f1d]/90 backdrop-blur-3xl border border-white/10 shadow-[0_25px_60px_rgba(0,0,0,0.6)] p-1.5 animate-fade-in-up !rounded-none min-w-[200px]">
+                        <div className="flex flex-col gap-1">
+                            {options.map((opt) => (
+                                <button
+                                    key={opt.id}
+                                    onClick={() => { onChange(opt.id); setIsOpen(false); }}
+                                    className={`w-full text-left px-5 py-3.5 rounded-none text-[11px] font-bold uppercase tracking-[0.2em] transition-all border-l-4 ${value === opt.id ? 'bg-brand-primary/20 border-brand-primary text-primary' : 'border-transparent text-muted/50 hover:bg-white/[0.04] hover:text-primary hover:border-white/20'}`}
+                                >
+                                    {opt.name}
+                                </button>
+                            ))}
+                        </div>
                     </div>
                 </>
             )}
@@ -242,7 +244,7 @@ export default function AdminDashboardClient({
 
 
             {/* --- Main High-Octane Content --- */}
-            <div className="glass-card min-h-[600px] border-t-0 p-0 overflow-hidden flex" style={{ padding: 0 }}>
+            <div className="glass-card min-h-[600px] border-t-0 p-0 flex" style={{ padding: 0 }}>
                 {/* --- Vertical Navigation Rail --- */}
                 <div className="w-[300px] bg-white/[0.015] border-r border-white/5 flex flex-col">
                     <div className="px-8 py-10 border-b border-white/5">
