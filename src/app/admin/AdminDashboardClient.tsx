@@ -34,12 +34,12 @@ const GlassDropdown = ({ value, options, onChange, label }: { value: string, opt
         <div className="relative">
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="glass-input h-10 flex items-center justify-between gap-2 !px-4 hover:border-brand-primary/50 transition-all cursor-pointer group !rounded-none"
+                className="glass-input !h-14 flex items-center justify-between gap-3 !px-5 hover:border-brand-primary/50 transition-all cursor-pointer group !rounded-none min-w-[200px]"
                 style={{ background: 'var(--glass-input-bg)' }}
             >
-                <div className="flex flex-col items-start">
-                    {label && <span className="text-[10px] font-bold text-muted uppercase tracking-wider leading-none mb-1.5">{label}</span>}
-                    <span className="text-[11px] font-bold text-primary uppercase tracking-wide">{selected.name}</span>
+                <div className="flex flex-col items-start gap-0.5">
+                    {label && <span className="text-[9px] font-bold text-muted uppercase tracking-[0.2em] leading-none mb-1 opacity-60">{label}</span>}
+                    <span className="text-[12px] font-bold text-primary uppercase tracking-wider">{selected.name}</span>
                 </div>
                 <ChevronDown size={14} className={`text-muted transition-transform group-hover:text-brand-primary ${isOpen ? 'rotate-180' : ''}`} />
             </button>
@@ -47,12 +47,12 @@ const GlassDropdown = ({ value, options, onChange, label }: { value: string, opt
             {isOpen && (
                 <>
                     <div className="fixed inset-0 z-40" onClick={() => setIsOpen(false)} />
-                    <div className="absolute top-12 left-0 right-0 z-50 glass-card !bg-bg-secondary border border-white/10 shadow-2xl p-1 animate-fade-in-up !rounded-none">
+                    <div className="absolute top-[60px] left-0 right-0 z-50 glass-card !bg-[#0f1629] border border-white/10 shadow-2xl p-1.5 animate-fade-in-up !rounded-none">
                         {options.map((opt) => (
                             <button
                                 key={opt.id}
                                 onClick={() => { onChange(opt.id); setIsOpen(false); }}
-                                className={`w-full text-left px-4 py-2.5 rounded-none text-[11px] font-bold uppercase tracking-wider transition-all mb-0.5 last:mb-0 ${value === opt.id ? 'bg-brand-primary/20 text-brand-primary' : 'text-muted hover:bg-white/5 hover:text-primary'}`}
+                                className={`w-full text-left px-5 py-3.5 rounded-none text-[11px] font-bold uppercase tracking-[0.15em] transition-all mb-1 last:mb-0 border-l-4 ${value === opt.id ? 'bg-brand-primary/15 border-brand-primary text-primary' : 'border-transparent text-muted hover:bg-white/5 hover:text-primary hover:border-white/10'}`}
                             >
                                 {opt.name}
                             </button>
