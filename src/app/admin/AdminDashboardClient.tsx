@@ -244,38 +244,44 @@ export default function AdminDashboardClient({
             {/* --- Main High-Octane Content --- */}
             <div className="glass-card min-h-[600px] border-t-0 p-0 overflow-hidden flex" style={{ padding: 0 }}>
                 {/* --- Vertical Navigation Rail --- */}
-                <div className="w-[300px] bg-white/[0.015] border-r border-white/5 p-8 flex flex-col gap-2">
-                    <div className="text-[10px] font-bold text-muted/40 uppercase tracking-[0.3em] mb-6 px-2">Command Modules</div>
-                    <button
-                        onClick={() => setActiveTab('subscriptions')}
-                        className={`group flex flex-col gap-1 px-6 py-5 rounded-2xl transition-all duration-500 text-left border ${activeTab === 'subscriptions' ? 'bg-brand-primary/10 border-brand-primary/30 text-white shadow-[0_0_20px_rgba(79,142,247,0.15)]' : 'border-transparent text-muted/60 hover:text-primary hover:bg-white/5'}`}
-                    >
-                        <div className="flex items-center gap-4">
-                            <CreditCard size={20} className={activeTab === 'subscriptions' ? 'text-brand-primary' : 'text-muted/40 group-hover:text-primary'} />
-                            <span className="text-[13px] font-bold uppercase tracking-wider">Financials</span>
-                        </div>
-                        <span className={`text-[10px] uppercase tracking-widest opacity-40 ml-9 font-medium transition-opacity ${activeTab === 'subscriptions' ? 'opacity-70 text-brand-primary' : ''}`}>Subscription Sync</span>
-                    </button>
-                    <button
-                        onClick={() => setActiveTab('masters')}
-                        className={`group flex flex-col gap-1 px-6 py-5 rounded-2xl transition-all duration-500 text-left border ${activeTab === 'masters' ? 'bg-brand-primary/10 border-brand-primary/30 text-white shadow-[0_0_20px_rgba(79,142,247,0.15)]' : 'border-transparent text-muted/60 hover:text-primary hover:bg-white/5'}`}
-                    >
-                        <div className="flex items-center gap-4">
-                            <Lock size={20} className={activeTab === 'masters' ? 'text-brand-primary' : 'text-muted/40 group-hover:text-primary'} />
-                            <span className="text-[13px] font-bold uppercase tracking-wider">Security</span>
-                        </div>
-                        <span className={`text-[10px] uppercase tracking-widest opacity-40 ml-9 font-medium transition-opacity ${activeTab === 'masters' ? 'opacity-70 text-brand-primary' : ''}`}>Master Access</span>
-                    </button>
+                <div className="w-[320px] bg-white/[0.01] border-r border-white/5 flex flex-col">
+                    <div className="p-8 border-b border-white/5">
+                        <div className="text-[10px] font-black text-muted/30 uppercase tracking-[0.4em]">Command Modules</div>
+                    </div>
+                    <div className="flex flex-col">
+                        <button
+                            onClick={() => setActiveTab('subscriptions')}
+                            className={`group flex flex-col gap-1 px-8 py-5 transition-all duration-300 text-left border-l-4 ${activeTab === 'subscriptions' ? 'bg-brand-primary/[0.07] border-brand-primary text-white shadow-[inset_0_0_20px_rgba(79,142,247,0.05)]' : 'border-transparent text-muted/50 hover:text-primary hover:bg-white/[0.03]'}`}
+                        >
+                            <div className="flex items-center gap-4">
+                                <CreditCard size={20} className={activeTab === 'subscriptions' ? 'text-brand-primary' : 'text-muted/40 group-hover:text-primary'} />
+                                <span className="text-[13px] font-bold uppercase tracking-widest">Financials</span>
+                            </div>
+                            <span className={`text-[10px] uppercase tracking-widest opacity-40 ml-9 font-bold transition-all ${activeTab === 'subscriptions' ? 'opacity-90 text-brand-primary translate-x-1' : 'group-hover:translate-x-1'}`}>Subscription Sync</span>
+                        </button>
+                        <button
+                            onClick={() => setActiveTab('masters')}
+                            className={`group flex flex-col gap-1 px-8 py-5 transition-all duration-300 text-left border-l-4 ${activeTab === 'masters' ? 'bg-brand-primary/[0.07] border-brand-primary text-white shadow-[inset_0_0_20px_rgba(79,142,247,0.05)]' : 'border-transparent text-muted/50 hover:text-primary hover:bg-white/[0.03]'}`}
+                        >
+                            <div className="flex items-center gap-4">
+                                <Lock size={20} className={activeTab === 'masters' ? 'text-brand-primary' : 'text-muted/40 group-hover:text-primary'} />
+                                <span className="text-[13px] font-bold uppercase tracking-widest">Security</span>
+                            </div>
+                            <span className={`text-[10px] uppercase tracking-widest opacity-40 ml-9 font-bold transition-all ${activeTab === 'masters' ? 'opacity-90 text-brand-primary translate-x-1' : 'group-hover:translate-x-1'}`}>Master Access</span>
+                        </button>
 
-                    <div className="mt-auto p-5 rounded-2xl bg-white/[0.02] border border-white/5 relative overflow-hidden">
-                        <div className="absolute top-0 left-0 w-1 h-full bg-brand-primary/20" />
-                        <div className="flex items-center gap-2 mb-2.5">
-                            <ShieldAlert size={14} className="text-brand-primary/60" />
-                            <span className="text-[11px] font-bold text-muted/60 uppercase tracking-widest">Master Mode</span>
+                    </div>
+
+                    <div className="mt-auto p-8 border-t border-white/5 bg-white/[0.005]">
+                        <div className="flex flex-col gap-4">
+                            <div className="flex items-center gap-3">
+                                <ShieldAlert size={16} className="text-brand-primary/40" />
+                                <span className="text-[11px] font-black text-muted/40 uppercase tracking-[0.2em]">Genesis Active</span>
+                            </div>
+                            <p className="text-[10px] text-muted/30 leading-relaxed uppercase tracking-widest font-bold">
+                                Root-level encryption protocol initialized. All systems authorized.
+                            </p>
                         </div>
-                        <p className="text-[10px] text-muted/40 leading-relaxed uppercase tracking-widest font-medium">
-                            Genesis access confirmed. All protocols authorized.
-                        </p>
                     </div>
                 </div>
 
