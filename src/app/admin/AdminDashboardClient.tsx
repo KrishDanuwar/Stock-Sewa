@@ -1,15 +1,14 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { addAdminEmail, removeAdminEmail } from '@/lib/actions/admin-management';
 import { activateSubscription, rejectSubscription } from '@/lib/actions/subscriptions';
 import { toast } from 'sonner';
 import {
-    ShieldCheck, UserPlus, Trash2, Mail, Lock, AlertCircle, Info,
-    CheckCircle2, ArrowLeft, History, Users, ShieldAlert, X,
-    CreditCard, Search, Filter, RefreshCw, XCircle, ChevronDown, Activity,
-    Zap, Gem, Crown, Check, AlertTriangle
+    ShieldCheck, UserPlus, Trash2, Mail, Lock, CheckCircle2,
+    ArrowLeft, Users, X, CreditCard, Search, Filter, RefreshCw,
+    XCircle, ChevronDown, Zap, Crown, AlertTriangle
 } from 'lucide-react';
 import { PLANS } from '@/config/plans';
 
@@ -25,40 +24,42 @@ interface Org {
     created_at: string;
 }
 
-// --- Custom Glass Dropdown Component ---
-const GlassDropdown = ({ value, options, onChange, label }: { value: string, options: { id: string, name: string }[], onChange: (val: string) => void, label?: string }) => {
+// --- Glass Select Dropdown ---
+const GlassSelect = ({ value, options, onChange, label }: { value: string; options: { id: string; name: string }[]; onChange: (val: string) => void; label?: string }) => {
     const [isOpen, setIsOpen] = useState(false);
-    const selected = options.find(o => o.id === value) || options[0] || { id: 'none', name: 'Select Plan' };
+    const selected = options.find(o => o.id === value) || options[0] || { id: 'none', name: 'Select...' };
 
     return (
-        <div className="relative">
+        <div style={{ position: 'relative' }}>
+            {label && <label className="glass-label" style={{ marginBottom: 6, display: 'block' }}>{label}</label>}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="glass-input !h-14 flex items-center justify-between gap-3 !px-5 hover:border-brand-primary/50 transition-all cursor-pointer group !rounded-none min-w-[200px]"
-                style={{ background: 'var(--glass-input-bg)' }}
+                className="glass-input"
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', cursor: 'pointer', width: '100%', textAlign: 'left', minWidth: 180 }}
             >
-                <div className="flex flex-col items-start gap-1 py-1">
-                    {label && <span className="text-[9px] font-bold text-muted uppercase tracking-[0.1em] leading-none opacity-60 truncate w-full">{label}</span>}
-                    <span className="text-[12px] font-bold text-primary uppercase tracking-wider truncate">{selected.name}</span>
-                </div>
-                <ChevronDown size={14} className={`text-muted transition-transform shrink-0 group-hover:text-brand-primary ${isOpen ? 'rotate-180' : ''}`} />
+                <span style={{ fontWeight: 600, fontSize: '0.8125rem' }}>{selected.name}</span>
+                <ChevronDown size={14} style={{ color: 'var(--text-muted)', transition: 'transform 0.2s', transform: isOpen ? 'rotate(180deg)' : 'none' }} />
             </button>
 
             {isOpen && (
                 <>
-                    <div className="fixed inset-0 z-[60]" onClick={() => setIsOpen(false)} />
-                    <div className="absolute top-[62px] left-0 right-0 z-[70] glass-card !bg-white/70 backdrop-blur-3xl border border-black/5 shadow-[0_25px_60px_rgba(0,0,0,0.15)] p-1.5 animate-fade-in-up !rounded-none min-w-[200px]">
-                        <div className="flex flex-col gap-1">
-                            {options.map((opt) => (
-                                <button
-                                    key={opt.id}
-                                    onClick={() => { onChange(opt.id); setIsOpen(false); }}
-                                    className={`w-full text-left px-5 py-3.5 rounded-none text-[11px] font-bold uppercase tracking-[0.2em] transition-all border-l-4 ${value === opt.id ? 'bg-brand-primary/10 border-brand-primary text-brand-primary' : 'border-transparent text-black/60 hover:bg-black/[0.03] hover:text-black hover:border-black/5'}`}
-                                >
-                                    {opt.name}
-                                </button>
-                            ))}
-                        </div>
+                    <div style={{ position: 'fixed', inset: 0, zIndex: 60 }} onClick={() => setIsOpen(false)} />
+                    <div className="glass-card" style={{ position: 'absolute', top: label ? 72 : 46, left: 0, right: 0, zIndex: 70, padding: 4, boxShadow: '0 20px 50px rgba(0,0,0,0.15)' }}>
+                        {options.map((opt) => (
+                            <button
+                                key={opt.id}
+                                onClick={() => { onChange(opt.id); setIsOpen(false); }}
+                                style={{
+                                    display: 'block', width: '100%', textAlign: 'left', padding: '10px 14px',
+                                    borderRadius: 8, border: 'none', cursor: 'pointer', fontSize: '0.8125rem',
+                                    fontWeight: value === opt.id ? 700 : 500, transition: 'all 0.15s',
+                                    background: value === opt.id ? 'rgba(79, 142, 247, 0.1)' : 'transparent',
+                                    color: value === opt.id ? 'var(--brand-primary)' : 'var(--text-primary)',
+                                }}
+                            >
+                                {opt.name}
+                            </button>
+                        ))}
                     </div>
                 </>
             )}
@@ -70,8 +71,8 @@ export default function AdminDashboardClient({
     initialAdmins,
     initialOrgs
 }: {
-    initialAdmins: AdminEntry[],
-    initialOrgs: Org[]
+    initialAdmins: AdminEntry[];
+    initialOrgs: Org[];
 }) {
     const router = useRouter();
     const [activeTab, setActiveTab] = useState<'subscriptions' | 'masters'>('subscriptions');
@@ -171,414 +172,375 @@ export default function AdminDashboardClient({
     const pendingCount = orgs.filter(o => o.last_transaction_id && o.subscription_status !== 'active').length;
     const totalMasters = initialAdmins.length + 1;
 
+    const tabs = [
+        { id: 'subscriptions' as const, label: 'Subscriptions', icon: CreditCard },
+        { id: 'masters' as const, label: 'Access Control', icon: Lock },
+    ];
+
     return (
         <div className="animate-fade-in-up">
-            {/* --- Premium Header --- */}
-            <div className="page-header" style={{ marginBottom: 40 }}>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-                        <button
-                            onClick={() => router.back()}
-                            className="glass-button h-12 w-12 !p-0 !rounded-none shadow-xl hover:scale-110 active:scale-95 transition-all"
-                        >
-                            <ArrowLeft size={22} />
-                        </button>
-                        <div>
-                            <div className="flex items-center gap-3">
-                                <h1 className="page-title !text-3xl font-bold">System Control</h1>
-                                <span className="bg-brand-primary/10 text-brand-primary text-[10px] font-bold px-2.5 py-1 rounded-lg border border-brand-primary/20 uppercase tracking-widest">Master</span>
-                            </div>
-                            <p className="page-subtitle !text-[13px] font-medium text-muted/80 mt-1">
-                                Core Infrastructure Protocol v2.5.0
-                            </p>
+            {/* Header */}
+            <div className="page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <button onClick={() => router.back()} className="glass-button" style={{ width: 44, height: 44, padding: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        <ArrowLeft size={20} />
+                    </button>
+                    <div>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                            <h1 className="page-title">System Control</h1>
+                            <span className="badge badge-info" style={{ fontSize: '0.625rem', fontWeight: 700 }}>ADMIN</span>
                         </div>
+                        <p className="page-subtitle">Manage subscriptions and admin access</p>
                     </div>
                 </div>
             </div>
 
-            {/* --- Premium Stats Architecture --- */}
-            <div className="grid-stats">
-                <div className="glass-card !rounded-none relative overflow-hidden group border-white/5 hover:border-brand-primary/30 transition-all duration-300" style={{ padding: '24px' }}>
-                    <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-none bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/20">
-                            <Zap size={28} />
+            {/* Stat Cards */}
+            <div className="grid-stats" style={{ marginBottom: 24 }}>
+                <div className="glass-card" style={{ padding: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+                        <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>Pending Requests</div>
+                        <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(245, 158, 11, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Zap size={18} color="var(--brand-warning)" />
                         </div>
-                        <div>
-                            <div className="text-[12px] font-semibold text-muted uppercase tracking-wider mb-1">Pending Syncs</div>
-                            <div className={`text-2xl font-bold ${pendingCount > 0 ? 'text-brand-warning' : 'text-primary'}`}>
-                                {pendingCount.toString().padStart(2, '0')}
-                            </div>
-                        </div>
+                    </div>
+                    <div style={{ fontSize: '1.75rem', fontWeight: 700, color: pendingCount > 0 ? 'var(--brand-warning)' : 'var(--text-primary)' }}>
+                        {pendingCount}
                     </div>
                 </div>
 
-                <div className="glass-card !rounded-none relative overflow-hidden group border-white/5 hover:border-purple-500/30 transition-all duration-300" style={{ padding: '24px' }}>
-                    <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-none bg-purple-500/10 flex items-center justify-center text-purple-500 border border-purple-500/20">
-                            <Crown size={28} />
-                        </div>
-                        <div>
-                            <div className="text-[12px] font-semibold text-muted uppercase tracking-wider mb-1">Active Masters</div>
-                            <div className="text-2xl font-bold text-primary">
-                                {totalMasters.toString().padStart(2, '0')}
-                            </div>
+                <div className="glass-card" style={{ padding: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+                        <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>Total Organizations</div>
+                        <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(79, 142, 247, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Users size={18} color="var(--brand-primary)" />
                         </div>
                     </div>
+                    <div style={{ fontSize: '1.75rem', fontWeight: 700 }}>{orgs.length}</div>
                 </div>
 
-                <div className="glass-card !rounded-none relative overflow-hidden group border-white/5 hover:border-emerald-500/30 transition-all duration-300" style={{ padding: '24px' }}>
-                    <div className="flex items-center gap-5">
-                        <div className="w-14 h-14 rounded-none bg-emerald-500/10 flex items-center justify-center text-emerald-500 border border-emerald-500/20">
-                            <ShieldCheck size={28} />
-                        </div>
-                        <div>
-                            <div className="text-[12px] font-semibold text-muted uppercase tracking-wider mb-1">Security Grid</div>
-                            <div className="text-xl font-bold text-emerald-500 uppercase tracking-tight">
-                                ROOT-LEVEL
-                            </div>
+                <div className="glass-card" style={{ padding: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+                        <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>Admin Users</div>
+                        <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(139, 92, 246, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <Crown size={18} color="#8b5cf6" />
                         </div>
                     </div>
+                    <div style={{ fontSize: '1.75rem', fontWeight: 700 }}>{totalMasters}</div>
+                </div>
+
+                <div className="glass-card" style={{ padding: 20 }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 16 }}>
+                        <div style={{ fontSize: '0.875rem', fontWeight: 600 }}>Security Status</div>
+                        <div style={{ width: 36, height: 36, borderRadius: 10, backgroundColor: 'rgba(16, 185, 129, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <ShieldCheck size={18} color="var(--brand-success)" />
+                        </div>
+                    </div>
+                    <div style={{ fontSize: '1.125rem', fontWeight: 700, color: 'var(--brand-success)' }}>Active</div>
                 </div>
             </div>
 
-
-
-            {/* --- Main High-Octane Content --- */}
-            <div className="glass-card min-h-[600px] border-t-0 p-0 flex" style={{ padding: 0 }}>
-                {/* --- Vertical Navigation Rail --- */}
-                <div className="w-[300px] bg-white/[0.015] border-r border-white/5 flex flex-col">
-                    <div className="px-8 py-10 border-b border-white/5">
-                        <div className="text-[10px] font-bold text-muted uppercase tracking-[0.4em]">System Modules</div>
-                    </div>
-                    <div className="flex flex-col py-4">
+            {/* Tab Switcher */}
+            <div className="glass-card" style={{ padding: 0, marginBottom: 24 }}>
+                <div style={{ display: 'flex', borderBottom: '1px solid var(--glass-border)' }}>
+                    {tabs.map(tab => (
                         <button
-                            onClick={() => setActiveTab('subscriptions')}
-                            className={`group flex flex-col gap-1.5 px-8 py-7 transition-all duration-300 text-left border-l-4 ${activeTab === 'subscriptions' ? 'bg-brand-primary/[0.08] border-brand-primary text-primary shadow-[inset_10px_0_30px_rgba(79,142,247,0.03)]' : 'border-transparent text-muted hover:text-primary hover:bg-white/[0.02]'}`}
+                            key={tab.id}
+                            onClick={() => setActiveTab(tab.id)}
+                            style={{
+                                flex: 1, padding: '16px 24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 10,
+                                border: 'none', cursor: 'pointer', fontSize: '0.875rem', fontWeight: 600, transition: 'all 0.2s',
+                                background: activeTab === tab.id ? 'rgba(79, 142, 247, 0.08)' : 'transparent',
+                                color: activeTab === tab.id ? 'var(--brand-primary)' : 'var(--text-secondary)',
+                                borderBottom: activeTab === tab.id ? '2px solid var(--brand-primary)' : '2px solid transparent',
+                            }}
                         >
-                            <div className="flex items-center gap-5">
-                                <CreditCard size={18} className={activeTab === 'subscriptions' ? 'text-brand-primary scale-110 transition-transform' : 'text-muted group-hover:text-primary'} />
-                                <span className={`text-[13px] font-bold uppercase tracking-[0.1em] ${activeTab === 'subscriptions' ? 'text-primary' : ''}`}>Financials</span>
-                            </div>
-                            <span className={`text-[10px] uppercase tracking-widest ml-[36px] font-bold opacity-30 ${activeTab === 'subscriptions' ? 'text-brand-primary opacity-80' : ''}`}>Sync Protocols</span>
+                            <tab.icon size={18} />
+                            {tab.label}
+                            {tab.id === 'subscriptions' && pendingCount > 0 && (
+                                <span style={{
+                                    minWidth: 20, height: 20, borderRadius: 10, backgroundColor: 'var(--brand-warning)',
+                                    color: 'white', fontSize: '0.6875rem', fontWeight: 700, display: 'flex',
+                                    alignItems: 'center', justifyContent: 'center', padding: '0 6px'
+                                }}>
+                                    {pendingCount}
+                                </span>
+                            )}
                         </button>
-                        <button
-                            onClick={() => setActiveTab('masters')}
-                            className={`group flex flex-col gap-1.5 px-8 py-7 transition-all duration-300 text-left border-l-4 ${activeTab === 'masters' ? 'bg-brand-primary/[0.08] border-brand-primary text-primary shadow-[inset_10px_0_30px_rgba(79,142,247,0.03)]' : 'border-transparent text-muted hover:text-primary hover:bg-white/[0.02]'}`}
-                        >
-                            <div className="flex items-center gap-5">
-                                <Lock size={18} className={activeTab === 'masters' ? 'text-brand-primary scale-110 transition-transform' : 'text-muted group-hover:text-primary'} />
-                                <span className={`text-[13px] font-bold uppercase tracking-[0.1em] ${activeTab === 'masters' ? 'text-primary' : ''}`}>Security</span>
-                            </div>
-                            <span className={`text-[10px] uppercase tracking-widest ml-[34px] font-bold opacity-30 ${activeTab === 'masters' ? 'text-brand-primary opacity-80' : ''}`}>Access Control</span>
-                        </button>
-                    </div>
-
-                    <div className="mt-auto p-10 border-t border-white/5 bg-white/[0.01]">
-                        <div className="flex flex-col gap-5">
-                            <div className="flex items-center gap-4">
-                                <ShieldAlert size={16} className="text-brand-primary/60" />
-                                <span className="text-[11px] font-bold text-muted uppercase tracking-[0.2em]">Genesis Active</span>
-                            </div>
-                            <p className="text-[11px] text-muted/40 leading-relaxed uppercase tracking-[0.2em] font-bold">
-                                Root access authorized. <br />
-                                System integrity verified.
-                            </p>
-                        </div>
-                    </div>
+                    ))}
                 </div>
+            </div>
 
-                {/* --- Content Area --- */}
-                <div className="flex-1 flex flex-col min-w-0">
-                    {activeTab === 'subscriptions' ? (
-                        <>
-                            <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
-                                <div className="flex flex-col gap-1.5">
-                                    <h2 className="text-xl font-bold uppercase tracking-[0.15em] text-primary">Financial Protocols</h2>
-                                    <p className="text-[11px] text-muted uppercase tracking-[0.2em] font-bold opacity-40">Manual Subscription Synchronization</p>
-                                </div>
-                            </div>
+            {/* Content */}
+            {activeTab === 'subscriptions' ? (
+                <div className="glass-card" style={{ padding: 0 }}>
+                    {/* Search & Filter Bar */}
+                    <div style={{ padding: 20, borderBottom: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', gap: 12 }}>
+                        <div style={{ position: 'relative', flex: 1, maxWidth: 400 }}>
+                            <Search size={15} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-secondary)' }} />
+                            <input
+                                className="glass-input"
+                                style={{ paddingLeft: 36 }}
+                                placeholder="Search shop or transaction ID..."
+                                value={subSearch}
+                                onChange={(e) => setSubSearch(e.target.value)}
+                            />
+                        </div>
+                        <button
+                            onClick={() => setShowOnlyPending(!showOnlyPending)}
+                            className={`glass-button ${showOnlyPending ? 'glass-button-primary' : ''}`}
+                            style={{ fontSize: '0.8125rem' }}
+                        >
+                            <Filter size={14} /> {showOnlyPending ? 'Pending Only' : 'Show All'}
+                        </button>
+                    </div>
 
-                            <div className="p-8 border-b border-white/5 bg-white/[0.005]">
-                                <div className="flex items-center gap-6">
-                                    <div className="relative flex-1 max-w-md group">
-                                        <Search className="absolute left-5 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-brand-primary transition-colors" size={18} />
-                                        <input
-                                            className="glass-input !pl-14 !h-14 !text-sm !font-semibold !rounded-none border-white/5 focus:border-brand-primary/50"
-                                            placeholder="Find shop or transaction ID..."
-                                            value={subSearch}
-                                            onChange={(e) => setSubSearch(e.target.value)}
-                                        />
-                                    </div>
-                                    <button
-                                        onClick={() => setShowOnlyPending(!showOnlyPending)}
-                                        className={`glass-button h-14 px-8 !rounded-none !text-[10px] font-black tracking-[0.2em] transition-all ${showOnlyPending ? 'glass-button-primary' : 'bg-white/5 text-muted hover:text-primary'}`}
-                                    >
-                                        <Filter size={16} /> {showOnlyPending ? 'PENDING SYNC' : 'ALL ENTRIES'}
-                                    </button>
-                                </div>
-                            </div>
+                    {/* Table */}
+                    <div style={{ overflowX: 'auto' }}>
+                        <table className="glass-table">
+                            <thead>
+                                <tr>
+                                    <th>Organization</th>
+                                    <th>Transaction ID</th>
+                                    <th>Status</th>
+                                    <th>Plan</th>
+                                    <th style={{ textAlign: 'right' }}>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {filteredOrgs.length > 0 ? filteredOrgs.map(org => {
+                                    const isPending = org.last_transaction_id && org.subscription_status !== 'active';
+                                    const planOptions = Object.values(PLANS).filter(p => p.id !== 'trial').map(p => ({ id: p.id, name: p.name }));
 
-                            <table className="glass-table !table-fixed">
-                                <thead>
-                                    <tr>
-                                        <th style={{ paddingLeft: 32, width: '30%' }}>Organization / Shop</th>
-                                        <th style={{ width: '25%' }}>Transaction ID</th>
-                                        <th style={{ width: '15%' }}>Status Details</th>
-                                        <th style={{ textAlign: 'right', paddingRight: 32, width: '30%' }}>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredOrgs.length > 0 ? filteredOrgs.map(org => {
-                                        const isPending = org.last_transaction_id && org.subscription_status !== 'active';
-                                        const planOptions = Object.values(PLANS).filter(p => p.id !== 'trial').map(p => ({ id: p.id, name: p.name.toUpperCase() }));
-
-                                        return (
-                                            <tr key={org.id} className="group transition-all hover:bg-white/[0.02]">
-                                                <td style={{ paddingLeft: 32 }}>
-                                                    <div className="flex flex-col gap-1 py-4 group-hover:translate-x-1 transition-transform">
-                                                        <span className="text-[14px] font-bold text-primary tracking-tight">{org.name}</span>
-                                                        <span className="text-[10px] text-muted/60 font-mono">{org.id}</span>
+                                    return (
+                                        <tr key={org.id}>
+                                            <td>
+                                                <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                                    <span style={{ fontWeight: 600 }}>{org.name}</span>
+                                                    <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', fontFamily: 'monospace' }}>{org.id.slice(0, 8)}...</span>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                {org.last_transaction_id ? (
+                                                    <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+                                                        <code style={{ padding: '4px 8px', borderRadius: 6, background: 'rgba(79, 142, 247, 0.08)', color: 'var(--brand-primary)', fontSize: '0.75rem', fontWeight: 600, width: 'fit-content' }}>
+                                                            {org.last_transaction_id}
+                                                        </code>
+                                                        <span style={{ fontSize: '0.625rem', color: 'var(--brand-warning)', fontWeight: 600 }}>⏳ Needs verification</span>
                                                     </div>
-                                                </td>
-                                                <td>
-                                                    {org.last_transaction_id ? (
-                                                        <div className="flex flex-col gap-1.5 py-4">
-                                                            <code className="bg-brand-primary/5 border border-brand-primary/10 px-3 py-1.5 rounded-lg text-brand-primary/90 font-bold tracking-wider text-[11px] w-fit shadow-sm">
-                                                                {org.last_transaction_id}
-                                                            </code>
-                                                            <div className="flex items-center gap-2">
-                                                                <div className="h-1.5 w-1.5 rounded-full bg-amber-500" />
-                                                                <span className="text-[10px] text-amber-500/80 font-bold uppercase tracking-wider leading-none">Manual Verification Required</span>
-                                                            </div>
-                                                        </div>
-                                                    ) : <span className="text-[10px] text-muted/20 font-bold uppercase tracking-widest">—</span>}
-                                                </td>
-                                                <td>
-                                                    <div className="flex flex-col gap-1 py-4">
-                                                        <div className="flex items-center gap-2">
-                                                            <div className={`h-2 w-2 rounded-full ${org.subscription_status === 'active' ? 'bg-brand-success shadow-[0_0_10px_var(--brand-success)]' : 'bg-brand-warning shadow-[0_0_10px_#f59e0b]'}`} />
-                                                            <span className={`text-[11px] font-bold uppercase tracking-wider ${org.subscription_status === 'active' ? 'text-emerald-400' : 'text-brand-warning'}`}>
-                                                                {org.subscription_status}
-                                                            </span>
-                                                        </div>
-                                                        <span className="text-[10px] text-muted font-semibold uppercase tracking-tight opacity-70">
-                                                            {org.subscription_ends_at ? `Exp: ${new Date(org.subscription_ends_at).toLocaleDateString()}` : org.trial_ends_at ? `Trial: ${new Date(org.trial_ends_at).toLocaleDateString()}` : 'Indefinite'}
+                                                ) : (
+                                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem' }}>—</span>
+                                                )}
+                                            </td>
+                                            <td>
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                    <div style={{
+                                                        width: 8, height: 8, borderRadius: '50%',
+                                                        backgroundColor: org.subscription_status === 'active' ? 'var(--brand-success)' : 'var(--brand-warning)',
+                                                        boxShadow: org.subscription_status === 'active' ? '0 0 8px var(--brand-success)' : '0 0 8px #f59e0b'
+                                                    }} />
+                                                    <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                        <span className={`badge ${org.subscription_status === 'active' ? 'badge-success' : 'badge-warning'}`} style={{ fontSize: '0.6875rem' }}>
+                                                            {org.subscription_status.toUpperCase()}
+                                                        </span>
+                                                        <span style={{ fontSize: '0.625rem', color: 'var(--text-muted)', marginTop: 2 }}>
+                                                            {org.subscription_ends_at ? `Exp: ${new Date(org.subscription_ends_at).toLocaleDateString()}` :
+                                                                org.trial_ends_at ? `Trial: ${new Date(org.trial_ends_at).toLocaleDateString()}` : ''}
                                                         </span>
                                                     </div>
-                                                </td>
-                                                <td style={{ textAlign: 'right', paddingRight: 32 }}>
-                                                    <div className="flex justify-end items-center gap-4 py-3">
-                                                        <div className="w-48">
-                                                            <GlassDropdown
-                                                                label="Activation Tier"
-                                                                value={selectedPlans[org.id] || (org.subscription_plan === 'trial' ? 'monthly' : org.subscription_plan) || 'monthly'}
-                                                                options={planOptions}
-                                                                onChange={(val) => setSelectedPlans(prev => ({ ...prev, [org.id]: val }))}
-                                                            />
-                                                        </div>
-                                                        <div className="flex gap-2">
-                                                            <button
-                                                                onClick={() => handleActivate(org.id, selectedPlans[org.id] || org.subscription_plan || 'monthly')}
-                                                                className={`glass-button !h-10 !px-5 !rounded-none !text-[10px] font-bold tracking-wider transition-all ${isPending ? 'glass-button-primary shadow-md hover:shadow-lg' : 'hover:bg-brand-primary/10'}`}
-                                                                disabled={loadingId === org.id}
-                                                            >
-                                                                {loadingId === org.id && actionType === 'activate' ? <RefreshCw className="animate-spin" size={14} /> : <CheckCircle2 size={16} />}
-                                                                ACTIVATE
-                                                            </button>
-                                                            {isPending && (
-                                                                <button
-                                                                    onClick={() => handleReject(org.id)}
-                                                                    className="glass-button !h-10 !px-5 !rounded-none !text-[10px] font-bold tracking-wider border-red-500/10 text-red-500 hover:bg-red-500/10"
-                                                                    disabled={loadingId === org.id}
-                                                                >
-                                                                    {loadingId === org.id && actionType === 'reject' ? <RefreshCw className="animate-spin" size={14} /> : <XCircle size={16} />}
-                                                                    REJECT
-                                                                </button>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        );
-                                    }) : (
-                                        <tr>
-                                            <td colSpan={4} className="py-32 text-center bg-white/[0.005]">
-                                                <div className="flex flex-col items-center gap-4 opacity-10">
-                                                    <Activity size={48} className="text-brand-primary" />
-                                                    <p className="text-sm font-bold uppercase tracking-[0.4em]">No Data Flow</p>
+                                                </div>
+                                            </td>
+                                            <td>
+                                                <GlassSelect
+                                                    value={selectedPlans[org.id] || (org.subscription_plan === 'trial' ? 'monthly' : org.subscription_plan) || 'monthly'}
+                                                    options={planOptions}
+                                                    onChange={(val) => setSelectedPlans(prev => ({ ...prev, [org.id]: val }))}
+                                                />
+                                            </td>
+                                            <td style={{ textAlign: 'right' }}>
+                                                <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
+                                                    <button
+                                                        onClick={() => handleActivate(org.id, selectedPlans[org.id] || org.subscription_plan || 'monthly')}
+                                                        className={`glass-button ${isPending ? 'glass-button-primary' : ''}`}
+                                                        style={{ fontSize: '0.75rem', padding: '8px 16px' }}
+                                                        disabled={loadingId === org.id}
+                                                    >
+                                                        {loadingId === org.id && actionType === 'activate' ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
+                                                        Activate
+                                                    </button>
+                                                    {isPending && (
+                                                        <button
+                                                            onClick={() => handleReject(org.id)}
+                                                            className="glass-button"
+                                                            style={{ fontSize: '0.75rem', padding: '8px 16px', color: 'var(--brand-danger)', borderColor: 'rgba(239, 68, 68, 0.2)' }}
+                                                            disabled={loadingId === org.id}
+                                                        >
+                                                            {loadingId === org.id && actionType === 'reject' ? <RefreshCw size={14} className="animate-spin" /> : <XCircle size={14} />}
+                                                            Reject
+                                                        </button>
+                                                    )}
                                                 </div>
                                             </td>
                                         </tr>
-                                    )}
-                                </tbody>
-                            </table>
-                        </>
-                    ) : (
-                        <>
-                            <div className="p-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
-                                <div className="flex flex-col gap-1.5">
-                                    <h2 className="text-xl font-bold uppercase tracking-[0.15em] text-primary">Security Protocols</h2>
-                                    <p className="text-[11px] text-muted/40 uppercase tracking-widest font-bold">Infrastructure Master Access Management</p>
-                                </div>
-                                <button
-                                    onClick={() => setShowAddModal(true)}
-                                    className="glass-button glass-button-primary !h-12 !px-8 shadow-lg hover:shadow-xl transition-all !text-[11px] font-bold uppercase tracking-widest !rounded-none"
-                                >
-                                    <UserPlus size={16} /> Authorize Master
-                                </button>
-                            </div>
-
-                            <table className="glass-table">
-                                <thead>
+                                    );
+                                }) : (
                                     <tr>
-                                        <th style={{ paddingLeft: 32, width: '40%' }}>Administrator / Master</th>
-                                        <th style={{ textAlign: 'center', width: '25%' }}>Access Level</th>
-                                        <th style={{ textAlign: 'center', width: '25%' }}>Authorized On</th>
-                                        <th style={{ textAlign: 'right', paddingRight: 32, width: '10%' }}>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {/* Root Admin – The Legend */}
-                                    <tr className="bg-brand-primary/[0.03] border-l-4 border-brand-primary">
-                                        <td style={{ paddingLeft: 28 }}>
-                                            <div className="flex items-center gap-5 py-5 group">
-                                                <div className="w-12 h-12 rounded-2xl bg-brand-primary flex items-center justify-center text-white text-sm font-bold shadow-lg border border-white/10">
-                                                    JS
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <span className="text-base font-bold text-primary flex items-center gap-2 group-hover:translate-x-1 transition-transform">
-                                                        junsangsingh@gmail.com <CheckCircle2 size={16} className="text-brand-primary" />
-                                                    </span>
-                                                    <span className="text-[10px] text-brand-primary font-bold uppercase tracking-wider">System Owner</span>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td style={{ textAlign: 'center' }}>
-                                            <span className="bg-brand-primary/10 text-brand-primary text-[10px] font-bold px-3 py-1.5 rounded-lg border border-brand-primary/20 uppercase tracking-widest shadow-sm">
-                                                ROOT ADMIN
-                                            </span>
-                                        </td>
-                                        <td style={{ textAlign: 'center' }}>
-                                            <div className="flex flex-col items-center">
-                                                <span className="text-[11px] font-bold text-primary uppercase tracking-tight">System Launch</span>
-                                                <span className="text-[10px] text-muted font-medium uppercase tracking-wider opacity-60">FEB 2026</span>
-                                            </div>
-                                        </td>
-                                        <td style={{ textAlign: 'right', paddingRight: 32 }}>
-                                            <div className="flex justify-end pr-4 opacity-40"><Lock size={20} /></div>
+                                        <td colSpan={5} style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
+                                            <CreditCard size={36} style={{ margin: '0 auto 10px', opacity: 0.4 }} />
+                                            <p style={{ fontSize: '0.875rem' }}>{showOnlyPending ? 'No pending requests' : 'No organizations found'}</p>
                                         </td>
                                     </tr>
-
-                                    {initialAdmins.filter(a => a.email !== 'junsangsingh@gmail.com').map(admin => (
-                                        <tr key={admin.id} className="hover:bg-white/[0.02] transition-colors group">
-                                            <td style={{ paddingLeft: 32 }}>
-                                                <div className="flex items-center gap-5 py-5">
-                                                    <div className="w-12 h-12 rounded-2xl bg-white/5 flex items-center justify-center text-muted text-sm font-bold border border-white/10 group-hover:border-brand-primary/40 transition-all uppercase">
-                                                        {admin.email.substring(0, 2)}
-                                                    </div>
-                                                    <div className="flex flex-col">
-                                                        <span className="text-base font-bold text-primary tracking-tight">{admin.email}</span>
-                                                        <span className="text-[10px] text-muted font-bold uppercase tracking-widest">Authorized Master</span>
-                                                    </div>
-                                                </div>
-                                            </td>
-                                            <td style={{ textAlign: 'center' }}>
-                                                <span className="badge badge-info !px-3 !py-1.5 !rounded-lg !text-[10px] font-bold uppercase tracking-wider">AUTHORIZED</span>
-                                            </td>
-                                            <td style={{ textAlign: 'center' }}>
-                                                <span className="text-[11px] font-bold text-muted uppercase tracking-wider">
-                                                    {new Date(admin.created_at).toLocaleDateString()}
-                                                </span>
-                                            </td>
-                                            <td style={{ textAlign: 'right', paddingRight: 32 }}>
-                                                <button
-                                                    onClick={() => handleRemoveMaster(admin.id, admin.email)}
-                                                    className="glass-button h-12 w-12 !p-0 !rounded-2xl !border-red-500/10 text-red-500 hover:bg-red-500/10 hover:scale-110 active:scale-95 transition-all"
-                                                    disabled={masterLoading}
-                                                >
-                                                    <Trash2 size={20} />
-                                                </button>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </>
-                    )}
+                                )}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
-
-            {/* Grant Authorization Modal – Ultra Premium */}
-            {showAddModal && (
-                <div className="glass-modal !p-0 items-center">
-                    <div className="glass-card glass-modal-card animate-scale-in !bg-bg-base overflow-hidden !rounded-none" style={{ width: '100%', maxWidth: 500, border: '1px solid rgba(79,142,247,0.2)' }}>
-                        <div className="h-2 w-full bg-gradient-to-r from-brand-primary via-brand-secondary to-brand-accent animate-shimmer" style={{ backgroundSize: '200% 100%' }} />
-
-                        <div className="p-10 relative">
-                            <button onClick={() => setShowAddModal(false)} className="absolute top-6 right-6 text-muted hover:text-primary transition-all">
-                                <X size={24} />
-                            </button>
-
-                            <div className="w-20 h-20 rounded-3xl bg-brand-primary/10 flex items-center justify-center text-brand-primary border border-brand-primary/10 mx-auto mb-8 shadow-sm">
-                                <ShieldAlert size={40} />
-                            </div>
-
-                            <h2 className="text-2xl font-bold text-center mb-1">Grant Master Access</h2>
-                            <p className="text-[11px] text-muted text-center mb-10 uppercase tracking-widest font-bold">New Infrastructure Administrator</p>
-
-                            <form onSubmit={handleAddMaster} className="flex flex-col gap-8">
-                                <div className="space-y-3">
-                                    <label className="text-[11px] font-bold text-primary uppercase tracking-wider block ml-1">Email Identifier</label>
-                                    <div className="relative group">
-                                        <input
-                                            type="email"
-                                            required
-                                            className="glass-input !pl-16 h-16 text-lg font-bold !rounded-none bg-white/[0.02] relative z-10"
-                                            placeholder="admin@example.com"
-                                            value={email}
-                                            onChange={(e) => setEmail(e.target.value)}
-                                            autoFocus
-                                        />
-                                        <Mail className="absolute left-6 top-1/2 -translate-y-1/2 text-muted group-focus-within:text-brand-primary transition-all z-20" size={22} />
-                                    </div>
-                                </div>
-
-                                <div className="p-5 rounded-none bg-brand-warning/[0.03] border border-brand-warning/10 flex gap-4">
-                                    <AlertTriangle className="text-brand-warning shrink-0" size={20} />
-                                    <p className="text-[10px] text-brand-warning/80 leading-relaxed font-bold uppercase tracking-wider">
-                                        Warning: Authorized Masters gain control over organizational settings, billing, and system security protocols.
-                                    </p>
-                                </div>
-
-                                <div className="flex gap-4 mt-2">
-                                    <button type="button" onClick={() => setShowAddModal(false)} className="glass-button flex-1 h-14 font-bold uppercase text-[11px] tracking-widest !rounded-none">Abort</button>
-                                    <button type="submit" className="glass-button glass-button-primary flex-1 h-14 font-bold uppercase text-[11px] tracking-widest shadow-lg !rounded-none" disabled={masterLoading}>
-                                        {masterLoading ? (
-                                            <div className="flex items-center gap-3">
-                                                <RefreshCw className="animate-spin" size={16} />
-                                                <span>Authorizing...</span>
-                                            </div>
-                                        ) : 'Authorize Access'}
-                                    </button>
-                                </div>
-                            </form>
+            ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                    {/* Header Row */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div>
+                            <h2 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: 4 }}>Admin Access</h2>
+                            <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>Manage who can access the system control panel</p>
                         </div>
+                        <button onClick={() => setShowAddModal(true)} className="glass-button glass-button-primary" style={{ fontSize: '0.8125rem' }}>
+                            <UserPlus size={16} /> Add Admin
+                        </button>
+                    </div>
+
+                    {/* Admin List */}
+                    <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
+                        <table className="glass-table">
+                            <thead>
+                                <tr>
+                                    <th>Administrator</th>
+                                    <th style={{ textAlign: 'center' }}>Role</th>
+                                    <th style={{ textAlign: 'center' }}>Authorized</th>
+                                    <th style={{ textAlign: 'right' }}>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {/* Root Admin */}
+                                <tr style={{ background: 'rgba(79, 142, 247, 0.04)' }}>
+                                    <td>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'var(--brand-primary)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', fontSize: '0.8125rem', fontWeight: 700 }}>
+                                                JS
+                                            </div>
+                                            <div>
+                                                <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
+                                                    junsangsingh@gmail.com <CheckCircle2 size={14} color="var(--brand-primary)" />
+                                                </div>
+                                                <div style={{ fontSize: '0.6875rem', color: 'var(--brand-primary)', fontWeight: 600 }}>System Owner</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style={{ textAlign: 'center' }}>
+                                        <span className="badge badge-info" style={{ fontSize: '0.6875rem' }}>ROOT</span>
+                                    </td>
+                                    <td style={{ textAlign: 'center', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+                                        System Launch
+                                    </td>
+                                    <td style={{ textAlign: 'right' }}>
+                                        <Lock size={16} color="var(--text-muted)" />
+                                    </td>
+                                </tr>
+
+                                {initialAdmins.filter(a => a.email !== 'junsangsingh@gmail.com').map(admin => (
+                                    <tr key={admin.id}>
+                                        <td>
+                                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                                <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(255, 255, 255, 0.05)', border: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.8125rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-secondary)' }}>
+                                                    {admin.email.substring(0, 2)}
+                                                </div>
+                                                <div>
+                                                    <div style={{ fontWeight: 600 }}>{admin.email}</div>
+                                                    <div style={{ fontSize: '0.6875rem', color: 'var(--text-muted)' }}>Authorized Admin</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td style={{ textAlign: 'center' }}>
+                                            <span className="badge badge-outline" style={{ fontSize: '0.6875rem' }}>ADMIN</span>
+                                        </td>
+                                        <td style={{ textAlign: 'center', fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+                                            {new Date(admin.created_at).toLocaleDateString()}
+                                        </td>
+                                        <td style={{ textAlign: 'right' }}>
+                                            <button
+                                                onClick={() => handleRemoveMaster(admin.id, admin.email)}
+                                                className="glass-button"
+                                                style={{ padding: '6px 12px', color: 'var(--brand-danger)', borderColor: 'rgba(239, 68, 68, 0.2)', fontSize: '0.75rem' }}
+                                                disabled={masterLoading}
+                                            >
+                                                <Trash2 size={14} /> Remove
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             )}
 
-            <style jsx>{`
-            .shadow-glow {
-                filter: drop-shadow(0 0 8px var(--brand-primary));
-            }
-            @keyframes scaleIn {
-                from { opacity: 0; transform: scale(0.95); }
-                to { opacity: 1; transform: scale(1); }
-            }
-            .animate-scale-in {
-                animation: scaleIn 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            }
-        `}</style>
+            {/* Add Admin Modal */}
+            {showAddModal && (
+                <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                    <div className="glass-card animate-scale-in" style={{ maxWidth: 450, width: '100%', padding: 32 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(79, 142, 247, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    <UserPlus size={22} color="var(--brand-primary)" />
+                                </div>
+                                <div>
+                                    <h2 style={{ fontSize: '1.125rem', fontWeight: 700 }}>Add Admin</h2>
+                                    <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Grant system control access</p>
+                                </div>
+                            </div>
+                            <button onClick={() => setShowAddModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
+                                <X size={20} />
+                            </button>
+                        </div>
+
+                        <form onSubmit={handleAddMaster} style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
+                            <div className="form-group">
+                                <label className="glass-label">Email Address</label>
+                                <div style={{ position: 'relative' }}>
+                                    <Mail size={16} style={{ position: 'absolute', left: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                                    <input
+                                        type="email"
+                                        required
+                                        className="glass-input"
+                                        style={{ paddingLeft: 40 }}
+                                        placeholder="admin@example.com"
+                                        value={email}
+                                        onChange={(e) => setEmail(e.target.value)}
+                                        autoFocus
+                                    />
+                                </div>
+                            </div>
+
+                            <div style={{ padding: 16, borderRadius: 12, background: 'rgba(245, 158, 11, 0.06)', border: '1px solid rgba(245, 158, 11, 0.15)', display: 'flex', gap: 12, alignItems: 'flex-start' }}>
+                                <AlertTriangle size={18} color="var(--brand-warning)" style={{ flexShrink: 0, marginTop: 2 }} />
+                                <p style={{ fontSize: '0.8125rem', color: 'var(--brand-warning)', lineHeight: 1.5 }}>
+                                    Admins gain full control over subscriptions, billing, and security settings.
+                                </p>
+                            </div>
+
+                            <div style={{ display: 'flex', gap: 12 }}>
+                                <button type="button" onClick={() => setShowAddModal(false)} className="glass-button" style={{ flex: 1, justifyContent: 'center' }}>
+                                    Cancel
+                                </button>
+                                <button type="submit" className="glass-button glass-button-primary" style={{ flex: 1, justifyContent: 'center' }} disabled={masterLoading}>
+                                    {masterLoading ? (
+                                        <><RefreshCw size={14} className="animate-spin" /> Authorizing...</>
+                                    ) : 'Authorize Access'}
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
