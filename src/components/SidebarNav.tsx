@@ -11,6 +11,7 @@ import {
     FileText,
     ShoppingCart,
     BarChart2,
+    Truck,
     Settings,
     ShieldCheck,
     Lock,
@@ -45,6 +46,7 @@ export default function SidebarNav() {
         { href: '/dashboard/pos', icon: ShoppingCart, label: 'POS' },
         { href: '/dashboard/invoices', icon: FileText, label: 'Bills' },
         { href: '/dashboard/reports', icon: BarChart2, label: 'Reports' },
+        { href: '/dashboard/suppliers', icon: Truck, label: 'Suppliers' },
         { href: '/dashboard/settings', icon: Settings, label: 'Settings' },
     ];
 

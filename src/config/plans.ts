@@ -8,6 +8,7 @@ export interface PlanConfig {
         canExportCSV: boolean;
         hasPrioritySupport: boolean;
         hasAdvancedReports: boolean;
+        canManageSuppliers: boolean;
         maxInvoicesPerMonth?: number;
     };
 }
@@ -21,6 +22,7 @@ export const PLANS: Record<SubscriptionPlan, PlanConfig> = {
             canExportCSV: false,
             hasPrioritySupport: false,
             hasAdvancedReports: false,
+            canManageSuppliers: false,
             maxInvoicesPerMonth: 50,
         }
     },
@@ -32,6 +34,7 @@ export const PLANS: Record<SubscriptionPlan, PlanConfig> = {
             canExportCSV: false,
             hasPrioritySupport: false,
             hasAdvancedReports: false,
+            canManageSuppliers: false,
         }
     },
     yearly: {
@@ -42,6 +45,7 @@ export const PLANS: Record<SubscriptionPlan, PlanConfig> = {
             canExportCSV: true,
             hasPrioritySupport: true,
             hasAdvancedReports: true,
+            canManageSuppliers: true,
         }
     }
 };

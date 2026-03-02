@@ -199,3 +199,59 @@ CREATE POLICY "invoice_items_isolation" ON invoice_items
 ALTER TABLE stock_movements ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "stock_movements_isolation" ON stock_movements
     FOR ALL USING (organization_id = public.current_org_id());
+
+-- ======================================================
+-- 9. SUPPLIERS
+-- ======================================================
+CREATE TABLE IF NOT EXISTS suppliers (
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
+    name            TEXT NOT NULL,
+    phone           TEXT,
+    email           TEXT,
+    address         TEXT,
+    pan_number      TEXT,
+    created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE suppliers ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "suppliers_isolation" ON suppliers
+    FOR ALL USING (organization_id = public.current_org_id());
+
+-- ======================================================
+-- 10. PURCHASES (from suppliers)
+-- ======================================================
+CREATE TABLE IF NOT EXISTS purchases (
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
+    supplier_id     UUID REFERENCES suppliers(id) ON DELETE SET NULL,
+    purchase_date   TEXT,
+    total_amount    DECIMAL(12, 2) DEFAULT 0.00,
+    notes           TEXT,
+    created_at      TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE purchases ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "purchases_isolation" ON purchases
+    FOR ALL USING (organization_id = public.current_org_id());
+
+-- ======================================================
+-- 11. PURCHASE ITEMS
+-- ======================================================
+CREATE TABLE IF NOT EXISTS purchase_items (
+    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    purchase_id     UUID REFERENCES purchases(id) ON DELETE CASCADE NOT NULL,
+    product_id      UUID REFERENCES products(id) ON DELETE SET NULL,
+    product_name    TEXT NOT NULL,
+    quantity        INTEGER NOT NULL DEFAULT 0,
+    unit_price      DECIMAL(12, 2) DEFAULT 0.00,
+    cost_price      DECIMAL(12, 2) DEFAULT 0.00
+);
+
+ALTER TABLE purchase_items ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "purchase_items_isolation" ON purchase_items
+    FOR ALL USING (
+        purchase_id IN (
+            SELECT id FROM purchases WHERE organization_id = public.current_org_id()
+        )
+    );
