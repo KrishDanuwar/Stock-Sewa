@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
+import { SignOutButton } from '@clerk/nextjs';
 import { addAdminEmail, removeAdminEmail } from '@/lib/actions/admin-management';
 import { activateSubscription, rejectSubscription } from '@/lib/actions/subscriptions';
 import { updatePlan, createPlan, deletePlan, toggleFeature, addFeatureToPlan, removeFeatureFromPlan } from '@/lib/actions/plan-management';
@@ -10,7 +11,8 @@ import { toast } from 'sonner';
 import {
     ShieldCheck, UserPlus, Trash2, Mail, Lock, CheckCircle2,
     ArrowLeft, Users, X, CreditCard, Search, Filter, RefreshCw,
-    XCircle, ChevronDown, Zap, Crown, AlertTriangle, Settings, Plus, Save, Star, ToggleLeft, ToggleRight
+    XCircle, ChevronDown, Zap, Crown, AlertTriangle, Settings, Plus, Save, Star, ToggleLeft, ToggleRight,
+    LogOut
 } from 'lucide-react';
 
 type AdminEntry = { id: string; email: string; created_at: string };
@@ -295,7 +297,7 @@ export default function AdminDashboardClient({
     }, [orgs, subSearch, showOnlyPending]);
 
     const pendingCount = orgs.filter(o => o.last_transaction_id && o.subscription_status !== 'active').length;
-    const totalMasters = initialAdmins.length + 1;
+    const totalMasters = initialAdmins.length;
 
     const tabs = [
         { id: 'subscriptions' as const, label: 'Subscriptions', icon: CreditCard },
@@ -319,6 +321,13 @@ export default function AdminDashboardClient({
                         <p className="page-subtitle">Manage subscriptions and admin access</p>
                     </div>
                 </div>
+
+                <SignOutButton>
+                    <button className="glass-button glass-button-danger" style={{ gap: 8 }}>
+                        <LogOut size={16} />
+                        <span style={{ fontSize: '0.8125rem', fontWeight: 600 }}>Logout</span>
+                    </button>
+                </SignOutButton>
             </div>
 
             {/* Stat Cards */}
