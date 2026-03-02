@@ -1,7 +1,7 @@
 import { createAdminClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { auth, currentUser } from '@clerk/nextjs/server';
-import { PLANS, getPlanConfig, PlanConfig } from '@/config/plans';
+import { getPlanConfig, PlanConfig } from '@/config/plans';
 
 export interface OrgContext {
     userId: string;
@@ -63,7 +63,7 @@ export async function getOrgContext(): Promise<OrgContext> {
             const isTrialExpired = trialEndsAt ? new Date(trialEndsAt) < now : false;
 
             const subPlan = orgData?.subscription_plan || 'trial';
-            const planConfig = getPlanConfig(subPlan);
+            const planConfig = await getPlanConfig(subPlan);
 
             return {
                 userId,
@@ -106,7 +106,7 @@ export async function getOrgContext(): Promise<OrgContext> {
             email: user.emailAddresses[0]?.emailAddress || '',
             subscriptionPlan: 'trial',
             subscriptionStatus: 'active',
-            plan: PLANS.trial,
+            plan: await getPlanConfig('trial'),
             trialEndsAt: null,
             subscriptionEndsAt: null,
             isTrialExpired: false,

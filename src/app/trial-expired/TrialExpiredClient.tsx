@@ -1,40 +1,22 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Check, CreditCard, MessageCircle, Rocket, Sparkles, Send, ShieldCheck, Zap } from 'lucide-react';
+import { Check, CreditCard, MessageCircle, Sparkles, Send, ShieldCheck, Zap, Rocket } from 'lucide-react';
 import { submitTransactionId } from '@/lib/actions/subscriptions';
 import { toast } from 'sonner';
+import type { PlanWithFeatures } from '@/lib/actions/plan-management';
 
 interface TrialExpiredClientProps {
     email: string;
+    plans: PlanWithFeatures[];
 }
 
-export default function TrialExpiredClient({ email }: TrialExpiredClientProps) {
-    const [selectedPlan, setSelectedPlan] = useState<'monthly' | 'yearly'>('yearly');
+export default function TrialExpiredClient({ email, plans }: TrialExpiredClientProps) {
+    const [selectedPlan, setSelectedPlan] = useState<string>(
+        plans.find(p => p.is_popular)?.id || plans[0]?.id || 'monthly'
+    );
     const [transactionId, setTransactionId] = useState('');
     const [loading, setLoading] = useState(false);
-
-    const plans = [
-        {
-            id: 'monthly' as const,
-            name: 'Basic Monthly',
-            price: '999',
-            period: 'per month',
-            description: 'Essential toolkit for growing shops.',
-            features: ['Unlimited Invoices', 'Inventory Tracking', 'Basic Reports', 'Customer Database'],
-            icon: Rocket,
-        },
-        {
-            id: 'yearly' as const,
-            name: 'Premium Yearly',
-            price: '9,588',
-            period: 'per year',
-            description: 'Best value for established enterprises.',
-            features: ['Everything in Basic', '20% Annual Savings', 'Priority Support', 'Advanced Data Export'],
-            icon: Zap,
-            popular: true,
-        },
-    ];
 
     const handleSubmit = async () => {
         if (!transactionId.trim()) {
@@ -59,6 +41,16 @@ export default function TrialExpiredClient({ email }: TrialExpiredClientProps) {
         }
     };
 
+    const formatPrice = (price: number) => price.toLocaleString();
+    const periodLabel = (period: string) => {
+        if (period === 'month') return 'per month';
+        if (period === 'year') return 'per year';
+        if (period === 'quarter') return 'per quarter';
+        return `per ${period}`;
+    };
+
+    const planIcons = [Rocket, Zap];
+
     return (
         <div className="animate-fade-in-up" style={{ width: '100%', maxWidth: '1000px', margin: '0 auto', paddingBottom: '100px' }}>
             {/* Header */}
@@ -77,68 +69,76 @@ export default function TrialExpiredClient({ email }: TrialExpiredClientProps) {
             </header>
 
             {/* Pricing Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))', gap: '24px', marginBottom: '64px' }}>
-                {plans.map((plan) => (
-                    <div
-                        key={plan.id}
-                        onClick={() => setSelectedPlan(plan.id)}
-                        className="glass-card"
-                        style={{
-                            padding: '40px',
-                            cursor: 'pointer',
-                            position: 'relative',
-                            border: selectedPlan === plan.id ? '2px solid var(--brand-primary)' : '1px solid var(--glass-border)',
-                            transform: selectedPlan === plan.id ? 'scale(1.02)' : 'none',
-                            transition: 'all 0.4s cubic-bezier(0.23, 1, 0.32, 1)',
-                            background: selectedPlan === plan.id ? 'rgba(79, 142, 247, 0.05)' : 'var(--glass-bg)'
-                        }}
-                    >
-                        {plan.popular && (
-                            <div style={{
-                                position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)',
-                                background: 'var(--brand-primary)', color: 'white', fontSize: '0.625rem', fontWeight: 800,
-                                padding: '4px 12px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.1em'
-                            }}>
-                                Best Value
-                            </div>
-                        )}
+            <div style={{ display: 'grid', gridTemplateColumns: `repeat(auto-fit, minmax(${plans.length > 2 ? '280px' : '320px'}, 1fr))`, gap: '24px', marginBottom: '64px' }}>
+                {plans.map((plan, idx) => {
+                    const IconComp = planIcons[idx % planIcons.length];
+                    const enabledFeatures = plan.features.filter(f => f.enabled).map(f => f.feature_label);
+                    // Base features all plans include
+                    const baseFeatures = ['Unlimited Invoices', 'Inventory Tracking', 'Customer Database'];
+                    const displayFeatures = [...baseFeatures, ...enabledFeatures];
 
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
-                            <div>
-                                <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '4px' }}>{plan.name}</h3>
-                                <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{plan.description}</p>
-                            </div>
-                            <div style={{ padding: '12px', borderRadius: '12px', background: selectedPlan === plan.id ? 'rgba(79, 142, 247, 0.1)' : 'rgba(255,255,255,0.05)', color: selectedPlan === plan.id ? 'var(--brand-primary)' : 'var(--text-muted)' }}>
-                                <plan.icon size={24} />
-                            </div>
-                        </div>
-
-                        <div style={{ marginBottom: '32px' }}>
-                            <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                                <span style={{ fontSize: '3rem', fontWeight: 900 }}>Rs. {plan.price}</span>
-                                <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', fontWeight: 600, textTransform: 'uppercase' }}>{plan.period}</span>
-                            </div>
-                        </div>
-
-                        <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 40px 0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            {plan.features.map((feature) => (
-                                <li key={feature} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.9375rem', color: 'var(--text-secondary)' }}>
-                                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
-                                        <Check size={12} color="var(--brand-success)" />
-                                    </div>
-                                    {feature}
-                                </li>
-                            ))}
-                        </ul>
-
-                        <button
-                            className={`glass-button ${selectedPlan === plan.id ? 'glass-button-primary' : ''}`}
-                            style={{ width: '100%', justifyContent: 'center', height: '52px', fontSize: '1rem' }}
+                    return (
+                        <div
+                            key={plan.id}
+                            onClick={() => setSelectedPlan(plan.id)}
+                            className="glass-card"
+                            style={{
+                                padding: '40px',
+                                cursor: 'pointer',
+                                position: 'relative',
+                                border: selectedPlan === plan.id ? '2px solid var(--brand-primary)' : '1px solid var(--glass-border)',
+                                transform: selectedPlan === plan.id ? 'scale(1.02)' : 'none',
+                                transition: 'all 0.4s cubic-bezier(0.23, 1, 0.32, 1)',
+                                background: selectedPlan === plan.id ? 'rgba(79, 142, 247, 0.05)' : 'var(--glass-bg)'
+                            }}
                         >
-                            {selectedPlan === plan.id ? 'Current Selection' : 'Choose This Plan'}
-                        </button>
-                    </div>
-                ))}
+                            {plan.is_popular && (
+                                <div style={{
+                                    position: 'absolute', top: '-12px', left: '50%', transform: 'translateX(-50%)',
+                                    background: 'var(--brand-primary)', color: 'white', fontSize: '0.625rem', fontWeight: 800,
+                                    padding: '4px 12px', borderRadius: '100px', textTransform: 'uppercase', letterSpacing: '0.1em'
+                                }}>
+                                    Best Value
+                                </div>
+                            )}
+
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '32px' }}>
+                                <div>
+                                    <h3 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '4px' }}>{plan.name}</h3>
+                                    <p style={{ color: 'var(--text-muted)', fontSize: '0.875rem' }}>{plan.description}</p>
+                                </div>
+                                <div style={{ padding: '12px', borderRadius: '12px', background: selectedPlan === plan.id ? 'rgba(79, 142, 247, 0.1)' : 'rgba(255,255,255,0.05)', color: selectedPlan === plan.id ? 'var(--brand-primary)' : 'var(--text-muted)' }}>
+                                    <IconComp size={24} />
+                                </div>
+                            </div>
+
+                            <div style={{ marginBottom: '32px' }}>
+                                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+                                    <span style={{ fontSize: '3rem', fontWeight: 900 }}>Rs. {formatPrice(plan.price)}</span>
+                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', fontWeight: 600, textTransform: 'uppercase' }}>{periodLabel(plan.period)}</span>
+                                </div>
+                            </div>
+
+                            <ul style={{ listStyle: 'none', padding: 0, margin: '0 0 40px 0', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                                {displayFeatures.map((feature) => (
+                                    <li key={feature} style={{ display: 'flex', alignItems: 'center', gap: '12px', fontSize: '0.9375rem', color: 'var(--text-secondary)' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: '20px', height: '20px', borderRadius: '50%', background: 'rgba(16, 185, 129, 0.1)', border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                                            <Check size={12} color="var(--brand-success)" />
+                                        </div>
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+
+                            <button
+                                className={`glass-button ${selectedPlan === plan.id ? 'glass-button-primary' : ''}`}
+                                style={{ width: '100%', justifyContent: 'center', height: '52px', fontSize: '1rem' }}
+                            >
+                                {selectedPlan === plan.id ? 'Current Selection' : 'Choose This Plan'}
+                            </button>
+                        </div>
+                    );
+                })}
             </div>
 
             {/* Payment Verification */}

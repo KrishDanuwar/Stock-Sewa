@@ -39,7 +39,7 @@ export async function activateSubscription(orgId: string, plan: string) {
     const supabase = await createAdminClient();
 
     // Use configuration for duration
-    const planConfig = getPlanConfig(plan);
+    const planConfig = await getPlanConfig(plan);
     const expiryDate = new Date();
     expiryDate.setDate(expiryDate.getDate() + planConfig.durationDays);
 

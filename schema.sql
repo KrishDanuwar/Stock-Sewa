@@ -256,3 +256,59 @@ CREATE POLICY "purchase_items_isolation" ON purchase_items
             SELECT id FROM purchases WHERE organization_id = public.current_org_id()
         )
     );
+
+-- ======================================================
+-- 12. PLANS (Admin-managed subscription plans)
+-- ======================================================
+CREATE TABLE IF NOT EXISTS plans (
+    id          TEXT PRIMARY KEY,
+    name        TEXT NOT NULL,
+    description TEXT,
+    price       DECIMAL(12, 2) DEFAULT 0.00,
+    period      TEXT DEFAULT 'month',
+    duration_days INTEGER DEFAULT 30,
+    is_popular  BOOLEAN DEFAULT false,
+    sort_order  INTEGER DEFAULT 0,
+    is_active   BOOLEAN DEFAULT true,
+    created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- ======================================================
+-- 13. PLAN FEATURES (Feature flags per plan)
+-- ======================================================
+CREATE TABLE IF NOT EXISTS plan_features (
+    id          UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    plan_id     TEXT REFERENCES plans(id) ON DELETE CASCADE NOT NULL,
+    feature_key TEXT NOT NULL,
+    feature_label TEXT NOT NULL,
+    enabled     BOOLEAN DEFAULT true,
+    created_at  TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Seed default plans
+INSERT INTO plans (id, name, description, price, period, duration_days, is_popular, sort_order) VALUES
+    ('trial', 'Free Trial', '3-day trial to explore Stock Sewa', 0, 'trial', 3, false, 0),
+    ('monthly', 'Basic Monthly', 'Essential toolkit for growing shops', 999, 'month', 30, false, 1),
+    ('yearly', 'Premium Yearly', 'Best value for established enterprises', 9588, 'year', 365, true, 2)
+ON CONFLICT (id) DO NOTHING;
+
+-- Seed default features for trial
+INSERT INTO plan_features (plan_id, feature_key, feature_label, enabled) VALUES
+    ('trial', 'canExportCSV', 'CSV Export', false),
+    ('trial', 'hasPrioritySupport', 'Priority Support', false),
+    ('trial', 'hasAdvancedReports', 'Advanced Reports', false),
+    ('trial', 'canManageSuppliers', 'Supplier Management', false);
+
+-- Seed default features for monthly
+INSERT INTO plan_features (plan_id, feature_key, feature_label, enabled) VALUES
+    ('monthly', 'canExportCSV', 'CSV Export', false),
+    ('monthly', 'hasPrioritySupport', 'Priority Support', false),
+    ('monthly', 'hasAdvancedReports', 'Advanced Reports', false),
+    ('monthly', 'canManageSuppliers', 'Supplier Management', false);
+
+-- Seed default features for yearly
+INSERT INTO plan_features (plan_id, feature_key, feature_label, enabled) VALUES
+    ('yearly', 'canExportCSV', 'CSV Export', true),
+    ('yearly', 'hasPrioritySupport', 'Priority Support', true),
+    ('yearly', 'hasAdvancedReports', 'Advanced Reports', true),
+    ('yearly', 'canManageSuppliers', 'Supplier Management', true);

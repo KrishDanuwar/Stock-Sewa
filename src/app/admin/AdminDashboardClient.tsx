@@ -4,13 +4,14 @@ import { useState, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { addAdminEmail, removeAdminEmail } from '@/lib/actions/admin-management';
 import { activateSubscription, rejectSubscription } from '@/lib/actions/subscriptions';
+import { updatePlan, createPlan, deletePlan, toggleFeature, addFeatureToPlan, removeFeatureFromPlan } from '@/lib/actions/plan-management';
+import type { PlanWithFeatures, PlanFeature } from '@/lib/actions/plan-management';
 import { toast } from 'sonner';
 import {
     ShieldCheck, UserPlus, Trash2, Mail, Lock, CheckCircle2,
     ArrowLeft, Users, X, CreditCard, Search, Filter, RefreshCw,
-    XCircle, ChevronDown, Zap, Crown, AlertTriangle
+    XCircle, ChevronDown, Zap, Crown, AlertTriangle, Settings, Plus, Save, Star, ToggleLeft, ToggleRight
 } from 'lucide-react';
-import { PLANS } from '@/config/plans';
 
 type AdminEntry = { id: string; email: string; created_at: string };
 interface Org {
@@ -67,15 +68,25 @@ const GlassSelect = ({ value, options, onChange, label }: { value: string; optio
     );
 };
 
+// --- Known feature keys ---
+const KNOWN_FEATURES = [
+    { key: 'canExportCSV', label: 'CSV Export' },
+    { key: 'hasPrioritySupport', label: 'Priority Support' },
+    { key: 'hasAdvancedReports', label: 'Advanced Reports' },
+    { key: 'canManageSuppliers', label: 'Supplier Management' },
+];
+
 export default function AdminDashboardClient({
     initialAdmins,
-    initialOrgs
+    initialOrgs,
+    initialPlans
 }: {
     initialAdmins: AdminEntry[];
     initialOrgs: Org[];
+    initialPlans: PlanWithFeatures[];
 }) {
     const router = useRouter();
-    const [activeTab, setActiveTab] = useState<'subscriptions' | 'masters'>('subscriptions');
+    const [activeTab, setActiveTab] = useState<'subscriptions' | 'masters' | 'plans'>('subscriptions');
 
     // --- Subscriptions State ---
     const [orgs, setOrgs] = useState(initialOrgs);
@@ -89,6 +100,16 @@ export default function AdminDashboardClient({
     const [email, setEmail] = useState('');
     const [masterLoading, setMasterLoading] = useState(false);
     const [showAddModal, setShowAddModal] = useState(false);
+
+    // --- Plans State ---
+    const [plans, setPlans] = useState<PlanWithFeatures[]>(initialPlans);
+    const [planLoading, setPlanLoading] = useState<string | null>(null);
+    const [editingPrices, setEditingPrices] = useState<Record<string, string>>({});
+    const [editingNames, setEditingNames] = useState<Record<string, string>>({});
+    const [editingDescriptions, setEditingDescriptions] = useState<Record<string, string>>({});
+    const [editingDurations, setEditingDurations] = useState<Record<string, string>>({});
+    const [showNewPlanModal, setShowNewPlanModal] = useState(false);
+    const [newPlan, setNewPlan] = useState({ id: '', name: '', description: '', price: '', period: 'month', duration_days: '30' });
 
     // --- Subscription Handlers ---
     async function handleActivate(id: string, plan: string) {
@@ -151,6 +172,87 @@ export default function AdminDashboardClient({
         setMasterLoading(false);
     }
 
+    // --- Plan Handlers ---
+    async function handleSavePlan(plan: PlanWithFeatures) {
+        setPlanLoading(plan.id);
+        const result = await updatePlan(plan.id, {
+            name: editingNames[plan.id] ?? plan.name,
+            description: editingDescriptions[plan.id] ?? plan.description ?? '',
+            price: Number(editingPrices[plan.id] ?? plan.price),
+            duration_days: Number(editingDurations[plan.id] ?? plan.duration_days),
+        });
+        if (result.success) {
+            toast.success(`${plan.name} updated`);
+            setPlans(prev => prev.map(p => p.id === plan.id ? {
+                ...p,
+                name: editingNames[plan.id] ?? p.name,
+                description: editingDescriptions[plan.id] ?? p.description,
+                price: Number(editingPrices[plan.id] ?? p.price),
+                duration_days: Number(editingDurations[plan.id] ?? p.duration_days),
+            } : p));
+        } else toast.error(result.error || 'Failed to update');
+        setPlanLoading(null);
+    }
+
+    async function handleToggleFeature(plan: PlanWithFeatures, featureKey: string, featureLabel: string) {
+        setPlanLoading(plan.id);
+        const existing = plan.features.find(f => f.feature_key === featureKey);
+        if (existing) {
+            const result = await toggleFeature(existing.id, !existing.enabled);
+            if (result.success) {
+                setPlans(prev => prev.map(p => p.id === plan.id ? {
+                    ...p, features: p.features.map(f => f.id === existing.id ? { ...f, enabled: !f.enabled } : f)
+                } : p));
+            } else toast.error(result.error || 'Failed');
+        } else {
+            const result = await addFeatureToPlan(plan.id, featureKey, featureLabel, true);
+            if (result.success) { router.refresh(); }
+            else toast.error(result.error || 'Failed');
+        }
+        setPlanLoading(null);
+    }
+
+    async function handleTogglePopular(plan: PlanWithFeatures) {
+        setPlanLoading(plan.id);
+        const result = await updatePlan(plan.id, { is_popular: !plan.is_popular });
+        if (result.success) {
+            setPlans(prev => prev.map(p => p.id === plan.id ? { ...p, is_popular: !p.is_popular } : p));
+        } else toast.error(result.error || 'Failed');
+        setPlanLoading(null);
+    }
+
+    async function handleDeletePlan(id: string) {
+        if (!confirm('Delete this plan? This cannot be undone.')) return;
+        setPlanLoading(id);
+        const result = await deletePlan(id);
+        if (result.success) {
+            toast.success('Plan deleted');
+            setPlans(prev => prev.filter(p => p.id !== id));
+        } else toast.error(result.error || 'Failed');
+        setPlanLoading(null);
+    }
+
+    async function handleCreatePlan(e: React.FormEvent) {
+        e.preventDefault();
+        if (!newPlan.id || !newPlan.name) return;
+        setPlanLoading('new');
+        const result = await createPlan({
+            id: newPlan.id.toLowerCase().replace(/\s+/g, '-'),
+            name: newPlan.name,
+            description: newPlan.description,
+            price: Number(newPlan.price) || 0,
+            period: newPlan.period,
+            duration_days: Number(newPlan.duration_days) || 30,
+        });
+        if (result.success) {
+            toast.success('Plan created');
+            setShowNewPlanModal(false);
+            setNewPlan({ id: '', name: '', description: '', price: '', period: 'month', duration_days: '30' });
+            router.refresh();
+        } else toast.error(result.error || 'Failed');
+        setPlanLoading(null);
+    }
+
     // --- Memoized Filters ---
     const filteredOrgs = useMemo(() => {
         let list = orgs.filter(o =>
@@ -174,6 +276,7 @@ export default function AdminDashboardClient({
 
     const tabs = [
         { id: 'subscriptions' as const, label: 'Subscriptions', icon: CreditCard },
+        { id: 'plans' as const, label: 'Plan Management', icon: Settings },
         { id: 'masters' as const, label: 'Access Control', icon: Lock },
     ];
 
@@ -310,7 +413,7 @@ export default function AdminDashboardClient({
                             <tbody>
                                 {filteredOrgs.length > 0 ? filteredOrgs.map(org => {
                                     const isPending = org.last_transaction_id && org.subscription_status !== 'active';
-                                    const planOptions = Object.values(PLANS).filter(p => p.id !== 'trial').map(p => ({ id: p.id, name: p.name }));
+                                    const planOptions = plans.filter(p => p.id !== 'trial').map(p => ({ id: p.id, name: p.name }));
 
                                     return (
                                         <tr key={org.id}>
@@ -394,6 +497,144 @@ export default function AdminDashboardClient({
                             </tbody>
                         </table>
                     </div>
+                </div>
+            ) : activeTab === 'plans' ? (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
+                    {/* Plans Header */}
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                        <div>
+                            <h2 style={{ fontSize: '1.125rem', fontWeight: 600, marginBottom: 4 }}>Subscription Plans</h2>
+                            <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>Set pricing, features, and visibility for each plan</p>
+                        </div>
+                        <button onClick={() => setShowNewPlanModal(true)} className="glass-button glass-button-primary" style={{ fontSize: '0.8125rem' }}>
+                            <Plus size={16} /> Add Plan
+                        </button>
+                    </div>
+
+                    {/* Plan Cards Grid */}
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 24 }}>
+                        {plans.map(plan => {
+                            const isLoading = planLoading === plan.id;
+                            return (
+                                <div key={plan.id} className="glass-card" style={{ padding: 0, overflow: 'hidden', opacity: isLoading ? 0.7 : 1, transition: 'opacity 0.2s', position: 'relative' }}>
+                                    {/* Card Header */}
+                                    <div style={{ padding: '20px 24px', borderBottom: '1px solid var(--glass-border)', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: plan.is_popular ? 'rgba(79, 142, 247, 0.06)' : 'transparent' }}>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+                                            <div style={{ width: 36, height: 36, borderRadius: 10, background: plan.id === 'trial' ? 'rgba(245, 158, 11, 0.15)' : 'rgba(79, 142, 247, 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                {plan.id === 'trial' ? <Zap size={18} color="var(--brand-warning)" /> : <Crown size={18} color="var(--brand-primary)" />}
+                                            </div>
+                                            <div>
+                                                <span style={{ fontWeight: 700, fontSize: '0.9375rem' }}>{plan.name}</span>
+                                                <span style={{ fontSize: '0.6875rem', color: 'var(--text-muted)', display: 'block' }}>ID: {plan.id}</span>
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', gap: 6 }}>
+                                            <button onClick={() => handleTogglePopular(plan)} title={plan.is_popular ? 'Remove popular badge' : 'Mark as popular'} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+                                                <Star size={18} fill={plan.is_popular ? 'var(--brand-warning)' : 'none'} color={plan.is_popular ? 'var(--brand-warning)' : 'var(--text-muted)'} />
+                                            </button>
+                                            {plan.id !== 'trial' && (
+                                                <button onClick={() => handleDeletePlan(plan.id)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: 4 }}>
+                                                    <Trash2 size={16} color="var(--brand-danger)" />
+                                                </button>
+                                            )}
+                                        </div>
+                                    </div>
+
+                                    {/* Editable Fields */}
+                                    <div style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                        <div className="form-group">
+                                            <label className="glass-label">Plan Name</label>
+                                            <input className="glass-input" defaultValue={plan.name} onChange={e => setEditingNames(p => ({ ...p, [plan.id]: e.target.value }))} />
+                                        </div>
+                                        <div className="form-group">
+                                            <label className="glass-label">Description</label>
+                                            <input className="glass-input" defaultValue={plan.description || ''} onChange={e => setEditingDescriptions(p => ({ ...p, [plan.id]: e.target.value }))} />
+                                        </div>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                                            <div className="form-group">
+                                                <label className="glass-label">Price (Rs.)</label>
+                                                <input className="glass-input" type="number" defaultValue={plan.price} onChange={e => setEditingPrices(p => ({ ...p, [plan.id]: e.target.value }))} />
+                                            </div>
+                                            <div className="form-group">
+                                                <label className="glass-label">Duration (days)</label>
+                                                <input className="glass-input" type="number" defaultValue={plan.duration_days} onChange={e => setEditingDurations(p => ({ ...p, [plan.id]: e.target.value }))} />
+                                            </div>
+                                        </div>
+                                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                            <span className="badge badge-outline" style={{ fontSize: '0.6875rem' }}>{plan.period}</span>
+                                            <span className="badge badge-outline" style={{ fontSize: '0.6875rem' }}>Sort: {plan.sort_order}</span>
+                                            {plan.is_popular && <span className="badge badge-warning" style={{ fontSize: '0.6875rem' }}>★ POPULAR</span>}
+                                        </div>
+                                    </div>
+
+                                    {/* Feature Toggles */}
+                                    <div style={{ padding: '16px 24px', borderTop: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.02)' }}>
+                                        <label className="glass-label" style={{ marginBottom: 12, display: 'block' }}>Exclusive Features</label>
+                                        <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                            {KNOWN_FEATURES.map(kf => {
+                                                const feat = plan.features.find(f => f.feature_key === kf.key);
+                                                const isEnabled = feat?.enabled ?? false;
+                                                return (
+                                                    <button key={kf.key} onClick={() => handleToggleFeature(plan, kf.key, kf.label)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 10, border: '1px solid var(--glass-border)', background: isEnabled ? 'rgba(16, 185, 129, 0.06)' : 'transparent', cursor: 'pointer', transition: 'all 0.15s', width: '100%', textAlign: 'left' }}>
+                                                        {isEnabled ? <ToggleRight size={20} color="var(--brand-success)" /> : <ToggleLeft size={20} color="var(--text-muted)" />}
+                                                        <span style={{ fontSize: '0.8125rem', fontWeight: isEnabled ? 600 : 400, color: isEnabled ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{kf.label}</span>
+                                                        {isEnabled && <CheckCircle2 size={14} color="var(--brand-success)" style={{ marginLeft: 'auto' }} />}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
+                                    {/* Save Button */}
+                                    <div style={{ padding: '16px 24px', borderTop: '1px solid var(--glass-border)' }}>
+                                        <button onClick={() => handleSavePlan(plan)} className="glass-button glass-button-primary" style={{ width: '100%', justifyContent: 'center', fontSize: '0.8125rem' }} disabled={isLoading}>
+                                            {isLoading ? <><RefreshCw size={14} className="animate-spin" /> Saving...</> : <><Save size={14} /> Save Changes</>}
+                                        </button>
+                                    </div>
+                                </div>
+                            );
+                        })}
+                    </div>
+
+                    {/* New Plan Modal */}
+                    {showNewPlanModal && (
+                        <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                            <div className="glass-card animate-scale-in" style={{ maxWidth: 480, width: '100%', padding: 32 }}>
+                                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
+                                    <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                                        <div style={{ width: 44, height: 44, borderRadius: 12, background: 'rgba(79, 142, 247, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                            <Plus size={22} color="var(--brand-primary)" />
+                                        </div>
+                                        <div>
+                                            <h2 style={{ fontSize: '1.125rem', fontWeight: 700 }}>Create Plan</h2>
+                                            <p style={{ fontSize: '0.75rem', color: 'var(--text-secondary)' }}>Add a new subscription plan</p>
+                                        </div>
+                                    </div>
+                                    <button onClick={() => setShowNewPlanModal(false)} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}>
+                                        <X size={20} />
+                                    </button>
+                                </div>
+                                <form onSubmit={handleCreatePlan} style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                                        <div className="form-group"><label className="glass-label">Plan ID</label><input className="glass-input" required placeholder="e.g. quarterly" value={newPlan.id} onChange={e => setNewPlan(p => ({ ...p, id: e.target.value }))} /></div>
+                                        <div className="form-group"><label className="glass-label">Plan Name</label><input className="glass-input" required placeholder="e.g. Quarterly" value={newPlan.name} onChange={e => setNewPlan(p => ({ ...p, name: e.target.value }))} /></div>
+                                    </div>
+                                    <div className="form-group"><label className="glass-label">Description</label><input className="glass-input" placeholder="Short description" value={newPlan.description} onChange={e => setNewPlan(p => ({ ...p, description: e.target.value }))} /></div>
+                                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 12 }}>
+                                        <div className="form-group"><label className="glass-label">Price (Rs.)</label><input className="glass-input" type="number" placeholder="0" value={newPlan.price} onChange={e => setNewPlan(p => ({ ...p, price: e.target.value }))} /></div>
+                                        <div className="form-group"><label className="glass-label">Period</label><input className="glass-input" placeholder="month" value={newPlan.period} onChange={e => setNewPlan(p => ({ ...p, period: e.target.value }))} /></div>
+                                        <div className="form-group"><label className="glass-label">Days</label><input className="glass-input" type="number" placeholder="30" value={newPlan.duration_days} onChange={e => setNewPlan(p => ({ ...p, duration_days: e.target.value }))} /></div>
+                                    </div>
+                                    <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
+                                        <button type="button" onClick={() => setShowNewPlanModal(false)} className="glass-button" style={{ flex: 1, justifyContent: 'center' }}>Cancel</button>
+                                        <button type="submit" className="glass-button glass-button-primary" style={{ flex: 1, justifyContent: 'center' }} disabled={planLoading === 'new'}>
+                                            {planLoading === 'new' ? <><RefreshCw size={14} className="animate-spin" /> Creating...</> : 'Create Plan'}
+                                        </button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
