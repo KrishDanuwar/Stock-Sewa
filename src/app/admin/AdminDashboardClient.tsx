@@ -109,7 +109,23 @@ export default function AdminDashboardClient({
     const [editingDescriptions, setEditingDescriptions] = useState<Record<string, string>>({});
     const [editingDurations, setEditingDurations] = useState<Record<string, string>>({});
     const [showNewPlanModal, setShowNewPlanModal] = useState(false);
-    const [newPlan, setNewPlan] = useState({ id: '', name: '', description: '', price: '', period: 'month', duration_days: '30' });
+    const [newPlan, setNewPlan] = useState<{
+        id: string;
+        name: string;
+        description: string;
+        price: string;
+        period: string;
+        duration_days: string;
+        selectedFeatures: string[];
+    }>({
+        id: '',
+        name: '',
+        description: '',
+        price: '',
+        period: 'month',
+        duration_days: '30',
+        selectedFeatures: []
+    });
 
     // --- Subscription Handlers ---
     async function handleActivate(id: string, plan: string) {
@@ -236,8 +252,9 @@ export default function AdminDashboardClient({
         e.preventDefault();
         if (!newPlan.id || !newPlan.name) return;
         setPlanLoading('new');
+        const planId = newPlan.id.toLowerCase().replace(/\s+/g, '-');
         const result = await createPlan({
-            id: newPlan.id.toLowerCase().replace(/\s+/g, '-'),
+            id: planId,
             name: newPlan.name,
             description: newPlan.description,
             price: Number(newPlan.price) || 0,
@@ -245,9 +262,15 @@ export default function AdminDashboardClient({
             duration_days: Number(newPlan.duration_days) || 30,
         });
         if (result.success) {
+            // Add selected features to the new plan
+            for (const featureKey of newPlan.selectedFeatures) {
+                const featureLabel = KNOWN_FEATURES.find(kf => kf.key === featureKey)?.label || featureKey;
+                await addFeatureToPlan(planId, featureKey, featureLabel, true);
+            }
+
             toast.success('Plan created');
             setShowNewPlanModal(false);
-            setNewPlan({ id: '', name: '', description: '', price: '', period: 'month', duration_days: '30' });
+            setNewPlan({ id: '', name: '', description: '', price: '', period: 'month', duration_days: '30', selectedFeatures: [] });
             router.refresh();
         } else toast.error(result.error || 'Failed');
         setPlanLoading(null);
@@ -455,7 +478,7 @@ export default function AdminDashboardClient({
                                             </td>
                                             <td>
                                                 <GlassSelect
-                                                    value={selectedPlans[org.id] || (org.subscription_plan === 'trial' ? 'monthly' : org.subscription_plan) || 'monthly'}
+                                                    value={selectedPlans[org.id] || (org.subscription_plan === 'trial' ? (planOptions[0]?.id || 'monthly') : org.subscription_plan) || (planOptions[0]?.id || 'monthly')}
                                                     options={planOptions}
                                                     onChange={(val) => setSelectedPlans(prev => ({ ...prev, [org.id]: val }))}
                                                 />
@@ -625,6 +648,39 @@ export default function AdminDashboardClient({
                                         <div className="form-group"><label className="glass-label">Period</label><input className="glass-input" placeholder="month" value={newPlan.period} onChange={e => setNewPlan(p => ({ ...p, period: e.target.value }))} /></div>
                                         <div className="form-group"><label className="glass-label">Days</label><input className="glass-input" type="number" placeholder="30" value={newPlan.duration_days} onChange={e => setNewPlan(p => ({ ...p, duration_days: e.target.value }))} /></div>
                                     </div>
+
+                                    <div style={{ marginTop: 8 }}>
+                                        <label className="glass-label" style={{ marginBottom: 12, display: 'block' }}>Include Features</label>
+                                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+                                            {KNOWN_FEATURES.map(kf => {
+                                                const isEnabled = newPlan.selectedFeatures.includes(kf.key);
+                                                return (
+                                                    <button
+                                                        key={kf.key}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setNewPlan(prev => ({
+                                                                ...prev,
+                                                                selectedFeatures: isEnabled
+                                                                    ? prev.selectedFeatures.filter(k => k !== kf.key)
+                                                                    : [...prev.selectedFeatures, kf.key]
+                                                            }));
+                                                        }}
+                                                        style={{
+                                                            display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
+                                                            borderRadius: 10, border: '1px solid var(--glass-border)',
+                                                            background: isEnabled ? 'rgba(16, 185, 129, 0.06)' : 'transparent',
+                                                            cursor: 'pointer', transition: 'all 0.15s', textAlign: 'left'
+                                                        }}
+                                                    >
+                                                        {isEnabled ? <ToggleRight size={20} color="var(--brand-success)" /> : <ToggleLeft size={20} color="var(--text-muted)" />}
+                                                        <span style={{ fontSize: '0.8125rem', fontWeight: isEnabled ? 600 : 400, color: isEnabled ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{kf.label}</span>
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+
                                     <div style={{ display: 'flex', gap: 12, marginTop: 8 }}>
                                         <button type="button" onClick={() => setShowNewPlanModal(false)} className="glass-button" style={{ flex: 1, justifyContent: 'center' }}>Cancel</button>
                                         <button type="submit" className="glass-button glass-button-primary" style={{ flex: 1, justifyContent: 'center' }} disabled={planLoading === 'new'}>
