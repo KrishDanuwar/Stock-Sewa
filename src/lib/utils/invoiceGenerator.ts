@@ -219,8 +219,8 @@ export function downloadInvoicePDF(data: InvoiceData) {
 }
 
 /**
- * Opens the invoice PDF in a new browser tab for printing.
- * The tab stays open so the user can review and print at their leisure.
+ * Triggers the system print dialog using a hidden iframe.
+ * This keeps the user on the current page while printing.
  */
 export function printInvoicePDF(data: InvoiceData) {
     try {
@@ -230,15 +230,22 @@ export function printInvoicePDF(data: InvoiceData) {
         const blob = doc.output('blob');
         const url = URL.createObjectURL(blob);
 
-        // Open in a new tab so the print dialog stays visible
-        const printWindow = window.open(url, '_blank');
+        const hiddFrame = document.createElement('iframe');
+        hiddFrame.style.position = 'fixed';
+        hiddFrame.style.visibility = 'hidden';
+        hiddFrame.style.width = '0';
+        hiddFrame.style.height = '0';
+        hiddFrame.src = url;
 
-        if (!printWindow) {
-            // If popup was blocked, fall back to download
-            console.warn('Popup blocked — falling back to PDF download.');
-            downloadInvoicePDF(data);
+        document.body.appendChild(hiddFrame);
+
+        // Cleanup after a longer delay (60s) to ensure print dialog isn't affected
+        setTimeout(() => {
+            if (document.body.contains(hiddFrame)) {
+                document.body.removeChild(hiddFrame);
+            }
             URL.revokeObjectURL(url);
-        }
+        }, 60000);
     } catch (err) {
         console.error('Print trigger failed:', err);
         // Fallback to download if print fails
