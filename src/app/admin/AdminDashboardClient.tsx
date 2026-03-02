@@ -431,7 +431,7 @@ export default function AdminDashboardClient({
                     </div>
 
                     {/* Table */}
-                    <div style={{ overflowX: 'auto' }}>
+                    <div style={{ overflowX: 'auto', paddingBottom: '160px' }}>
                         <table className="glass-table">
                             <thead>
                                 <tr>
@@ -715,7 +715,7 @@ export default function AdminDashboardClient({
                     </div>
 
                     {/* Admin List */}
-                    <div className="glass-card" style={{ padding: 0, overflow: 'hidden' }}>
+                    <div className="glass-card" style={{ padding: 0 }}>
                         <table className="glass-table">
                             <thead>
                                 <tr>

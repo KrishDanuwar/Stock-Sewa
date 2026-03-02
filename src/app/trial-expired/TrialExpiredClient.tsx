@@ -113,9 +113,9 @@ export default function TrialExpiredClient({ email, plans }: TrialExpiredClientP
                             </div>
 
                             <div style={{ marginBottom: '32px' }}>
-                                <div style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-                                    <span style={{ fontSize: '3rem', fontWeight: 900 }}>Rs. {formatPrice(plan.price)}</span>
-                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', fontWeight: 600, textTransform: 'uppercase' }}>{periodLabel(plan.period)}</span>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                                    <span style={{ fontSize: plan.price > 99999 ? '2.5rem' : '3rem', fontWeight: 900, lineHeight: 1 }}>Rs. {formatPrice(plan.price)}</span>
+                                    <span style={{ color: 'var(--text-muted)', fontSize: '0.8125rem', fontWeight: 600, textTransform: 'uppercase', marginTop: '4px' }}>{periodLabel(plan.period)}</span>
                                 </div>
                             </div>
 
