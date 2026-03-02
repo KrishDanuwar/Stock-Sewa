@@ -93,7 +93,6 @@ export default function SuppliersClient({ suppliers, purchases, products }: Prop
         setPurchaseItems(prev => prev.map((item, i) => {
             if (i !== idx) return item;
             const updated = { ...item, [field]: value };
-            // Auto-fill name/price when product selected
             if (field === 'product_id') {
                 const product = products.find(p => p.id === value);
                 if (product) {
@@ -165,26 +164,21 @@ export default function SuppliersClient({ suppliers, purchases, products }: Prop
                 </div>
             </div>
 
-            {/* Tabs */}
-            <div style={{ display: 'flex', gap: 0, marginBottom: 16, borderBottom: '1px solid var(--glass-border)' }}>
+            {/* Tabs - styled similarly to dashboard tabs */}
+            <div className="glass-card" style={{ padding: '4px', display: 'inline-flex', gap: 4, marginBottom: 20, borderRadius: 12 }}>
                 {(['suppliers', 'purchases'] as const).map(t => (
                     <button
                         key={t}
                         onClick={() => setTab(t)}
+                        className={tab === t ? 'glass-button glass-button-primary' : 'glass-button'}
                         style={{
-                            padding: '10px 24px',
-                            fontSize: '0.875rem',
-                            fontWeight: tab === t ? 700 : 500,
-                            color: tab === t ? 'var(--brand-primary)' : 'var(--text-secondary)',
-                            background: 'transparent',
-                            border: 'none',
-                            borderBottom: tab === t ? '2px solid var(--brand-primary)' : '2px solid transparent',
-                            cursor: 'pointer',
-                            textTransform: 'capitalize',
+                            padding: '8px 20px',
+                            fontSize: '0.8rem',
+                            borderRadius: 10,
                         }}
                     >
-                        {t === 'suppliers' ? <><Truck size={14} style={{ marginRight: 6, verticalAlign: 'middle' }} />Suppliers ({suppliers.length})</> :
-                            <><FileText size={14} style={{ marginRight: 6, verticalAlign: 'middle' }} />Purchases ({purchases.length})</>}
+                        {t === 'suppliers' ? <><Truck size={14} /> Suppliers ({suppliers.length})</> :
+                            <><FileText size={14} /> Purchases ({purchases.length})</>}
                     </button>
                 ))}
             </div>
@@ -206,119 +200,140 @@ export default function SuppliersClient({ suppliers, purchases, products }: Prop
             {/* ============= SUPPLIERS TAB ============= */}
             {tab === 'suppliers' && (
                 <div className="glass-card" style={{ overflow: 'auto' }}>
-                    <table className="glass-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Phone</th>
-                                <th>Email</th>
-                                <th>Address</th>
-                                <th>PAN</th>
-                                <th style={{ textAlign: 'center' }}>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {filteredSuppliers.length === 0 ? (
-                                <tr><td colSpan={6} style={{ textAlign: 'center', padding: 32, color: 'var(--text-muted)' }}>No suppliers found</td></tr>
-                            ) : filteredSuppliers.map(s => (
-                                <tr key={s.id}>
-                                    <td style={{ fontWeight: 600 }}>{s.name}</td>
-                                    <td>{s.phone || '—'}</td>
-                                    <td>{s.email || '—'}</td>
-                                    <td>{s.address || '—'}</td>
-                                    <td>{s.pan_number || '—'}</td>
-                                    <td style={{ textAlign: 'center' }}>
-                                        <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
-                                            <button onClick={() => { setEditSupplier(s); setShowSupplierModal(true); }} className="action-button action-info" title="Edit">✏️</button>
-                                            <button onClick={() => handleDeleteSupplier(s.id, s.name)} className="action-button action-danger" title="Delete"><Trash2 size={14} /></button>
-                                        </div>
-                                    </td>
+                    {filteredSuppliers.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
+                            <Truck size={40} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
+                            <p style={{ fontSize: '0.9rem' }}>No suppliers found. Click &quot;Add Supplier&quot; to get started.</p>
+                        </div>
+                    ) : (
+                        <table className="glass-table">
+                            <thead>
+                                <tr>
+                                    <th>Supplier</th>
+                                    <th>Phone</th>
+                                    <th>Address</th>
+                                    <th>PAN</th>
+                                    <th style={{ textAlign: 'center', width: 100 }}>Actions</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                {filteredSuppliers.map(s => (
+                                    <tr key={s.id}>
+                                        <td>
+                                            <div style={{ fontWeight: 600 }}>{s.name}</div>
+                                            {s.email && <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>{s.email}</div>}
+                                        </td>
+                                        <td>{s.phone || '—'}</td>
+                                        <td style={{ color: 'var(--text-secondary)', fontSize: '0.85rem' }}>{s.address || '—'}</td>
+                                        <td><code style={{ fontSize: '0.8rem', background: 'rgba(255,255,255,0.05)', padding: '2px 8px', borderRadius: 6 }}>{s.pan_number || '—'}</code></td>
+                                        <td style={{ textAlign: 'center' }}>
+                                            <div style={{ display: 'flex', gap: 6, justifyContent: 'center' }}>
+                                                <button onClick={() => { setEditSupplier(s); setShowSupplierModal(true); }} className="action-button action-info" title="Edit">✏️</button>
+                                                <button onClick={() => handleDeleteSupplier(s.id, s.name)} className="action-button action-danger" title="Delete"><Trash2 size={14} /></button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             )}
 
             {/* ============= PURCHASES TAB ============= */}
             {tab === 'purchases' && (
                 <div className="glass-card" style={{ overflow: 'auto' }}>
-                    <table className="glass-table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th>Date</th>
-                                <th>Supplier</th>
-                                <th>Items</th>
-                                <th style={{ textAlign: 'right' }}>Total</th>
-                                <th>Notes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {purchases.length === 0 ? (
-                                <tr><td colSpan={6} style={{ textAlign: 'center', padding: 32, color: 'var(--text-muted)' }}>No purchases recorded yet</td></tr>
-                            ) : purchases.map(p => {
-                                const supplierRaw = p.suppliers as any;
-                                const supplierName = Array.isArray(supplierRaw) ? supplierRaw[0]?.name : supplierRaw?.name;
-                                const isExpanded = expandedPurchase === p.id;
-                                return (
-                                    <>
-                                        <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => setExpandedPurchase(isExpanded ? null : p.id)}>
-                                            <td style={{ width: 30, textAlign: 'center' }}>
-                                                {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
-                                            </td>
-                                            <td>{p.purchase_date || '—'}</td>
-                                            <td style={{ fontWeight: 600 }}>{supplierName || 'Unknown'}</td>
-                                            <td>{(p.purchase_items as any[])?.length || 0} items</td>
-                                            <td style={{ textAlign: 'right', fontWeight: 600 }}>Rs. {Number(p.total_amount).toLocaleString()}</td>
-                                            <td style={{ color: 'var(--text-secondary)', fontSize: '0.8rem' }}>{p.notes || '—'}</td>
-                                        </tr>
-                                        {isExpanded && (
-                                            <tr key={`${p.id}-detail`}>
-                                                <td colSpan={6} style={{ padding: '0 12px 12px 36px', background: 'rgba(255,255,255,0.02)' }}>
-                                                    <table style={{ width: '100%', fontSize: '0.8rem' }}>
-                                                        <thead>
-                                                            <tr style={{ color: 'var(--text-muted)' }}>
-                                                                <th style={{ textAlign: 'left', padding: '4px 8px' }}>Product</th>
-                                                                <th style={{ textAlign: 'center', padding: '4px 8px' }}>Qty</th>
-                                                                <th style={{ textAlign: 'right', padding: '4px 8px' }}>Cost Price</th>
-                                                                <th style={{ textAlign: 'right', padding: '4px 8px' }}>Subtotal</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {(p.purchase_items as PurchaseItem[]).map(item => (
-                                                                <tr key={item.id}>
-                                                                    <td style={{ padding: '4px 8px' }}>{item.product_name}</td>
-                                                                    <td style={{ textAlign: 'center', padding: '4px 8px' }}>{item.quantity}</td>
-                                                                    <td style={{ textAlign: 'right', padding: '4px 8px' }}>Rs. {Number(item.cost_price).toLocaleString()}</td>
-                                                                    <td style={{ textAlign: 'right', padding: '4px 8px' }}>Rs. {(item.quantity * Number(item.cost_price)).toLocaleString()}</td>
-                                                                </tr>
-                                                            ))}
-                                                        </tbody>
-                                                    </table>
+                    {purchases.length === 0 ? (
+                        <div style={{ textAlign: 'center', padding: '48px 0', color: 'var(--text-muted)' }}>
+                            <Package size={40} style={{ margin: '0 auto 12px', opacity: 0.4 }} />
+                            <p style={{ fontSize: '0.9rem' }}>No purchases recorded yet. Click &quot;New Purchase&quot; to log your first one.</p>
+                        </div>
+                    ) : (
+                        <table className="glass-table">
+                            <thead>
+                                <tr>
+                                    <th style={{ width: 30 }}></th>
+                                    <th>Date</th>
+                                    <th>Supplier</th>
+                                    <th style={{ textAlign: 'center' }}>Items</th>
+                                    <th style={{ textAlign: 'right' }}>Total</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {purchases.map(p => {
+                                    const supplierRaw = p.suppliers as any;
+                                    const supplierName = Array.isArray(supplierRaw) ? supplierRaw[0]?.name : supplierRaw?.name;
+                                    const isExpanded = expandedPurchase === p.id;
+                                    return (
+                                        <>
+                                            <tr key={p.id} style={{ cursor: 'pointer' }} onClick={() => setExpandedPurchase(isExpanded ? null : p.id)}>
+                                                <td style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+                                                    {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                                                 </td>
+                                                <td style={{ fontWeight: 500 }}>{p.purchase_date || '—'}</td>
+                                                <td>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                                        <div style={{ width: 28, height: 28, borderRadius: 8, background: 'rgba(var(--brand-primary-rgb, 99, 102, 241), 0.15)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                                            <Truck size={14} style={{ color: 'var(--brand-primary)' }} />
+                                                        </div>
+                                                        <span style={{ fontWeight: 600 }}>{supplierName || 'Unknown'}</span>
+                                                    </div>
+                                                </td>
+                                                <td style={{ textAlign: 'center' }}>
+                                                    <span className="badge badge-info">{(p.purchase_items as any[])?.length || 0}</span>
+                                                </td>
+                                                <td style={{ textAlign: 'right', fontWeight: 700, color: 'var(--brand-success)' }}>Rs. {Number(p.total_amount).toLocaleString()}</td>
+                                                <td style={{ color: 'var(--text-muted)', fontSize: '0.8rem', maxWidth: 150, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{p.notes || '—'}</td>
                                             </tr>
-                                        )}
-                                    </>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                            {isExpanded && (
+                                                <tr key={`${p.id}-detail`}>
+                                                    <td colSpan={6} style={{ padding: '4px 16px 16px 48px', background: 'rgba(255,255,255,0.02)', borderTop: 'none' }}>
+                                                        <div style={{ fontSize: '0.75rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Purchase Items</div>
+                                                        <table style={{ width: '100%', fontSize: '0.82rem' }}>
+                                                            <thead>
+                                                                <tr style={{ color: 'var(--text-muted)' }}>
+                                                                    <th style={{ textAlign: 'left', padding: '4px 8px', fontWeight: 600 }}>Product</th>
+                                                                    <th style={{ textAlign: 'center', padding: '4px 8px', fontWeight: 600 }}>Qty</th>
+                                                                    <th style={{ textAlign: 'right', padding: '4px 8px', fontWeight: 600 }}>Cost Price</th>
+                                                                    <th style={{ textAlign: 'right', padding: '4px 8px', fontWeight: 600 }}>Subtotal</th>
+                                                                </tr>
+                                                            </thead>
+                                                            <tbody>
+                                                                {(p.purchase_items as PurchaseItem[]).map(item => (
+                                                                    <tr key={item.id}>
+                                                                        <td style={{ padding: '6px 8px', fontWeight: 500 }}>{item.product_name}</td>
+                                                                        <td style={{ textAlign: 'center', padding: '6px 8px' }}>{item.quantity}</td>
+                                                                        <td style={{ textAlign: 'right', padding: '6px 8px' }}>Rs. {Number(item.cost_price).toLocaleString()}</td>
+                                                                        <td style={{ textAlign: 'right', padding: '6px 8px', fontWeight: 600 }}>Rs. {(item.quantity * Number(item.cost_price)).toLocaleString()}</td>
+                                                                    </tr>
+                                                                ))}
+                                                            </tbody>
+                                                        </table>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
+                    )}
                 </div>
             )}
 
             {/* ============= ADD/EDIT SUPPLIER MODAL ============= */}
             {showSupplierModal && (
-                <div className="modal-overlay" onClick={() => { setShowSupplierModal(false); setEditSupplier(null); }}>
-                    <div className="glass-card modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 480 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                            <h2 style={{ fontSize: '1.1rem', fontWeight: 700 }}>{editSupplier ? 'Edit Supplier' : 'Add Supplier'}</h2>
-                            <button onClick={() => { setShowSupplierModal(false); setEditSupplier(null); }} className="action-button"><X size={18} /></button>
-                        </div>
-                        <form onSubmit={handleSaveSupplier}>
+                <div className="glass-modal">
+                    <div className="glass-card glass-modal-card animate-fade-in-up" style={{ width: '100%', maxWidth: 480, padding: 28, position: 'relative' }}>
+                        <button onClick={() => { setShowSupplierModal(false); setEditSupplier(null); }} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+                            <X size={20} />
+                        </button>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 20 }}>{editSupplier ? 'Edit Supplier' : 'Add New Supplier'}</h2>
+                        <form onSubmit={handleSaveSupplier} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                             <div className="form-group">
                                 <label className="form-label">Supplier Name *</label>
-                                <input name="name" className="glass-input" required defaultValue={editSupplier?.name || ''} placeholder="e.g. Nepal Trading Co." />
+                                <input name="name" className="glass-input" required defaultValue={editSupplier?.name || ''} placeholder="e.g. Nepal Trading Co." autoComplete="off" />
                             </div>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                                 <div className="form-group">
@@ -338,7 +353,7 @@ export default function SuppliersClient({ suppliers, purchases, products }: Prop
                                 <label className="form-label">PAN Number</label>
                                 <input name="pan_number" className="glass-input" defaultValue={editSupplier?.pan_number || ''} placeholder="000000000" />
                             </div>
-                            <button type="submit" disabled={saving} className="glass-button glass-button-primary" style={{ width: '100%', justifyContent: 'center', marginTop: 10, padding: 14 }}>
+                            <button type="submit" disabled={saving} className="glass-button glass-button-primary" style={{ width: '100%', justifyContent: 'center', marginTop: 8, padding: 14 }}>
                                 {saving ? 'Saving...' : editSupplier ? 'Update Supplier' : 'Add Supplier'}
                             </button>
                         </form>
@@ -348,13 +363,13 @@ export default function SuppliersClient({ suppliers, purchases, products }: Prop
 
             {/* ============= NEW PURCHASE MODAL ============= */}
             {showPurchaseModal && (
-                <div className="modal-overlay" onClick={() => { setShowPurchaseModal(false); setPurchaseItems([]); }}>
-                    <div className="glass-card modal-content" onClick={e => e.stopPropagation()} style={{ maxWidth: 640 }}>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-                            <h2 style={{ fontSize: '1.1rem', fontWeight: 700 }}>Record New Purchase</h2>
-                            <button onClick={() => { setShowPurchaseModal(false); setPurchaseItems([]); }} className="action-button"><X size={18} /></button>
-                        </div>
-                        <form onSubmit={handleCreatePurchase}>
+                <div className="glass-modal">
+                    <div className="glass-card glass-modal-card animate-fade-in-up" style={{ width: '100%', maxWidth: 640, padding: 28, position: 'relative' }}>
+                        <button onClick={() => { setShowPurchaseModal(false); setPurchaseItems([]); }} style={{ position: 'absolute', top: 16, right: 16, background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-secondary)' }}>
+                            <X size={20} />
+                        </button>
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 700, marginBottom: 20 }}>Record New Purchase</h2>
+                        <form onSubmit={handleCreatePurchase} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
                                 <div className="form-group">
                                     <label className="form-label">Supplier *</label>
@@ -373,37 +388,50 @@ export default function SuppliersClient({ suppliers, purchases, products }: Prop
                                 <input className="glass-input" value={purchaseNotes} onChange={e => setPurchaseNotes(e.target.value)} placeholder="Optional notes..." />
                             </div>
 
-                            {/* Purchase Items */}
-                            <div style={{ marginTop: 12, marginBottom: 8, fontWeight: 700, fontSize: '0.9rem' }}>Items</div>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 240, overflowY: 'auto' }}>
-                                {purchaseItems.map((item, idx) => (
-                                    <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 30px', gap: 8, alignItems: 'end' }}>
-                                        <div>
-                                            {idx === 0 && <label className="form-label" style={{ fontSize: '0.7rem' }}>Product</label>}
-                                            <select className="glass-input" value={item.product_id} onChange={e => updatePurchaseItem(idx, 'product_id', e.target.value)} required>
-                                                <option value="">Select Product</option>
-                                                {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-                                            </select>
+                            {/* Items Section */}
+                            <div style={{ borderTop: '1px solid var(--glass-border)', paddingTop: 14 }}>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+                                    <span style={{ fontWeight: 700, fontSize: '0.9rem' }}>Purchase Items</span>
+                                    <button type="button" onClick={addPurchaseItem} className="glass-button" style={{ padding: '6px 12px', fontSize: '0.75rem' }}>
+                                        <Plus size={12} /> Add Item
+                                    </button>
+                                </div>
+                                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, maxHeight: 220, overflowY: 'auto' }}>
+                                    {purchaseItems.length === 0 && (
+                                        <div style={{ textAlign: 'center', padding: '20px 0', color: 'var(--text-muted)', fontSize: '0.8rem' }}>
+                                            No items added yet
                                         </div>
-                                        <div>
-                                            {idx === 0 && <label className="form-label" style={{ fontSize: '0.7rem' }}>Qty</label>}
-                                            <input className="glass-input" type="number" min="1" value={item.quantity} onChange={e => updatePurchaseItem(idx, 'quantity', e.target.value)} required />
+                                    )}
+                                    {purchaseItems.map((item, idx) => (
+                                        <div key={idx} style={{ display: 'grid', gridTemplateColumns: '2fr 1fr 1fr 30px', gap: 8, alignItems: 'end' }}>
+                                            <div>
+                                                {idx === 0 && <label className="form-label" style={{ fontSize: '0.7rem' }}>Product</label>}
+                                                <select className="glass-input" value={item.product_id} onChange={e => updatePurchaseItem(idx, 'product_id', e.target.value)} required style={{ fontSize: '0.82rem' }}>
+                                                    <option value="">Select</option>
+                                                    {products.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+                                                </select>
+                                            </div>
+                                            <div>
+                                                {idx === 0 && <label className="form-label" style={{ fontSize: '0.7rem' }}>Qty</label>}
+                                                <input className="glass-input" type="number" min="1" value={item.quantity} onChange={e => updatePurchaseItem(idx, 'quantity', e.target.value)} required style={{ fontSize: '0.82rem' }} />
+                                            </div>
+                                            <div>
+                                                {idx === 0 && <label className="form-label" style={{ fontSize: '0.7rem' }}>Cost Price</label>}
+                                                <input className="glass-input" type="number" min="0" step="0.01" value={item.cost_price} onChange={e => updatePurchaseItem(idx, 'cost_price', e.target.value)} style={{ fontSize: '0.82rem' }} />
+                                            </div>
+                                            <button type="button" onClick={() => removePurchaseItem(idx)} className="action-button action-danger" style={{ height: 36, width: 30 }}><Trash2 size={13} /></button>
                                         </div>
-                                        <div>
-                                            {idx === 0 && <label className="form-label" style={{ fontSize: '0.7rem' }}>Cost Price</label>}
-                                            <input className="glass-input" type="number" min="0" step="0.01" value={item.cost_price} onChange={e => updatePurchaseItem(idx, 'cost_price', e.target.value)} />
-                                        </div>
-                                        <button type="button" onClick={() => removePurchaseItem(idx)} className="action-button action-danger" style={{ height: 36 }}><Trash2 size={14} /></button>
-                                    </div>
-                                ))}
+                                    ))}
+                                </div>
                             </div>
-                            <button type="button" onClick={addPurchaseItem} className="glass-button" style={{ width: '100%', justifyContent: 'center', marginTop: 8, fontSize: '0.8rem' }}>
-                                <Plus size={14} /> Add Item
-                            </button>
 
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: 16, padding: '12px 0', borderTop: '1px solid var(--glass-border)' }}>
-                                <span style={{ fontWeight: 700, fontSize: '1rem' }}>Total: Rs. {purchaseTotal.toLocaleString()}</span>
-                                <button type="submit" disabled={creatingPurchase} className="glass-button glass-button-primary" style={{ padding: '12px 28px' }}>
+                            {/* Footer */}
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderTop: '1px solid var(--glass-border)', paddingTop: 14 }}>
+                                <div>
+                                    <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>Purchase Total</div>
+                                    <div style={{ fontSize: '1.15rem', fontWeight: 700, color: 'var(--brand-success)' }}>Rs. {purchaseTotal.toLocaleString()}</div>
+                                </div>
+                                <button type="submit" disabled={creatingPurchase} className="glass-button glass-button-primary" style={{ padding: '12px 24px' }}>
                                     {creatingPurchase ? 'Recording...' : 'Record Purchase & Restock'}
                                 </button>
                             </div>
