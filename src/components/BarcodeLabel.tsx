@@ -22,19 +22,18 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batchNumber }:
         return () => cancelAnimationFrame(frame);
     }, []);
 
-    // Generate barcode image after mount
     useEffect(() => {
         if (mounted && canvasRef.current && barcode) {
             try {
                 JsBarcode(canvasRef.current, barcode, {
                     format: "CODE128",
-                    width: 1.2,
-                    height: 28,
+                    width: 1,
+                    height: 22,
                     displayValue: true,
-                    fontSize: 10,
+                    fontSize: 8,
                     margin: 0,
                     background: "#ffffff",
-                    textMargin: 1
+                    textMargin: 0
                 });
                 setImgData(canvasRef.current.toDataURL("image/png"));
             } catch (err) {
@@ -62,16 +61,16 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batchNumber }:
                         {imgData ? (
                             <img src={imgData} className="barcode-img" alt="barcode" />
                         ) : (
-                            <div className="barcode-placeholder">Generating...</div>
+                            <div className="barcode-placeholder">...</div>
                         )}
                     </div>
 
-                    {/* Bottom details: MRP + MFG/Batch */}
+                    {/* Bottom row */}
                     <div className="details-row">
                         <span className="mrp-text">MRP: Rs.{price.toLocaleString()}</span>
                         <div className="meta-col">
-                            {hasMfg && <span>MFG: {mfg}</span>}
-                            {hasBatch && <span>Batch: {batchNumber}</span>}
+                            {hasMfg && <span className="meta-highlight">MFG: {mfg}</span>}
+                            {hasBatch && <span className="meta-highlight">B/N: {batchNumber}</span>}
                         </div>
                     </div>
                 </div>
@@ -88,72 +87,74 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batchNumber }:
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    padding: 0;
+                    margin: 0;
                 }
                 .label-content {
                     display: flex;
                     flex-direction: column;
                     align-items: center;
                     justify-content: space-between;
-                    height: 23mm;
+                    height: 24mm;
                     width: 48mm;
                     padding: 0.5mm 0;
                     box-sizing: border-box;
                 }
                 .product-name {
-                    font-size: 7pt;
-                    font-weight: 700;
+                    font-size: 6pt;
+                    font-weight: 600;
                     color: #000;
                     text-transform: uppercase;
                     text-align: center;
                     width: 48mm;
-                    display: -webkit-box;
-                    -webkit-line-clamp: 1;
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                    line-height: 1.15;
                     white-space: nowrap;
+                    overflow: hidden;
                     text-overflow: ellipsis;
+                    line-height: 1.1;
+                    letter-spacing: 0.2pt;
                 }
                 .barcode-zone {
-                    width: 46mm;
-                    height: 12mm;
+                    width: 44mm;
+                    height: 10mm;
                     display: flex;
                     align-items: center;
                     justify-content: center;
+                    margin: 0.3mm 0;
                 }
                 .barcode-img {
-                    max-width: 46mm;
-                    max-height: 12mm;
+                    max-width: 44mm;
+                    max-height: 10mm;
                     image-rendering: auto;
                 }
                 .barcode-placeholder {
                     font-size: 5pt;
-                    color: #666;
+                    color: #999;
                 }
                 .details-row {
                     display: flex;
                     justify-content: space-between;
                     align-items: flex-end;
                     width: 48mm;
-                    font-size: 5.5pt;
-                    font-weight: 700;
-                    color: #000;
                     padding: 0 0.5mm;
                     box-sizing: border-box;
-                    line-height: 1.2;
+                    line-height: 1.15;
                 }
                 .mrp-text {
-                    font-size: 6.5pt;
-                    font-weight: 800;
+                    font-size: 5.5pt;
+                    font-weight: 400;
+                    color: #222;
                     white-space: nowrap;
                 }
                 .meta-col {
                     display: flex;
                     flex-direction: column;
                     align-items: flex-end;
-                    font-size: 5pt;
-                    font-weight: 600;
                     gap: 0;
+                }
+                .meta-highlight {
+                    font-size: 5.5pt;
+                    font-weight: 800;
+                    color: #000;
                     line-height: 1.15;
                 }
             `}</style>
@@ -162,20 +163,20 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batchNumber }:
                 @page {
                     size: 50mm 25mm !important;
                     margin: 0 !important;
+                    padding: 0 !important;
                 }
                 @media print {
                     body > *:not(.print-portal-root) {
                         display: none !important;
                     }
-
                     html, body {
                         background: white !important;
                         margin: 0 !important;
                         padding: 0 !important;
-                        height: 25mm !important;
                         width: 50mm !important;
+                        height: 25mm !important;
+                        overflow: hidden !important;
                     }
-
                     .print-portal-root {
                         display: block !important;
                         position: fixed !important;
@@ -186,13 +187,15 @@ export default function BarcodeLabel({ name, price, barcode, mfg, batchNumber }:
                         background: white !important;
                         z-index: 2147483647 !important;
                         overflow: hidden !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
                     }
-
                     .label-container {
                         width: 50mm !important;
                         height: 25mm !important;
+                        margin: 0 !important;
+                        padding: 0 !important;
                     }
-
                     *::before, *::after {
                         display: none !important;
                         content: none !important;
