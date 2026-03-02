@@ -145,26 +145,43 @@ function prepareInvoiceDoc(data: InvoiceData): jsPDF {
     doc.text(`Grand Total: Rs. ${data.total_amount.toLocaleString()}`, 15, finalY + 5);
     finalY += 12;
 
-    // Amount in Words
+    // Grand Total in Words
     doc.setFontSize(9);
     doc.setFont('helvetica', 'italic');
-    const amountWords = numberToWords(typeof data.total_amount === 'number' ? data.total_amount : parseFloat(data.total_amount));
-    doc.text(`In Words: ${amountWords}`, 15, finalY);
+    const totalNum = typeof data.total_amount === 'number' ? data.total_amount : parseFloat(data.total_amount);
+    doc.text(`In Words: ${numberToWords(totalNum)}`, 15, finalY);
     finalY += 8;
 
+    // Reset font
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(10);
+
     if (data.amount_paid !== undefined) {
-        doc.setFontSize(10);
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Amount Paid: Rs. ${Number(data.amount_paid).toLocaleString()}`, 15, finalY);
+        const paidAmount = Number(data.amount_paid);
+        doc.text(`Amount Paid: Rs. ${paidAmount.toLocaleString()}`, 15, finalY);
         finalY += 5;
 
-        const due = data.due_amount !== undefined ? Number(data.due_amount) : Number(data.total_amount) - Number(data.amount_paid);
+        // Amount Paid in Words
+        doc.setFontSize(9);
+        doc.setFont('helvetica', 'italic');
+        doc.text(`(${numberToWords(paidAmount)})`, 15, finalY);
+        finalY += 6;
 
+        const due = data.due_amount !== undefined ? Number(data.due_amount) : Number(data.total_amount) - paidAmount;
+
+        doc.setFontSize(10);
         if (due > 0) {
             doc.setFont('helvetica', 'bold');
             doc.text(`Due Amount: Rs. ${due.toLocaleString()}`, 15, finalY);
+            finalY += 5;
+
+            // Due Amount in Words
+            doc.setFontSize(9);
+            doc.setFont('helvetica', 'italic');
+            doc.text(`(${numberToWords(due)})`, 15, finalY);
             doc.setFont('helvetica', 'normal');
         } else {
+            doc.setFont('helvetica', 'normal');
             doc.text(`Due Amount: Rs. 0`, 15, finalY);
         }
         finalY += 7;
@@ -202,7 +219,8 @@ export function downloadInvoicePDF(data: InvoiceData) {
 }
 
 /**
- * Triggers the system print dialog without saving a file
+ * Opens the invoice PDF in a new browser tab for printing.
+ * The tab stays open so the user can review and print at their leisure.
  */
 export function printInvoicePDF(data: InvoiceData) {
     try {
@@ -212,22 +230,15 @@ export function printInvoicePDF(data: InvoiceData) {
         const blob = doc.output('blob');
         const url = URL.createObjectURL(blob);
 
-        const hiddFrame = document.createElement('iframe');
-        hiddFrame.style.position = 'fixed';
-        hiddFrame.style.visibility = 'hidden';
-        hiddFrame.style.width = '0';
-        hiddFrame.style.height = '0';
-        hiddFrame.src = url;
+        // Open in a new tab so the print dialog stays visible
+        const printWindow = window.open(url, '_blank');
 
-        document.body.appendChild(hiddFrame);
-
-        // Cleanup
-        setTimeout(() => {
-            if (document.body.contains(hiddFrame)) {
-                document.body.removeChild(hiddFrame);
-            }
+        if (!printWindow) {
+            // If popup was blocked, fall back to download
+            console.warn('Popup blocked — falling back to PDF download.');
+            downloadInvoicePDF(data);
             URL.revokeObjectURL(url);
-        }, 10000);
+        }
     } catch (err) {
         console.error('Print trigger failed:', err);
         // Fallback to download if print fails

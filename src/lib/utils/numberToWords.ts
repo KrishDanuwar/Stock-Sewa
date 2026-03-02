@@ -1,17 +1,36 @@
 export function numberToWords(num: number): string {
-    if (num === 0) return 'Zero Only';
-    if (num.toString().length > 12) return 'Overflow';
+    if (isNaN(num)) return 'Zero Rupees Only';
 
-    return internationalToWords(num);
+    const absNum = Math.abs(num);
+    if (absNum === 0) return 'Zero Rupees Only';
+    if (absNum.toString().length > 12) return 'Amount Too Large';
+
+    const rupees = Math.floor(absNum);
+    const paisa = Math.round((absNum - rupees) * 100);
+
+    let result = '';
+
+    if (rupees > 0) {
+        result = convertWholeNumber(rupees) + ' Rupees';
+    }
+
+    if (paisa > 0) {
+        if (result) result += ' and ';
+        result += convertWholeNumber(paisa) + ' Paisa';
+    }
+
+    if (!result) return 'Zero Rupees Only';
+
+    return result + ' Only';
 }
 
-function internationalToWords(n: number): string {
+function convertWholeNumber(n: number): string {
     if (n === 0) return 'Zero';
 
     const units = ['', 'Thousand', 'Million', 'Billion'];
     let words = '';
 
-    const parts = [];
+    const parts: number[] = [];
     let temp = Math.floor(n);
     while (temp > 0) {
         parts.push(temp % 1000);
@@ -24,11 +43,7 @@ function internationalToWords(n: number): string {
         words = partWords + (units[i] ? ' ' + units[i] : '') + (words ? ' ' + words : '');
     }
 
-    // Capitalize first letter
-    const finalWords = words.trim();
-    if (!finalWords) return 'Zero Rupees Only';
-
-    return finalWords.charAt(0).toUpperCase() + finalWords.slice(1) + ' Rupees Only';
+    return words.trim();
 }
 
 function convertSubHundred(n: number): string {
