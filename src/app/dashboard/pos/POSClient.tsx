@@ -7,7 +7,7 @@ import { toast } from 'sonner';
 import { Plus, Minus, Trash2, ShoppingCart, Search, Receipt, CheckCircle, Printer } from 'lucide-react';
 import { printInvoicePDF } from '@/lib/utils/invoiceGenerator';
 
-type Product = { id: string; name: string; price: number; stock_quantity: number; unit: string; };
+type Product = { id: string; name: string; price: number; cost_price?: number; stock_quantity: number; unit: string; };
 type Customer = { id: string; name: string; pan_number: string | null; tax_type?: 'pan' | 'vat'; };
 type Organization = { name: string; pan_vat: string | null; address: string | null; phone: string | null; logo_url: string | null; } | null;
 
@@ -54,7 +54,7 @@ export default function POSClient({
         setCart(prev => {
             const exists = prev.find(i => i.product_id === p.id);
             if (exists) return prev.map(i => i.product_id === p.id ? { ...i, quantity: Math.min(i.quantity + 1, p.stock_quantity) } : i);
-            return [...prev, { product_id: p.id, product_name: p.name, quantity: 1, unit_price: p.price, discount_percent: '' }];
+            return [...prev, { product_id: p.id, product_name: p.name, quantity: 1, unit_price: p.price, cost_price: p.cost_price || 0, discount_percent: '' }];
         });
     };
 

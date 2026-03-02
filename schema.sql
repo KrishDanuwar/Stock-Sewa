@@ -97,7 +97,8 @@ CREATE TABLE IF NOT EXISTS invoice_items (
     product_id  UUID REFERENCES products(id) ON DELETE SET NULL,
     product_name TEXT NOT NULL,
     quantity    INTEGER NOT NULL,
-    unit_price  DECIMAL(12, 2) NOT NULL
+    unit_price  DECIMAL(12, 2) NOT NULL,
+    cost_price  DECIMAL(12, 2) DEFAULT 0.00
 );
 
 -- ======================================================

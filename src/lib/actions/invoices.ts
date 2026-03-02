@@ -10,6 +10,7 @@ export interface CartItem {
     product_name: string;
     quantity: number;
     unit_price: number;
+    cost_price: number;
 }
 
 export interface CreateInvoicePayload {
@@ -100,6 +101,7 @@ export async function createInvoice(payload: CreateInvoicePayload) {
             product_name: item.product_name,
             quantity: item.quantity,
             unit_price: item.unit_price,
+            cost_price: item.cost_price,
         }))
     );
     if (itemsError) return { error: itemsError.message };

@@ -8,7 +8,7 @@ import BarcodeLabel from '@/components/BarcodeLabel';
 
 type Product = {
     id: string; name: string; barcode: string | null;
-    price: number; stock_quantity: number;
+    price: number; cost_price: number; stock_quantity: number;
     unit: string; category: string | null; created_at: string;
     mfg_date?: string | null; expiry_date?: string | null; batch_number?: string | null;
 };
@@ -21,6 +21,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
     const [restockItem, setRestockItem] = useState<Product | null>(null);
     const [restockQty, setRestockQty] = useState('');
     const [restockPrice, setRestockPrice] = useState('');
+    const [restockCostPrice, setRestockCostPrice] = useState('');
     const [restockMfg, setRestockMfg] = useState('');
     const [restockExpiry, setRestockExpiry] = useState('');
     const [restockBatch, setRestockBatch] = useState('');
@@ -72,6 +73,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
             restockItem.id,
             qty,
             parseFloat(restockPrice),
+            parseFloat(restockCostPrice),
             restockMfg,
             restockExpiry,
             restockBatch
@@ -81,6 +83,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
             setRestockItem(null);
             setRestockQty('');
             setRestockPrice('');
+            setRestockCostPrice('');
             setRestockMfg('');
             setRestockExpiry('');
             setRestockBatch('');
@@ -182,6 +185,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                             <tr>
                                 <th>Name & Barcode</th>
                                 <th>Category</th>
+                                <th>Cost Price</th>
                                 <th>MRP</th>
                                 <th>Stock</th>
                                 <th>Expiry Status</th>
@@ -200,6 +204,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                         </div>
                                     </td>
                                     <td><span style={{ color: 'var(--text-secondary)' }}>{p.category || '—'}</span></td>
+                                    <td style={{ fontWeight: 600 }}>Rs. {Number(p.cost_price).toLocaleString()}</td>
                                     <td style={{ fontWeight: 600 }}>Rs. {Number(p.price).toLocaleString()}</td>
                                     <td>{stockBadge(p.stock_quantity)}</td>
                                     <td>{expiryBadge(p.expiry_date)}</td>
@@ -214,6 +219,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                                 setRestockItem(p);
                                                 setRestockQty('');
                                                 setRestockPrice(p.price.toString());
+                                                setRestockCostPrice(p.cost_price.toString());
                                                 setRestockMfg(p.mfg_date || '');
                                                 setRestockExpiry(p.expiry_date || '');
                                                 setRestockBatch(p.batch_number || '');
@@ -256,9 +262,13 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                                 <input name="name" required className="glass-input" autoComplete="off" />
                             </div>
 
-                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 14 }}>
                                 <div className="form-group">
-                                    <label className="form-label">MRP  रु *</label>
+                                    <label className="form-label">Cost Price रु *</label>
+                                    <input name="cost_price" type="number" min="0" step="0.01" required className="glass-input" placeholder="0.00" onKeyDown={e => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }} />
+                                </div>
+                                <div className="form-group">
+                                    <label className="form-label">MRP रु *</label>
                                     <input name="price" type="number" min="0" step="0.01" required className="glass-input" placeholder="0.00" onKeyDown={e => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }} />
                                 </div>
                                 <div className="form-group">
@@ -334,6 +344,18 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                             </div>
 
                             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 14 }}>
+                                <div className="form-group">
+                                    <label className="form-label">Update Cost Price रु</label>
+                                    <input
+                                        className="glass-input"
+                                        type="number"
+                                        min="0"
+                                        step="0.01"
+                                        value={restockCostPrice}
+                                        onChange={e => setRestockCostPrice(e.target.value)}
+                                        onKeyDown={e => { if (e.key === '-' || e.key === 'e') e.preventDefault(); }}
+                                    />
+                                </div>
                                 <div className="form-group">
                                     <label className="form-label">Update MRP रु</label>
                                     <input

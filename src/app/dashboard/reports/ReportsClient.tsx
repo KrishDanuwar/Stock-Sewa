@@ -31,10 +31,11 @@ interface ReportsClientProps {
     totalTax: number;
     totalSubtotal: number;
     totalSales: number;
+    totalProfit: number;
     plan: PlanConfig;
 }
 
-function generateCSV(invoiceRows: InvoiceRow[], topProducts: ProductSale[], totalRevenue: number, totalTax: number, totalSubtotal: number, totalSales: number): string {
+function generateCSV(invoiceRows: InvoiceRow[], topProducts: ProductSale[], totalRevenue: number, totalTax: number, totalSubtotal: number, totalSales: number, totalProfit: number): string {
     const lines: string[] = [];
 
     // Summary
@@ -44,6 +45,7 @@ function generateCSV(invoiceRows: InvoiceRow[], topProducts: ProductSale[], tota
     lines.push(`Total Revenue,Rs. ${totalRevenue}`);
     lines.push(`VAT Collected,Rs. ${totalTax}`);
     lines.push(`Net Subtotal,Rs. ${totalSubtotal}`);
+    lines.push(`Estimated Profit,Rs. ${totalProfit}`);
     lines.push(`Total Sales,${totalSales}`);
     lines.push('');
 
@@ -65,7 +67,7 @@ function generateCSV(invoiceRows: InvoiceRow[], topProducts: ProductSale[], tota
     return lines.join('\n');
 }
 
-export default function ReportsClient({ topProducts, invoiceRows, totalRevenue, totalTax, totalSubtotal, totalSales, plan }: ReportsClientProps) {
+export default function ReportsClient({ topProducts, invoiceRows, totalRevenue, totalTax, totalSubtotal, totalSales, totalProfit, plan }: ReportsClientProps) {
     const handleDownload = () => {
         if (!plan.features.canExportCSV) {
             toast.error('Advanced Data Export is only available on the Premium Yearly plan.', {
@@ -73,7 +75,7 @@ export default function ReportsClient({ topProducts, invoiceRows, totalRevenue, 
             });
             return;
         }
-        const csv = generateCSV(invoiceRows, topProducts, totalRevenue, totalTax, totalSubtotal, totalSales);
+        const csv = generateCSV(invoiceRows, topProducts, totalRevenue, totalTax, totalSubtotal, totalSales, totalProfit);
         const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');

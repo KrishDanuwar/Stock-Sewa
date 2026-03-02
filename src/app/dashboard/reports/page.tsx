@@ -27,7 +27,8 @@ export default async function ReportsPage() {
                 product_id,
                 product_name,
                 quantity,
-                unit_price
+                unit_price,
+                cost_price
             )
         `)
         .eq('organization_id', organizationId);
@@ -36,6 +37,14 @@ export default async function ReportsPage() {
     const totalRevenue = invoices?.reduce((s, i) => s + Number(i.total_amount), 0) ?? 0;
     const totalTax = invoices?.reduce((s, i) => s + Number(i.tax_amount), 0) ?? 0;
     const totalSubtotal = invoices?.reduce((s, i) => s + Number(i.subtotal || 0), 0) ?? 0;
+
+    // Calculate Total Cost
+    const totalCost = invoices?.reduce((sum, inv) => {
+        const itemsCost = (inv.invoice_items as any[])?.reduce((itemSum, item) => itemSum + (Number(item.cost_price || 0) * Number(item.quantity)), 0) || 0;
+        return sum + itemsCost;
+    }, 0) ?? 0;
+
+    const totalProfit = totalRevenue - totalCost;
 
     const vatInvoices = invoices?.filter(i => i.invoice_type === 'vat') ?? [];
     const panInvoices = invoices?.filter(i => i.invoice_type === 'pan') ?? [];
@@ -84,6 +93,7 @@ export default async function ReportsPage() {
 
     const stats = [
         { label: 'Total Revenue', value: `Rs. ${totalRevenue.toLocaleString()}`, color: 'var(--brand-success)' },
+        { label: 'Estimated Profit', value: `Rs. ${totalProfit.toLocaleString()}`, color: '#10b981' },
         { label: 'VAT Collected', value: `Rs. ${totalTax.toLocaleString()}`, color: 'var(--brand-primary)' },
         { label: 'Net Subtotal', value: `Rs. ${totalSubtotal.toLocaleString()}`, color: 'var(--brand-secondary)' },
         { label: 'Total Sales', value: invoices?.length ?? 0, color: 'var(--brand-accent)' },
@@ -105,6 +115,7 @@ export default async function ReportsPage() {
                     totalTax={totalTax}
                     totalSubtotal={totalSubtotal}
                     totalSales={invoices?.length ?? 0}
+                    totalProfit={totalProfit}
                     plan={plan}
                 />
             </div>
