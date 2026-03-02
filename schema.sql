@@ -13,6 +13,7 @@ CREATE TABLE IF NOT EXISTS organizations (
     id         UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     name       TEXT NOT NULL,
     pan_vat    TEXT,
+    pan_vat_type TEXT DEFAULT 'pan' CHECK (pan_vat_type IN ('pan', 'vat')),
     address    TEXT,
     phone      TEXT,
     logo_url   TEXT,

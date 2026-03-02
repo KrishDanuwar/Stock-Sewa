@@ -6,6 +6,7 @@ export interface InvoiceData {
     organization: {
         name: string;
         pan_vat: string | null;
+        pan_vat_type?: 'pan' | 'vat';
         address: string | null;
         phone: string | null;
     };
@@ -43,26 +44,23 @@ function prepareInvoiceDoc(data: InvoiceData): jsPDF {
     doc.setFont('helvetica', 'bold');
     doc.text(data.organization.name, pageWidth / 2, 20, { align: 'center' });
 
-    // Header Details - Left Aligned below Name
+    // PAN/VAT below org name (centered)
+    let detailY = 26;
+    if (data.organization.pan_vat) {
+        doc.setFontSize(10);
+        doc.setFont('helvetica', 'normal');
+        const taxLabel = data.organization.pan_vat_type === 'vat' ? 'VAT No' : 'PAN No';
+        doc.text(`${taxLabel}: ${data.organization.pan_vat}`, pageWidth / 2, detailY, { align: 'center' });
+        detailY += 5;
+    }
+
+    // Header Details - Left Aligned below
     doc.setFontSize(10);
     doc.setFont('helvetica', 'normal');
-    let detailY = 26;
     if (data.organization.address) {
         doc.text(`Address: ${data.organization.address}`, 15, detailY);
         detailY += 5;
     }
-
-    // Header PAN/VAT logic based on invoice type
-    if (data.invoice_type === 'vat' && data.organization.pan_vat) {
-        doc.text(`PAN No: ${data.organization.pan_vat}`, 15, detailY);
-        detailY += 5;
-        doc.text(`VAT No: ${data.organization.pan_vat}`, 15, detailY);
-        detailY += 5;
-    } else if (data.invoice_type === 'pan' && data.organization.pan_vat) {
-        doc.text(`PAN No: ${data.organization.pan_vat}`, 15, detailY);
-        detailY += 5;
-    }
-    // Normal bills (matching Sample 2) hide PAN/VAT in header
 
     if (data.organization.phone) {
         doc.text(`Phone: ${data.organization.phone}`, 15, detailY);

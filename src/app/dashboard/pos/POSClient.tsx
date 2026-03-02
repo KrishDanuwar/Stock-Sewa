@@ -9,7 +9,7 @@ import { printInvoicePDF } from '@/lib/utils/invoiceGenerator';
 
 type Product = { id: string; name: string; price: number; cost_price?: number; stock_quantity: number; unit: string; };
 type Customer = { id: string; name: string; pan_number: string | null; tax_type?: 'pan' | 'vat'; };
-type Organization = { name: string; pan_vat: string | null; address: string | null; phone: string | null; logo_url: string | null; } | null;
+type Organization = { name: string; pan_vat: string | null; pan_vat_type?: 'pan' | 'vat'; address: string | null; phone: string | null; logo_url: string | null; } | null;
 
 export default function POSClient({
     products = [],

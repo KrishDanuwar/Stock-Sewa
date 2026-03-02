@@ -14,6 +14,7 @@ type Organization = {
     name: string;
     logo_url: string | null;
     pan_vat: string | null;
+    pan_vat_type: 'pan' | 'vat';
     address: string | null;
     phone: string | null;
     subscription_plan?: string;
@@ -53,6 +54,7 @@ export default function SettingsClient({
     // Form State
     const [orgName, setOrgName] = useState(organization?.name || '');
     const [panVat, setPanVat] = useState(organization?.pan_vat || '');
+    const [panVatType, setPanVatType] = useState<'pan' | 'vat'>(organization?.pan_vat_type || 'pan');
     const [address, setAddress] = useState(organization?.address || '');
     const [phone, setPhone] = useState(organization?.phone || '');
 
@@ -150,6 +152,7 @@ export default function SettingsClient({
         const formData = new FormData();
         formData.append('name', orgName);
         formData.append('pan_vat', panVat);
+        formData.append('pan_vat_type', panVatType);
         formData.append('address', address);
         formData.append('phone', phone);
 
@@ -278,8 +281,34 @@ export default function SettingsClient({
                                 <input className="glass-input" value={orgName} onChange={(e) => setOrgName(e.target.value)} />
                             </div>
                             <div className="form-group">
-                                <label className="glass-label">PAN/VAT Number</label>
-                                <input className="glass-input" value={panVat} onChange={(e) => setPanVat(e.target.value)} placeholder="Enter PAN or VAT" />
+                                <label className="glass-label">Tax Registration Type</label>
+                                <div style={{ display: 'flex', gap: 0, borderRadius: 10, overflow: 'hidden', border: '1px solid var(--glass-border)' }}>
+                                    {(['pan', 'vat'] as const).map(t => (
+                                        <button
+                                            key={t}
+                                            type="button"
+                                            onClick={() => setPanVatType(t)}
+                                            style={{
+                                                flex: 1,
+                                                padding: '10px 0',
+                                                border: 'none',
+                                                cursor: 'pointer',
+                                                fontSize: '0.875rem',
+                                                fontWeight: 700,
+                                                letterSpacing: '0.05em',
+                                                transition: 'all 0.2s',
+                                                background: panVatType === t ? 'var(--brand-primary)' : 'transparent',
+                                                color: panVatType === t ? 'white' : 'var(--text-secondary)',
+                                            }}
+                                        >
+                                            {t.toUpperCase()}
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="form-group">
+                                <label className="glass-label">{panVatType === 'vat' ? 'VAT Number' : 'PAN Number'}</label>
+                                <input className="glass-input" value={panVat} onChange={(e) => setPanVat(e.target.value)} placeholder={`Enter ${panVatType.toUpperCase()} number`} />
                             </div>
                             <div className="form-group">
                                 <label className="glass-label">Address</label>

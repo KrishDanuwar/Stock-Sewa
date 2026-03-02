@@ -28,6 +28,7 @@ export async function getOrganization() {
         id: org.id,
         name: org.name,
         pan_vat: org.pan_vat || null,
+        pan_vat_type: org.pan_vat_type || 'pan',
         address: org.address || null,
         phone: org.phone || null,
         logo_url: org.logo_url || null,
@@ -80,6 +81,7 @@ export async function updateOrganizationDetails(formData: FormData) {
 
     const name = formData.get('name') as string;
     const pan_vat = formData.get('pan_vat') as string;
+    const pan_vat_type = formData.get('pan_vat_type') as string || 'pan';
     const address = formData.get('address') as string;
     const phone = formData.get('phone') as string;
 
@@ -88,6 +90,7 @@ export async function updateOrganizationDetails(formData: FormData) {
         .update({
             name,
             pan_vat,
+            pan_vat_type,
             address,
             phone,
         })

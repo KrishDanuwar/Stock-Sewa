@@ -30,7 +30,7 @@ type Invoice = {
     invoice_items?: InvoiceItem[];
 };
 
-type Organization = { name: string; pan_vat: string | null; address: string | null; phone: string | null; } | null;
+type Organization = { name: string; pan_vat: string | null; pan_vat_type?: 'pan' | 'vat'; address: string | null; phone: string | null; } | null;
 
 export default function InvoicesClient({ invoices, organization }: { invoices: Invoice[]; organization: Organization; }) {
     const statusBadge = (status: string) => {
