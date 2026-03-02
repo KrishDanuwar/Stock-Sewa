@@ -5,6 +5,7 @@ import { addProduct, deleteProduct, restockProduct, adjustStock } from '@/lib/ac
 import { toast } from 'sonner';
 import { Printer, Trash2, Package, X, Search, Plus, RefreshCw, SlidersHorizontal } from 'lucide-react';
 import BarcodeLabel from '@/components/BarcodeLabel';
+import { printBarcodeLabel } from '@/lib/utils/barcodeLabel';
 
 type Product = {
     id: string; name: string; barcode: string | null;
@@ -113,11 +114,13 @@ export default function ProductsClient({ products }: { products: Product[] }) {
     }
 
     const handlePrint = (product: Product) => {
-        setPrintProduct(product);
-        setTimeout(() => {
-            window.print();
-            setPrintProduct(null);
-        }, 2000);
+        printBarcodeLabel({
+            name: product.name,
+            price: product.price,
+            barcode: product.barcode || '',
+            mfg: product.mfg_date || '',
+            batchNumber: product.batch_number || '',
+        });
     };
 
     const stockBadge = (qty: number) => {
@@ -140,16 +143,7 @@ export default function ProductsClient({ products }: { products: Product[] }) {
 
     return (
         <div className="animate-fade-in-up">
-            {/* Print Portal Item */}
-            {printProduct && (
-                <BarcodeLabel
-                    name={printProduct.name}
-                    price={printProduct.price}
-                    barcode={printProduct.barcode || ''}
-                    mfg={printProduct.mfg_date || ''}
-                    batchNumber={printProduct.batch_number || ''}
-                />
-            )}
+
 
             <div className="page-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between' }}>
                 <div>
