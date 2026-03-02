@@ -146,7 +146,8 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                     name={printProduct.name}
                     price={printProduct.price}
                     barcode={printProduct.barcode || ''}
-                    mfg={printProduct.mfg_date || 'N/A'}
+                    mfg={printProduct.mfg_date || ''}
+                    batchNumber={printProduct.batch_number || ''}
                 />
             )}
 
