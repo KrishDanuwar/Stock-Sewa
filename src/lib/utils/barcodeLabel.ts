@@ -93,8 +93,9 @@ export function printBarcodeLabel(data: BarcodeLabelData) {
     const url = URL.createObjectURL(blob);
 
     const iframe = document.createElement('iframe');
-    iframe.style.position = 'fixed';
-    iframe.style.visibility = 'hidden';
+    iframe.style.position = 'absolute';
+    iframe.style.left = '-9999px';
+    iframe.style.top = '-9999px';
     iframe.style.width = '0';
     iframe.style.height = '0';
     iframe.src = url;

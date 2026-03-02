@@ -229,8 +229,9 @@ export function printInvoicePDF(data: InvoiceData) {
         const url = URL.createObjectURL(blob);
 
         const hiddFrame = document.createElement('iframe');
-        hiddFrame.style.position = 'fixed';
-        hiddFrame.style.visibility = 'hidden';
+        hiddFrame.style.position = 'absolute';
+        hiddFrame.style.left = '-9999px';
+        hiddFrame.style.top = '-9999px';
         hiddFrame.style.width = '0';
         hiddFrame.style.height = '0';
         hiddFrame.src = url;
