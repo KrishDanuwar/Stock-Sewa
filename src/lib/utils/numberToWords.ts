@@ -21,10 +21,14 @@ function internationalToWords(n: number): string {
     for (let i = 0; i < parts.length; i++) {
         if (parts[i] === 0) continue;
         const partWords = convertSubHundred(parts[i]);
-        words = partWords + (units[i] ? ' ' + units[i] : '') + (words ? ', ' + words : '');
+        words = partWords + (units[i] ? ' ' + units[i] : '') + (words ? ' ' + words : '');
     }
 
-    return words.trim() + ' Only';
+    // Capitalize first letter
+    const finalWords = words.trim();
+    if (!finalWords) return 'Zero Rupees Only';
+
+    return finalWords.charAt(0).toUpperCase() + finalWords.slice(1) + ' Rupees Only';
 }
 
 function convertSubHundred(n: number): string {

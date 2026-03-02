@@ -1,6 +1,6 @@
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
-// import { numberToWords } from './numberToWords'; // Flagged as unused but kept for future reference
+import { numberToWords } from './numberToWords';
 
 export interface InvoiceData {
     organization: {
@@ -144,6 +144,13 @@ function prepareInvoiceDoc(data: InvoiceData): jsPDF {
     doc.setFontSize(11);
     doc.text(`Grand Total: Rs. ${data.total_amount.toLocaleString()}`, 15, finalY + 5);
     finalY += 12;
+
+    // Amount in Words
+    doc.setFontSize(9);
+    doc.setFont('helvetica', 'italic');
+    const amountWords = numberToWords(typeof data.total_amount === 'number' ? data.total_amount : parseFloat(data.total_amount));
+    doc.text(`In Words: ${amountWords}`, 15, finalY);
+    finalY += 8;
 
     if (data.amount_paid !== undefined) {
         doc.setFontSize(10);
