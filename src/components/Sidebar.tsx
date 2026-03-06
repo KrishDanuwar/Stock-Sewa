@@ -42,7 +42,7 @@ export default async function Sidebar() {
                         </div>
                     </>
                 ) : (
-                    <Logo size="lg" text={organizationName} tagline="Systems Admin" />
+                    <Logo size="lg" text={organizationName} showIcon={false} showTagline={false} />
                 )}
             </div>
 

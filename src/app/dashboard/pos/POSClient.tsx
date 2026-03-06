@@ -230,7 +230,7 @@ export default function POSClient({
                 <div className="page-header" style={{ marginBottom: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                         {!organization?.logo_url ? (
-                            <Logo size="md" text={organization?.name || 'Stocksewa'} tagline="POS Terminal" />
+                            <Logo size="md" text={organization?.name || 'Stocksewa'} showIcon={false} showTagline={false} />
                         ) : (
                             <div style={{ width: 44, height: 44, borderRadius: 10, background: 'white', overflow: 'hidden', flexShrink: 0, border: '1px solid var(--glass-border)', padding: 2 }}>
                                 <img src={organization.logo_url} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
