@@ -10,7 +10,8 @@ import { PlanConfig } from '@/config/plans';
 import { useEffect, useCallback } from 'react';
 import { db } from '@/lib/offline/db';
 import { Wifi, WifiOff, CloudSync } from 'lucide-react';
-import useOnlineStatus from '@/hooks/useOnlineStatus'; // We'll create this
+import useOnlineStatus from '@/hooks/useOnlineStatus';
+import Logo from '@/components/Logo';
 
 type Product = { id: string; name: string; price: number; cost_price?: number; stock_quantity: number; unit: string; };
 type Customer = { id: string; name: string; pan_number: string | null; tax_type?: 'pan' | 'vat'; };
@@ -228,7 +229,9 @@ export default function POSClient({
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, overflow: 'hidden' }}>
                 <div className="page-header" style={{ marginBottom: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        {organization?.logo_url && (
+                        {!organization?.logo_url ? (
+                            <Logo size="md" />
+                        ) : (
                             <div style={{ width: 44, height: 44, borderRadius: 10, background: 'white', overflow: 'hidden', flexShrink: 0, border: '1px solid var(--glass-border)', padding: 2 }}>
                                 <img src={organization.logo_url} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
                             </div>

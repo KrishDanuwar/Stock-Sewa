@@ -1,6 +1,7 @@
 'use client';
 
 import { SignIn } from "@clerk/nextjs";
+import Logo from "@/components/Logo";
 
 
 export default function LoginPage() {
@@ -12,13 +13,9 @@ export default function LoginPage() {
             <div className="relative z-10 w-full max-w-[440px] animate-fade-in-up">
                 {/* Brand Identity */}
                 <div className="flex flex-col items-center mb-10">
-                    <div className="brand-icon-wrapper-premium">
+                    <div className="brand-icon-wrapper-premium" style={{ border: 'none', background: 'transparent', boxShadow: 'none', padding: 0 }}>
                         <div className="brand-glow"></div>
-                        <img src="/logo.jpg" alt="Logo" className="premium-logo-img" />
-                    </div>
-                    <div className="text-center">
-                        <h1 translate="no" className="brand-title">Stock Sewa</h1>
-                        <p className="brand-tagline">Premium Inventory & POS Solution</p>
+                        <Logo size="xl" className="relative z-10" />
                     </div>
                 </div>
 

@@ -37,6 +37,13 @@ export default async function ReportsPage() {
     const totalRevenue = invoices?.reduce((s, i) => s + Number(i.total_amount), 0) ?? 0;
     const totalTax = invoices?.reduce((s, i) => s + Number(i.tax_amount), 0) ?? 0;
     const totalSubtotal = invoices?.reduce((s, i) => s + Number(i.subtotal || 0), 0) ?? 0;
+    const totalDebtCollected = invoices?.reduce((s, i) => {
+        // Debt clearance invoices have total_amount 0 but amount_paid > 0
+        if (Number(i.total_amount) === 0 && Number(i.amount_paid) > 0) {
+            return s + Number(i.amount_paid);
+        }
+        return s;
+    }, 0) ?? 0;
 
     // Calculate Total Cost
     const totalCost = invoices?.reduce((sum, inv) => {
@@ -87,16 +94,17 @@ export default async function ReportsPage() {
             discount_amount: Number((i as any).discount_amount) || 0,
             payment_method: (i as any).payment_method || 'cash',
             payment_status: (i as any).payment_status || 'paid',
+            amount_paid: Number(i.amount_paid) || 0,
             customer_name: custName || 'Walk-in',
         };
     });
 
     const stats = [
+        { label: 'Total Sales', value: invoices?.filter(i => Number(i.total_amount) > 0).length ?? 0, color: 'var(--brand-accent)' },
         { label: 'Total Revenue', value: `Rs. ${totalRevenue.toLocaleString()}`, color: 'var(--brand-success)' },
+        { label: 'Debt Recovered', value: `Rs. ${totalDebtCollected.toLocaleString()}`, color: '#0ea5e9' },
         { label: 'Estimated Profit', value: `Rs. ${totalProfit.toLocaleString()}`, color: '#10b981' },
         { label: 'VAT Collected', value: `Rs. ${totalTax.toLocaleString()}`, color: 'var(--brand-primary)' },
-        { label: 'Net Subtotal', value: `Rs. ${totalSubtotal.toLocaleString()}`, color: 'var(--brand-secondary)' },
-        { label: 'Total Sales', value: invoices?.length ?? 0, color: 'var(--brand-accent)' },
     ];
 
     return (

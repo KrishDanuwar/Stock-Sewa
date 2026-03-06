@@ -1,19 +1,11 @@
 import { SignOutButton } from '@clerk/nextjs';
 import { getOrgContext } from '@/lib/org-context';
-import { createAdminClient } from '@/lib/supabase/server';
 import SidebarNav from './SidebarNav';
 import { LogOut } from 'lucide-react';
+import Logo from './Logo';
 
 export default async function Sidebar() {
     const { organizationName, organizationId } = await getOrgContext();
-    const supabase = await createAdminClient();
-
-    // Fetch logo
-    const { data: org } = await supabase
-        .from('organizations')
-        .select('logo_url')
-        .eq('id', organizationId)
-        .single();
 
     return (
         <aside
@@ -30,55 +22,20 @@ export default async function Sidebar() {
             }}
         >
             {/* Brand */}
-            <div style={{ padding: '28px 20px', borderBottom: '1px solid var(--glass-border)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-                    <div style={{
-                        width: 44,
-                        height: 44,
-                        borderRadius: 12,
-                        background: 'white',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        flexShrink: 0,
-                        overflow: 'hidden',
-                        padding: org?.logo_url ? 0 : 6,
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                        border: '1px solid var(--glass-border)'
-                    }}>
-                        {org?.logo_url ? (
-                            <img src={org.logo_url} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                        ) : (
-                            <img src="/logo.jpg" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                        )}
-                    </div>
-                    <div>
-                        <div translate="no" style={{
-                            fontSize: '1.125rem',
-                            fontWeight: 800,
-                            color: 'var(--text-primary)',
-                            lineHeight: 1.2
-                        }}>
-                            {org?.logo_url ? organizationName : 'Stock Sewa'}
-                        </div>
-                        {org?.logo_url && (
-                            <div style={{
-                                fontSize: '0.6875rem',
-                                color: 'var(--text-secondary)',
-                                fontWeight: 600,
-                                textTransform: 'uppercase',
-                                letterSpacing: '0.05em',
-                                opacity: 0.7
-                            }}>
-                                Powered by Stock Sewa
-                            </div>
-                        )}
-                        {!org?.logo_url && (
-                            <div style={{ fontSize: '0.6875rem', color: 'var(--text-secondary)' }}>
-                                {organizationName}
-                            </div>
-                        )}
-                    </div>
+            <div style={{ padding: '32px 24px', borderBottom: '1px solid var(--glass-border)' }}>
+                <Logo size="lg" />
+                <div style={{
+                    marginTop: 12,
+                    fontSize: '0.75rem',
+                    fontWeight: 600,
+                    color: 'var(--text-muted)',
+                    paddingLeft: 2,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: 6
+                }}>
+                    <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: 'var(--brand-success)' }}></span>
+                    {organizationName}
                 </div>
             </div>
 

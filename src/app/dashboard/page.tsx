@@ -29,11 +29,14 @@ export default async function DashboardPage() {
     const todayAd = new Date().toISOString().split('T')[0];
     const { data: todayInvoices } = await supabase
         .from('invoices')
-        .select('total_amount')
+        .select('total_amount, amount_paid')
         .eq('organization_id', organizationId)
         .eq('date_ad', todayAd);
 
-    const dailyRevenue = todayInvoices?.reduce((sum, inv) => sum + Number(inv.total_amount), 0) || 0;
+    const dailyCollections = todayInvoices?.reduce((sum, inv) => {
+        // Amount paid covers both direct sales and debt payments
+        return sum + Number(inv.amount_paid);
+    }, 0) || 0;
 
     // Low stock alerts
     const { data: lowStockProducts } = await supabase
@@ -59,8 +62,8 @@ export default async function DashboardPage() {
     const stats = [
         { label: 'Total Products', value: productCount ?? 0, icon: Package, color: 'var(--brand-primary)' },
         { label: 'Customers', value: customerCount ?? 0, icon: Users, color: 'var(--brand-secondary)' },
-        { label: 'Bills', value: invoiceCount ?? 0, icon: FileText, color: 'var(--brand-accent)' },
-        { label: 'Today\'s Revenue', value: `Rs. ${dailyRevenue.toLocaleString()}`, icon: TrendingUp, color: 'var(--brand-success)' },
+        { label: 'Bills Today', value: todayInvoices?.length ?? 0, icon: FileText, color: 'var(--brand-accent)' },
+        { label: 'Today\'s Cash', value: `Rs. ${dailyCollections.toLocaleString()}`, icon: TrendingUp, color: 'var(--brand-success)' },
     ];
 
     const invoiceTypeBadge = (type: string) => {

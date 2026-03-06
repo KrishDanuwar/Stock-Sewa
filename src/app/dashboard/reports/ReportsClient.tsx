@@ -21,6 +21,7 @@ interface InvoiceRow {
     discount_amount: number;
     payment_method: string;
     payment_status: string;
+    amount_paid: number;
     customer_name: string;
 }
 
@@ -59,9 +60,9 @@ function generateCSV(invoiceRows: InvoiceRow[], topProducts: ProductSale[], tota
 
     // All Invoices
     lines.push('All Invoices');
-    lines.push('Invoice #,Date (BS),Date (AD),Type,Subtotal,Tax,Total,Discount,Payment Method,Status,Customer');
+    lines.push('Invoice #,Date (BS),Date (AD),Type,Subtotal,Tax,Total,Discount,Payment Method,Status,Paid,Customer');
     invoiceRows.forEach(i => {
-        lines.push(`"${i.invoice_number}","${i.date_bs}","${i.date_ad}","${i.invoice_type}",${i.subtotal},${i.tax_amount},${i.total_amount},${i.discount_amount},"${i.payment_method}","${i.payment_status}","${i.customer_name}"`);
+        lines.push(`"${i.invoice_number}","${i.date_bs}","${i.date_ad}","${i.invoice_type}",${i.subtotal},${i.tax_amount},${i.total_amount},${i.discount_amount},"${i.payment_method}","${i.payment_status}",${i.amount_paid},"${i.customer_name}"`);
     });
 
     return lines.join('\n');
