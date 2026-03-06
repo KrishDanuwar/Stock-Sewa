@@ -3,9 +3,10 @@ import { createAdminClient } from '@/lib/supabase/server';
 import { Package, Users, FileText, TrendingUp } from 'lucide-react';
 import { getTodayBs } from '@/utils/date-utils';
 import ClockWrapper from '@/components/ClockWrapper';
+import Logo from '@/components/Logo';
 
 export default async function DashboardPage() {
-    const { organizationId, organizationName } = await getOrgContext();
+    const { organizationId, organizationName, logoUrl } = await getOrgContext();
     const supabase = await createAdminClient();
     const today = getTodayBs();
 
