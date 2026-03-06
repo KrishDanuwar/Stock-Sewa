@@ -18,6 +18,7 @@ export default async function ReportsPage() {
             tax_amount, 
             subtotal,
             discount_amount,
+            amount_paid,
             date_ad,
             date_bs,
             payment_method,
