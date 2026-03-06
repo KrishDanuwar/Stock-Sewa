@@ -9,6 +9,7 @@ const inter = Inter({ subsets: ['latin'] });
 export const metadata: Metadata = {
   title: 'Stock Sewa – Inventory & POS for Nepal',
   description: 'Multi-tenant inventory management and point-of-sale system designed for Nepali shopkeepers.',
+  manifest: '/manifest.json',
 };
 
 import { ClerkProvider, ClerkLoaded, ClerkLoading } from '@clerk/nextjs';
@@ -38,6 +39,21 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
                     color: 'var(--text-primary)',
                     backdropFilter: 'var(--glass-blur)',
                   },
+                }}
+              />
+              <script
+                dangerouslySetInnerHTML={{
+                  __html: `
+                    if ('serviceWorker' in navigator) {
+                      window.addEventListener('load', function() {
+                        navigator.serviceWorker.register('/sw.js').then(function(registration) {
+                          console.log('SW registered');
+                        }, function(err) {
+                          console.log('SW registration failed: ', err);
+                        });
+                      });
+                    }
+                  `,
                 }}
               />
             </ClerkLoaded>

@@ -10,6 +10,8 @@ export interface PlanConfig {
     is_popular: boolean;
     features: {
         canExportCSV: boolean;
+        canImportCSV: boolean;
+        hasOfflinePOS: boolean;
         hasPrioritySupport: boolean;
         hasAdvancedReports: boolean;
         canManageSuppliers: boolean;
@@ -29,6 +31,8 @@ const FALLBACK_PLAN: PlanConfig = {
     is_popular: false,
     features: {
         canExportCSV: false,
+        canImportCSV: false,
+        hasOfflinePOS: false,
         hasPrioritySupport: false,
         hasAdvancedReports: false,
         canManageSuppliers: false,
@@ -60,6 +64,8 @@ export async function getPlanConfig(planId: string): Promise<PlanConfig> {
         // Build features object from DB entries
         const featureFlags: Record<string, boolean> = {
             canExportCSV: false,
+            canImportCSV: false,
+            hasOfflinePOS: false,
             hasPrioritySupport: false,
             hasAdvancedReports: false,
             canManageSuppliers: false,

@@ -9,7 +9,7 @@ import { updatePlan, createPlan, deletePlan, toggleFeature, addFeatureToPlan, re
 import type { PlanWithFeatures, PlanFeature } from '@/lib/actions/plan-management';
 import { toast } from 'sonner';
 import {
-    ShieldCheck, UserPlus, Trash2, Mail, Lock, CheckCircle2,
+    ShieldCheck, UserPlus, Trash2, Mail, Lock, CheckCircle2, ShieldAlert,
     ArrowLeft, Users, X, CreditCard, Search, Filter, RefreshCw,
     XCircle, ChevronDown, Zap, Crown, AlertTriangle, Settings, Plus, Save, Star, ToggleLeft, ToggleRight,
     LogOut

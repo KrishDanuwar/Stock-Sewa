@@ -3,9 +3,13 @@
 import { useState } from 'react';
 import { addProduct, deleteProduct, restockProduct, adjustStock } from '@/lib/actions/products';
 import { toast } from 'sonner';
-import { Printer, Trash2, Package, X, Search, Plus, RefreshCw, SlidersHorizontal } from 'lucide-react';
+import { Printer, Trash2, Package, X, Search, Plus, RefreshCw, SlidersHorizontal, AlertCircle } from 'lucide-react';
 import BarcodeLabel from '@/components/BarcodeLabel';
 import { printBarcodeLabel } from '@/lib/utils/barcodeLabel';
+import { PlanConfig } from '@/config/plans';
+import ImportProducts from './ImportProducts';
+import Papa from 'papaparse';
+import { Download, UploadCloud } from 'lucide-react';
 
 type Product = {
     id: string; name: string; barcode: string | null;
@@ -14,8 +18,9 @@ type Product = {
     mfg_date?: string | null; expiry_date?: string | null; batch_number?: string | null;
 };
 
-export default function ProductsClient({ products }: { products: Product[] }) {
+export default function ProductsClient({ products, plan }: { products: Product[], plan: PlanConfig }) {
     const [showModal, setShowModal] = useState(false);
+    const [showImport, setShowImport] = useState(false);
     const [loading, setLoading] = useState(false);
     const [search, setSearch] = useState('');
     const [printProduct, setPrintProduct] = useState<Product | null>(null);
@@ -141,6 +146,35 @@ export default function ProductsClient({ products }: { products: Product[] }) {
         return <span className="badge badge-success" style={{ fontSize: '0.65rem' }}>{date}</span>;
     };
 
+    const handleExport = () => {
+        if (!plan.features.canExportCSV) {
+            toast.error("CSV Export is a premium feature. Please upgrade your plan.");
+            return;
+        }
+
+        const dataToExport = filtered.map(p => ({
+            Name: p.name,
+            Barcode: p.barcode,
+            Category: p.category,
+            Price: p.price,
+            Cost_Price: p.cost_price,
+            Stock: p.stock_quantity,
+            Unit: p.unit,
+            MFG: p.mfg_date,
+            Expiry: p.expiry_date,
+            Batch: p.batch_number
+        }));
+
+        const csv = Papa.unparse(dataToExport);
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `inventory_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        toast.success("Inventory exported successfully!");
+    };
+
     return (
         <div className="animate-fade-in-up">
 
@@ -150,10 +184,47 @@ export default function ProductsClient({ products }: { products: Product[] }) {
                     <h1 className="page-title">Products</h1>
                     <p className="page-subtitle">{products.length} items</p>
                 </div>
-                <button onClick={() => setShowModal(true)} className="glass-button glass-button-primary">
-                    <Plus size={16} /> Add Product
-                </button>
+                <div style={{ display: 'flex', gap: 10 }}>
+                    <button
+                        onClick={handleExport}
+                        className="glass-button"
+                        title={plan.features.canExportCSV ? "Export to CSV" : "Premium Feature"}
+                        style={{ opacity: plan.features.canExportCSV ? 1 : 0.6 }}
+                    >
+                        <Download size={16} /> Export
+                    </button>
+                    <button
+                        onClick={() => setShowImport(!showImport)}
+                        className="glass-button"
+                        title={plan.features.canImportCSV ? "Import from CSV" : "Premium Feature"}
+                        style={{ opacity: plan.features.canImportCSV ? 1 : 0.6 }}
+                    >
+                        <UploadCloud size={16} /> {showImport ? 'Hide Import' : 'Import'}
+                    </button>
+                    <button onClick={() => setShowModal(true)} className="glass-button glass-button-primary">
+                        <Plus size={16} /> Add Product
+                    </button>
+                </div>
             </div>
+
+            {showImport && (
+                <div className="animate-fade-in-down">
+                    {plan.features.canImportCSV ? (
+                        <ImportProducts onComplete={() => setShowImport(false)} />
+                    ) : (
+                        <div className="glass-card" style={{ padding: 24, marginTop: 20, textAlign: 'center' }}>
+                            <AlertCircle size={48} style={{ margin: '0 auto 12px', color: '#fbbf24' }} />
+                            <h3 style={{ fontWeight: 600 }}>CSV Import is Locked</h3>
+                            <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', marginTop: 8 }}>
+                                Upgrade to a Business or Pro plan to import bulk inventory data.
+                            </p>
+                            <button className="glass-button glass-button-primary" style={{ marginTop: 16, marginInline: 'auto' }}>
+                                View Pricing Plans
+                            </button>
+                        </div>
+                    )}
+                </div>
+            )}
 
             {/* Search */}
             <div style={{ position: 'relative', maxWidth: 360, marginBottom: 20 }}>

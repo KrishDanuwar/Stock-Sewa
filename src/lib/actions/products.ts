@@ -6,6 +6,56 @@ import { revalidatePath } from 'next/cache';
 
 import { ProductSchema } from '@/lib/security/schemas';
 import { rateLimit } from '@/lib/security/rate-limit';
+import { trackSecurityEvent } from '@/lib/security/audit-log';
+
+export async function importProductsBatch(products: any[]) {
+    try {
+        const { organizationId, userId, plan } = await getOrgContext();
+
+        // Feature Gate
+        if (!plan.features.canImportCSV) {
+            throw new Error('CSV Import is a premium feature. Please upgrade your plan.');
+        }
+
+        // Rate Limit (Slightly higher for batch)
+        const { success } = await rateLimit(5, 60000);
+        if (!success) throw new Error('Rate limit exceeded. Please try again later.');
+
+        const supabase = await createAdminClient();
+
+        // Validate each product
+        const validatedProducts = products.map(p => {
+            const validated = ProductSchema.parse({
+                ...p,
+                organization_id: organizationId
+            });
+            return {
+                ...validated,
+                organization_id: organizationId,
+                created_at: new Date().toISOString()
+            };
+        });
+
+        // Batch insert in chunks of 50 to avoid payload limits
+        const chunkSize = 50;
+        for (let i = 0; i < validatedProducts.length; i += chunkSize) {
+            const chunk = validatedProducts.slice(i, i + chunkSize);
+            const { error } = await supabase.from('products').insert(chunk);
+            if (error) throw error;
+        }
+
+        await trackSecurityEvent('bulk_import_products', { count: validatedProducts.length });
+
+        revalidatePath('/dashboard/products');
+        return { success: true, count: validatedProducts.length };
+    } catch (err: any) {
+        console.error('Import error:', err);
+        if (err.name === 'ZodError') {
+            return { error: `Validation error in one or more items: ${err.errors[0].message}` };
+        }
+        return { error: err.message || 'Failed to import products' };
+    }
+}
 
 export async function getProducts() {
     const { organizationId } = await getOrgContext();

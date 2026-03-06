@@ -2,6 +2,7 @@ import Sidebar from '@/components/Sidebar';
 import { getOrgContext } from '@/lib/org-context';
 import { redirect } from 'next/navigation';
 import { isAuthorizedAdmin } from '@/lib/actions/admin-management';
+import OfflineSync from '@/components/OfflineSync';
 
 export default async function DashboardLayout({ children }: { children: React.ReactNode }) {
     const { isTrialExpired, subscriptionStatus } = await getOrgContext();
@@ -19,6 +20,7 @@ export default async function DashboardLayout({ children }: { children: React.Re
 
     return (
         <div className="page-wrapper">
+            <OfflineSync />
             <div style={{ display: 'flex', flex: 1 }}>
                 <Sidebar />
                 <main className="main-content">

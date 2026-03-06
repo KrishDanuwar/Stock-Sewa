@@ -6,6 +6,11 @@ import type { CartItem } from '@/lib/actions/invoices';
 import { toast } from 'sonner';
 import { Plus, Minus, Trash2, ShoppingCart, Search, Receipt, CheckCircle, Printer } from 'lucide-react';
 import { printInvoicePDF } from '@/lib/utils/invoiceGenerator';
+import { PlanConfig } from '@/config/plans';
+import { useEffect, useCallback } from 'react';
+import { db } from '@/lib/offline/db';
+import { Wifi, WifiOff, CloudSync } from 'lucide-react';
+import useOnlineStatus from '@/hooks/useOnlineStatus'; // We'll create this
 
 type Product = { id: string; name: string; price: number; cost_price?: number; stock_quantity: number; unit: string; };
 type Customer = { id: string; name: string; pan_number: string | null; tax_type?: 'pan' | 'vat'; };
@@ -14,11 +19,13 @@ type Organization = { name: string; pan_vat: string | null; pan_vat_type?: 'pan'
 export default function POSClient({
     products = [],
     customers = [],
-    organization
+    organization,
+    plan
 }: {
     products?: Product[];
     customers?: Customer[];
     organization?: Organization;
+    plan: PlanConfig;
 }) {
     const productsList = products || [];
     const customersList = customers || [];
@@ -39,6 +46,24 @@ export default function POSClient({
     const [amountPaid, setAmountPaid] = useState<number | string>('');
     const [manualCustomerName, setManualCustomerName] = useState('');
     const [manualCustomerPan, setManualCustomerPan] = useState('');
+    const [isSyncing, setIsSyncing] = useState(false);
+    const isOnline = useOnlineStatus();
+    const hasOfflineFeature = plan.features.hasOfflinePOS;
+
+    // Sync products to IndexedDB when online
+    useEffect(() => {
+        if (isOnline && hasOfflineFeature && productsList.length > 0) {
+            db.products.bulkPut(productsList.map(p => ({
+                id: p.id,
+                name: p.name,
+                price: p.price,
+                stock_quantity: p.stock_quantity,
+                barcode: (p as any).barcode || null,
+                category: (p as any).category || null,
+                unit: p.unit
+            })));
+        }
+    }, [isOnline, hasOfflineFeature, productsList]);
 
     const filteredProducts = productsList.filter(p =>
         (p?.name || '').toLowerCase().includes(search.toLowerCase())
@@ -97,6 +122,36 @@ export default function POSClient({
 
             if (getPaymentStatus() !== 'paid' && !effectiveCustomerId) {
                 toast.error('Customer is required for credit/unpaid sales'); return;
+            }
+
+            if (!isOnline) {
+                if (!hasOfflineFeature) {
+                    toast.error('Offline Mode is a premium feature. Please connect to the internet.');
+                    return;
+                }
+
+                // Save to IndexedDB for later
+                await db.pendingInvoices.add({
+                    data: {
+                        customer_id: effectiveCustomerId,
+                        invoice_type: invoiceType,
+                        payment_method: paymentMethod,
+                        payment_status: getPaymentStatus(),
+                        amount_paid: numericAmountPaid,
+                        discount_amount: discountAmount,
+                        customer_name_manual: customerMode === 'walkin' ? manualCustomerName : undefined,
+                        customer_pan_manual: customerMode === 'walkin' ? manualCustomerPan : undefined,
+                        items: cart.map(({ discount_percent, ...rest }) => rest),
+                    },
+                    status: 'pending',
+                    timestamp: Date.now()
+                });
+
+                toast.success('Saved offline! Will sync when online.');
+                // Trigger local stock adjustment (optional/optimistic)
+                setCart([]);
+                setLoading(false);
+                return;
             }
 
             setLoading(true);
@@ -180,7 +235,13 @@ export default function POSClient({
                         )}
                         <div>
                             <h1 className="page-title">POS — Sales</h1>
-                            <p className="page-subtitle">{organization?.name || 'Point of Sale'}</p>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                                <p className="page-subtitle">{organization?.name || 'Point of Sale'}</p>
+                                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem', padding: '2px 8px', borderRadius: 20, background: isOnline ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: isOnline ? '#10b981' : '#ef4444', border: '1px solid currentColor' }}>
+                                    {isOnline ? <Wifi size={12} /> : <WifiOff size={12} />}
+                                    {isOnline ? 'Online' : 'Offline'}
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
