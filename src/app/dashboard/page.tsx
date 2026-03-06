@@ -75,29 +75,40 @@ export default async function DashboardPage() {
 
     return (
         <div className="animate-fade-in-up">
-            <div className="page-header" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                {logoUrl ? (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                        <div style={{ width: 64, height: 64, borderRadius: 16, background: 'white', flexShrink: 0, overflow: 'hidden', border: '1px solid var(--glass-border)', padding: 4 }}>
-                            <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                        </div>
-                        <div>
-                            <h1 className="page-title">{organizationName}</h1>
-                            <p className="page-subtitle">
-                                Today: <ClockWrapper fallbackDate={today.formattedEn} />
-                            </p>
-                        </div>
+            <div className="page-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                {/* Left: Brand */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
+                    <div style={{
+                        width: 48, height: 48, borderRadius: 12, overflow: 'hidden',
+                        border: '1px solid var(--glass-border)', background: 'white',
+                        padding: 3, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', flexShrink: 0
+                    }}>
+                        <img src="/logo.jpg" alt="Stock Sewa" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 8 }} />
                     </div>
-                ) : (
-                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                        <Logo size="xl" text={organizationName} useImageLogo={true} tagline="Stock Sewa" />
-                        <div style={{ textAlign: 'right' }}>
-                            <p className="page-subtitle" style={{ marginTop: 0 }}>
-                                Today: <ClockWrapper fallbackDate={today.formattedEn} />
-                            </p>
-                        </div>
+                    <div>
+                        <h1 style={{ fontSize: '1.25rem', fontWeight: 700, color: 'var(--text-primary)', margin: 0, letterSpacing: '-0.01em' }}>Stock Sewa</h1>
+                        <p className="page-subtitle" style={{ margin: 0, marginTop: 2 }}>
+                            <ClockWrapper fallbackDate={today.formattedEn} />
+                        </p>
                     </div>
-                )}
+                </div>
+
+                {/* Right: Org logo placeholder */}
+                <div style={{
+                    width: 44, height: 44, borderRadius: 12, overflow: 'hidden',
+                    border: '2px dashed var(--glass-border)', background: 'var(--glass-bg)',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0
+                }}>
+                    {logoUrl ? (
+                        <img src={logoUrl} alt={organizationName} style={{ width: '100%', height: '100%', objectFit: 'contain', padding: 3 }} />
+                    ) : (
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                            <rect x="3" y="3" width="18" height="18" rx="2" />
+                            <circle cx="8.5" cy="8.5" r="1.5" />
+                            <path d="m21 15-5-5L5 21" />
+                        </svg>
+                    )}
+                </div>
             </div>
 
             {/* Stat Cards */}

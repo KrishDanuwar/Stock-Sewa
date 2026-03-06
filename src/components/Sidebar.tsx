@@ -2,10 +2,9 @@ import { SignOutButton } from '@clerk/nextjs';
 import { getOrgContext } from '@/lib/org-context';
 import SidebarNav from './SidebarNav';
 import { LogOut } from 'lucide-react';
-import Logo from './Logo';
 
 export default async function Sidebar() {
-    const { organizationName, organizationId, logoUrl } = await getOrgContext();
+    const { organizationId } = await getOrgContext();
 
     return (
         <aside
@@ -22,30 +21,20 @@ export default async function Sidebar() {
             }}
         >
             {/* Brand */}
-            <div style={{ padding: '32px 24px', borderBottom: '1px solid var(--glass-border)' }}>
-                {logoUrl ? (
-                    <>
-                        <div style={{ width: 44, height: 44, borderRadius: 10, background: 'white', overflow: 'hidden', flexShrink: 0, border: '1px solid var(--glass-border)', padding: 2, marginBottom: 16 }}>
-                            <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                        </div>
-                        <div style={{
-                            fontSize: '0.75rem',
-                            fontWeight: 600,
-                            color: 'var(--text-muted)',
-                            paddingLeft: 2,
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: 6
-                        }}>
-                            <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: 'var(--brand-success)' }}></span>
-                            {organizationName}
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <Logo size="lg" text={organizationName} useImageLogo={true} tagline="Stock Sewa" />
-                    </>
-                )}
+            <div style={{ padding: '28px 24px', borderBottom: '1px solid var(--glass-border)' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+                    <div style={{
+                        width: 40, height: 40, borderRadius: 10, overflow: 'hidden',
+                        border: '1px solid var(--glass-border)', background: 'white',
+                        padding: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', flexShrink: 0
+                    }}>
+                        <img src="/logo.jpg" alt="Stock Sewa" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 7 }} />
+                    </div>
+                    <span style={{
+                        fontSize: '1.125rem', fontWeight: 700,
+                        color: 'var(--text-primary)', letterSpacing: '-0.01em'
+                    }}>Stock Sewa</span>
+                </div>
             </div>
 
             {/* Navigation */}
