@@ -56,10 +56,10 @@ export default function LoginPage() {
                 <div className="login-footer">
                     <p className="mb-4">Need technical assistance?</p>
                     <div className="flex justify-center gap-4">
-                        <a href="https://wa.me/9779703360369" target="_blank" rel="noopener noreferrer" className="support-card support-whatsapp">
+                        <a href={`https://wa.me/${process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="support-card support-whatsapp">
                             WhatsApp Support
                         </a>
-                        <a href="mailto:junsangsingh@gmail.com" className="support-card support-email">
+                        <a href={`mailto:${process.env.NEXT_PUBLIC_SYSTEM_OWNER_EMAIL}`} className="support-card support-email">
                             Email Support
                         </a>
                     </div>

@@ -454,10 +454,10 @@ export default function SettingsClient({
                         Need help or want to request a feature? Contact us directly.
                     </p>
                     <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: 16 }}>
-                        <a href="https://wa.me/9779703360369" target="_blank" rel="noopener noreferrer" className="glass-button" style={{ justifyContent: 'center', color: 'var(--brand-success)', borderColor: 'rgba(16, 185, 129, 0.2)' }}>
+                        <a href={`https://wa.me/${process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP}`} target="_blank" rel="noopener noreferrer" className="glass-button" style={{ justifyContent: 'center', color: 'var(--brand-success)', borderColor: 'rgba(16, 185, 129, 0.2)' }}>
                             WhatsApp Support
                         </a>
-                        <a href="mailto:junsangsingh@gmail.com" className="glass-button" style={{ justifyContent: 'center' }}>
+                        <a href={`mailto:${process.env.NEXT_PUBLIC_SYSTEM_OWNER_EMAIL}`} className="glass-button" style={{ justifyContent: 'center' }}>
                             Email Address
                         </a>
                     </div>

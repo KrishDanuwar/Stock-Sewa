@@ -4,6 +4,9 @@ import { getOrgContext } from '@/lib/org-context';
 import { createAdminClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
+import { SupplierSchema } from '@/lib/security/schemas';
+import { rateLimit } from '@/lib/security/rate-limit';
+
 // ==================== SUPPLIERS ====================
 
 export async function getSuppliers() {
@@ -21,64 +24,92 @@ export async function getSuppliers() {
 }
 
 export async function addSupplier(formData: FormData) {
-    const { organizationId } = await getOrgContext();
-    const supabase = await createAdminClient();
+    try {
+        await rateLimit(10, 60000);
+        const { organizationId } = await getOrgContext();
+        const supabase = await createAdminClient();
 
-    const name = formData.get('name') as string;
-    if (!name || !name.trim()) return { error: 'Supplier name is required' };
+        const rawData = {
+            name: formData.get('name') as string,
+            phone: (formData.get('phone') as string) || undefined,
+            email: (formData.get('email') as string) || undefined,
+            address: (formData.get('address') as string) || undefined,
+        };
 
-    const { error } = await supabase.from('suppliers').insert({
-        organization_id: organizationId,
-        name: name.trim(),
-        phone: (formData.get('phone') as string) || null,
-        email: (formData.get('email') as string) || null,
-        address: (formData.get('address') as string) || null,
-        pan_number: (formData.get('pan_number') as string) || null,
-    });
+        const validatedData = SupplierSchema.parse(rawData);
 
-    if (error) return { error: error.message };
-    revalidatePath('/dashboard/suppliers');
-    return { success: true };
+        const { error } = await supabase.from('suppliers').insert({
+            organization_id: organizationId,
+            ...validatedData,
+            pan_number: (formData.get('pan_number') as string) || null,
+        });
+
+        if (error) return { error: error.message };
+        revalidatePath('/dashboard/suppliers');
+        return { success: true };
+    } catch (err: any) {
+        if (err.name === 'ZodError') {
+            return { error: err.errors[0].message };
+        }
+        return { error: err.message || 'An unexpected error occurred' };
+    }
 }
 
 export async function updateSupplier(id: string, formData: FormData) {
-    const { organizationId } = await getOrgContext();
-    const supabase = await createAdminClient();
+    try {
+        await rateLimit(20, 60000);
+        const { organizationId } = await getOrgContext();
+        const supabase = await createAdminClient();
 
-    const name = formData.get('name') as string;
-    if (!name || !name.trim()) return { error: 'Supplier name is required' };
+        const rawData = {
+            name: formData.get('name') as string,
+            phone: (formData.get('phone') as string) || undefined,
+            email: (formData.get('email') as string) || undefined,
+            address: (formData.get('address') as string) || undefined,
+        };
 
-    const { error } = await supabase
-        .from('suppliers')
-        .update({
-            name: name.trim(),
-            phone: (formData.get('phone') as string) || null,
-            email: (formData.get('email') as string) || null,
-            address: (formData.get('address') as string) || null,
-            pan_number: (formData.get('pan_number') as string) || null,
-        })
-        .eq('id', id)
-        .eq('organization_id', organizationId);
+        const validatedData = SupplierSchema.parse(rawData);
 
-    if (error) return { error: error.message };
-    revalidatePath('/dashboard/suppliers');
-    return { success: true };
+        const { error } = await supabase
+            .from('suppliers')
+            .update({
+                ...validatedData,
+                pan_number: (formData.get('pan_number') as string) || null,
+            })
+            .eq('id', id)
+            .eq('organization_id', organizationId);
+
+        if (error) return { error: error.message };
+        revalidatePath('/dashboard/suppliers');
+        return { success: true };
+    } catch (err: any) {
+        if (err.name === 'ZodError') {
+            return { error: err.errors[0].message };
+        }
+        return { error: err.message || 'An unexpected error occurred' };
+    }
 }
 
 export async function deleteSupplier(id: string) {
-    const { organizationId } = await getOrgContext();
-    const supabase = await createAdminClient();
+    try {
+        await rateLimit(5, 60000);
+        const { organizationId } = await getOrgContext();
+        const supabase = await createAdminClient();
 
-    const { error } = await supabase
-        .from('suppliers')
-        .delete()
-        .eq('id', id)
-        .eq('organization_id', organizationId);
+        const { error } = await supabase
+            .from('suppliers')
+            .delete()
+            .eq('id', id)
+            .eq('organization_id', organizationId);
 
-    if (error) return { error: error.message };
-    revalidatePath('/dashboard/suppliers');
-    return { success: true };
+        if (error) return { error: error.message };
+        revalidatePath('/dashboard/suppliers');
+        return { success: true };
+    } catch (err: any) {
+        return { error: err.message || 'An unexpected error occurred' };
+    }
 }
+
 
 // ==================== PURCHASES ====================
 

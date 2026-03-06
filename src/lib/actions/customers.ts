@@ -1,10 +1,11 @@
-'use server';
-
 import { createAdminClient } from '@/lib/supabase/server';
 import { getOrgContext } from '@/lib/org-context';
 import { revalidatePath } from 'next/cache';
 import { createInvoice } from './invoices';
 import { getTodayBs } from '@/utils/date-utils';
+import { rateLimit } from '@/lib/security/rate-limit';
+import { CustomerSchema } from '@/lib/security/schemas';
+import { trackSecurityEvent } from '@/lib/security/audit-log';
 
 export async function getCustomers() {
     const { organizationId } = await getOrgContext();
@@ -28,36 +29,62 @@ export async function getCustomers() {
     }));
 }
 
+
+
 export async function addCustomer(formData: FormData) {
-    const { organizationId } = await getOrgContext();
-    const supabase = await createAdminClient();
-    const { error } = await supabase.from('customers').insert({
-        organization_id: organizationId,
-        name: formData.get('name') as string,
-        phone: formData.get('phone') as string,
-        email: formData.get('email') as string,
-        pan_number: formData.get('pan_number') as string,
-        tax_type: formData.get('tax_type') as string || 'pan',
-        address: formData.get('address') as string,
-        credit_limit: parseFloat(formData.get('credit_limit') as string || '0'),
-    });
-    if (error) return { error: error.message };
-    revalidatePath('/dashboard/customers');
-    return { success: true };
+    try {
+        await rateLimit(10, 60000);
+        const { organizationId } = await getOrgContext();
+        const supabase = await createAdminClient();
+
+        const rawData = {
+            name: formData.get('name') as string,
+            phone: (formData.get('phone') as string) || undefined,
+            email: (formData.get('email') as string) || undefined,
+            pan_number: (formData.get('pan_number') as string) || undefined,
+            tax_type: (formData.get('tax_type') as string) || 'pan',
+            address: (formData.get('address') as string) || undefined,
+            credit_limit: parseFloat(formData.get('credit_limit') as string || '0'),
+        };
+
+        const validatedData = CustomerSchema.parse(rawData);
+
+        const { error } = await supabase.from('customers').insert({
+            organization_id: organizationId,
+            ...validatedData,
+        });
+
+        if (error) return { error: error.message };
+        revalidatePath('/dashboard/customers');
+        return { success: true };
+    } catch (err: any) {
+        if (err.name === 'ZodError') return { error: err.errors[0].message };
+        return { error: err.message || 'An unexpected error occurred' };
+    }
 }
 
 export async function deleteCustomer(id: string) {
-    const { organizationId } = await getOrgContext();
-    const supabase = await createAdminClient();
-    const { error } = await supabase
-        .from('customers')
-        .delete()
-        .eq('id', id)
-        .eq('organization_id', organizationId);
-    if (error) return { error: error.message };
-    revalidatePath('/dashboard/customers');
-    return { success: true };
+    try {
+        await rateLimit(5, 60000);
+        const { organizationId } = await getOrgContext();
+        const supabase = await createAdminClient();
+
+        await trackSecurityEvent('delete_customer', { customerId: id, orgId: organizationId });
+
+        const { error } = await supabase
+            .from('customers')
+            .delete()
+            .eq('id', id)
+            .eq('organization_id', organizationId);
+
+        if (error) return { error: error.message };
+        revalidatePath('/dashboard/customers');
+        return { success: true };
+    } catch (err: any) {
+        return { error: err.message || 'An unexpected error occurred' };
+    }
 }
+
 
 export async function clearCustomerCredit(customerId: string, amount: number, paymentMethod: string) {
     const { organizationId } = await getOrgContext();

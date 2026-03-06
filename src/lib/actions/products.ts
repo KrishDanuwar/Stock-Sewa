@@ -4,6 +4,9 @@ import { createAdminClient } from '@/lib/supabase/server';
 import { getOrgContext } from '@/lib/org-context';
 import { revalidatePath } from 'next/cache';
 
+import { ProductSchema } from '@/lib/security/schemas';
+import { rateLimit } from '@/lib/security/rate-limit';
+
 export async function getProducts() {
     const { organizationId } = await getOrgContext();
     const supabase = await createAdminClient();
@@ -31,50 +34,12 @@ export async function getProducts() {
 }
 
 export async function addProduct(formData: FormData) {
-    const { organizationId } = await getOrgContext();
-    const supabase = await createAdminClient();
+    try {
+        await rateLimit(10, 60000); // 10 products per minute
+        const { organizationId } = await getOrgContext();
+        const supabase = await createAdminClient();
 
-    const name = formData.get('name') as string;
-    const price = parseFloat(formData.get('price') as string);
-    const cost_price = parseFloat(formData.get('cost_price') as string) || 0;
-    const stock_quantity = parseInt(formData.get('stock_quantity') as string);
-    const unit = formData.get('unit') as string;
-    const category = formData.get('category') as string;
-    const mfg_date = formData.get('mfg_date') as string;
-    const expiry_date = formData.get('expiry_date') as string;
-    const batch_number = formData.get('batch_number') as string;
-    let barcode = formData.get('barcode') as string;
-
-    // Auto-generate barcode if empty
-    if (!barcode) {
-        const timestamp = Date.now().toString().slice(-8);
-        const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-        barcode = `${timestamp}${random}`;
-    }
-
-    const { error } = await supabase.from('products').insert({
-        organization_id: organizationId,
-        name, price, cost_price, stock_quantity, unit, category,
-        barcode,
-        mfg_date: mfg_date || null,
-        expiry_date: expiry_date || null,
-        batch_number: batch_number || null
-    });
-
-    if (error) return { error: error.message };
-
-    revalidatePath('/dashboard/products');
-    revalidatePath('/dashboard');
-    return { success: true };
-}
-
-export async function updateProduct(id: string, formData: FormData) {
-    const { organizationId } = await getOrgContext();
-    const supabase = await createAdminClient();
-
-    const { error } = await supabase
-        .from('products')
-        .update({
+        const rawData = {
             name: formData.get('name') as string,
             price: parseFloat(formData.get('price') as string),
             cost_price: parseFloat(formData.get('cost_price') as string) || 0,
@@ -84,32 +49,105 @@ export async function updateProduct(id: string, formData: FormData) {
             mfg_date: formData.get('mfg_date') as string,
             expiry_date: formData.get('expiry_date') as string,
             batch_number: formData.get('batch_number') as string,
-        })
-        .eq('id', id)
-        .eq('organization_id', organizationId);
+            barcode: formData.get('barcode') as string || undefined,
+        };
 
-    if (error) return { error: error.message };
+        const validatedData = ProductSchema.parse(rawData);
 
-    revalidatePath('/dashboard/products');
-    return { success: true };
+        // Auto-generate barcode if empty
+        if (!validatedData.barcode) {
+            const timestamp = Date.now().toString().slice(-8);
+            const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+            validatedData.barcode = `${timestamp}${random}`;
+        }
+
+        const { error } = await supabase.from('products').insert({
+            organization_id: organizationId,
+            ...validatedData,
+            mfg_date: validatedData.mfg_date || null,
+            expiry_date: validatedData.expiry_date || null,
+            batch_number: validatedData.batch_number || null
+        });
+
+        if (error) return { error: error.message };
+
+        revalidatePath('/dashboard/products');
+        revalidatePath('/dashboard');
+        return { success: true };
+    } catch (err: any) {
+        if (err.name === 'ZodError') {
+            return { error: err.errors[0].message };
+        }
+        return { error: err.message || 'An unexpected error occurred' };
+    }
+}
+
+export async function updateProduct(id: string, formData: FormData) {
+    try {
+        await rateLimit(20, 60000);
+        const { organizationId } = await getOrgContext();
+        const supabase = await createAdminClient();
+
+        const rawData = {
+            name: formData.get('name') as string,
+            price: parseFloat(formData.get('price') as string),
+            cost_price: parseFloat(formData.get('cost_price') as string) || 0,
+            stock_quantity: parseInt(formData.get('stock_quantity') as string),
+            unit: formData.get('unit') as string,
+            category: formData.get('category') as string,
+            mfg_date: formData.get('mfg_date') as string,
+            expiry_date: formData.get('expiry_date') as string,
+            batch_number: formData.get('batch_number') as string,
+            barcode: formData.get('barcode') as string || undefined,
+        };
+
+        const validatedData = ProductSchema.parse(rawData);
+
+        const { error } = await supabase
+            .from('products')
+            .update({
+                ...validatedData,
+                mfg_date: validatedData.mfg_date || null,
+                expiry_date: validatedData.expiry_date || null,
+                batch_number: validatedData.batch_number || null
+            })
+            .eq('id', id)
+            .eq('organization_id', organizationId);
+
+        if (error) return { error: error.message };
+
+        revalidatePath('/dashboard/products');
+        return { success: true };
+    } catch (err: any) {
+        if (err.name === 'ZodError') {
+            return { error: err.errors[0].message };
+        }
+        return { error: err.message || 'An unexpected error occurred' };
+    }
 }
 
 export async function deleteProduct(id: string) {
-    const { organizationId } = await getOrgContext();
-    const supabase = await createAdminClient();
+    try {
+        await rateLimit(5, 60000);
+        const { organizationId } = await getOrgContext();
+        const supabase = await createAdminClient();
 
-    const { error } = await supabase
-        .from('products')
-        .delete()
-        .eq('id', id)
-        .eq('organization_id', organizationId);
+        const { error } = await supabase
+            .from('products')
+            .delete()
+            .eq('id', id)
+            .eq('organization_id', organizationId);
 
-    if (error) return { error: error.message };
+        if (error) return { error: error.message };
 
-    revalidatePath('/dashboard/products');
-    revalidatePath('/dashboard');
-    return { success: true };
+        revalidatePath('/dashboard/products');
+        revalidatePath('/dashboard');
+        return { success: true };
+    } catch (err: any) {
+        return { error: err.message || 'An unexpected error occurred' };
+    }
 }
+
 
 export async function restockProduct(
     id: string,

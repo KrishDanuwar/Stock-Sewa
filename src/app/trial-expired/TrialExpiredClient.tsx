@@ -223,7 +223,7 @@ export default function TrialExpiredClient({ email, plans }: TrialExpiredClientP
                 </p>
                 <div style={{ display: 'flex', justifyContent: 'center' }}>
                     <a
-                        href="https://wa.me/9779703360369"
+                        href={`https://wa.me/${process.env.NEXT_PUBLIC_SUPPORT_WHATSAPP}`}
                         target="_blank"
                         rel="noreferrer"
                         className="glass-button"

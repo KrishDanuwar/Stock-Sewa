@@ -6,6 +6,19 @@ export default clerkMiddleware(async (auth, request) => {
     if (!isPublicRoute(request)) {
         await auth.protect();
     }
+
+    const response = await (await import('next/server')).NextResponse.next();
+
+    // Security Headers
+    response.headers.set('X-DNS-Prefetch-Control', 'on');
+    response.headers.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    response.headers.set('X-Frame-Options', 'SAMEORIGIN');
+    response.headers.set('X-Content-Type-Options', 'nosniff');
+    response.headers.set('Referrer-Policy', 'origin-when-cross-origin');
+    response.headers.set('X-Permitted-Cross-Domain-Policies', 'none');
+    response.headers.set('X-XSS-Protection', '1; mode=block');
+
+    return response;
 });
 
 export const config = {

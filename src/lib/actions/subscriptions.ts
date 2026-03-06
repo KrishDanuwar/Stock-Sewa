@@ -5,30 +5,39 @@ import { getOrgContext } from '@/lib/org-context';
 import { revalidatePath } from 'next/cache';
 import { currentUser } from '@clerk/nextjs/server';
 import { getPlanConfig } from '@/config/plans';
-
 import { isAuthorizedAdmin } from './admin-management';
+import { rateLimit } from '@/lib/security/rate-limit';
+import { trackSecurityEvent } from '@/lib/security/audit-log';
 
 export async function submitTransactionId(transactionId: string, plan: string) {
-    const { organizationId } = await getOrgContext();
-    const supabase = await createAdminClient();
+    try {
+        await rateLimit(5, 60000); // 5 submissions per minute
+        const { organizationId } = await getOrgContext();
+        const supabase = await createAdminClient();
 
-    const { error } = await supabase
-        .from('organizations')
-        .update({
-            last_transaction_id: transactionId,
-            subscription_status: 'pending',
-            subscription_plan: plan,
-        })
-        .eq('id', organizationId);
+        await trackSecurityEvent('submit_transaction', { transactionId, plan, orgId: organizationId });
 
-    if (error) {
-        return { success: false, error: error.message };
+        const { error } = await supabase
+            .from('organizations')
+            .update({
+                last_transaction_id: transactionId,
+                subscription_status: 'pending',
+                subscription_plan: plan,
+            })
+            .eq('id', organizationId);
+
+        if (error) {
+            return { success: false, error: error.message };
+        }
+
+        revalidatePath('/dashboard');
+        revalidatePath('/trial-expired');
+        return { success: true };
+    } catch (err: any) {
+        return { success: false, error: err.message || 'An unexpected error occurred' };
     }
-
-    revalidatePath('/dashboard');
-    revalidatePath('/trial-expired');
-    return { success: true };
 }
+
 
 export async function activateSubscription(orgId: string, plan: string) {
     const isAuthorized = await isAuthorizedAdmin();

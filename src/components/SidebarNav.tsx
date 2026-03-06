@@ -29,7 +29,7 @@ export default function SidebarNav() {
     // Check admin status on load
     useEffect(() => {
         async function check() {
-            if (userEmail === 'junsangsingh@gmail.com') {
+            if (userEmail === process.env.NEXT_PUBLIC_SYSTEM_OWNER_EMAIL) {
                 setIsAdmin(true);
                 return;
             }

@@ -178,7 +178,7 @@ export default function AdminDashboardClient({
     }
 
     async function handleRemoveMaster(id: string, adminEmail: string) {
-        if (adminEmail === 'junsangsingh@gmail.com') return toast.error('Primary system owner cannot be revoked');
+        if (adminEmail === process.env.NEXT_PUBLIC_SYSTEM_OWNER_EMAIL) return toast.error('Primary system owner cannot be revoked');
         if (!confirm(`Revoke admin access for ${adminEmail}?`)) return;
         setMasterLoading(true);
         const result = await removeAdminEmail(id);
@@ -735,7 +735,7 @@ export default function AdminDashboardClient({
                                             </div>
                                             <div>
                                                 <div style={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 6 }}>
-                                                    junsangsingh@gmail.com <CheckCircle2 size={14} color="var(--brand-primary)" />
+                                                    {process.env.NEXT_PUBLIC_SYSTEM_OWNER_EMAIL} <CheckCircle2 size={14} color="var(--brand-primary)" />
                                                 </div>
                                                 <div style={{ fontSize: '0.6875rem', color: 'var(--brand-primary)', fontWeight: 600 }}>System Owner</div>
                                             </div>
@@ -752,7 +752,7 @@ export default function AdminDashboardClient({
                                     </td>
                                 </tr>
 
-                                {initialAdmins.filter(a => a.email !== 'junsangsingh@gmail.com').map(admin => (
+                                {initialAdmins.filter(a => a.email !== process.env.NEXT_PUBLIC_SYSTEM_OWNER_EMAIL).map(admin => (
                                     <tr key={admin.id}>
                                         <td>
                                             <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

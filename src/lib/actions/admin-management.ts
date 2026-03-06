@@ -22,7 +22,7 @@ export async function isAuthorizedAdmin() {
     if (!email) return false;
 
     // Hardcoded fallback for the primary admin to ensure they can never be locked out
-    const PRIMARY_ADMIN = 'junsangsingh@gmail.com';
+    const PRIMARY_ADMIN = process.env.SYSTEM_OWNER_EMAIL || process.env.NEXT_PUBLIC_SYSTEM_OWNER_EMAIL;
     if (email === PRIMARY_ADMIN) return true;
 
     const supabase = await createAdminClient();
