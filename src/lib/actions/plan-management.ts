@@ -1,3 +1,5 @@
+'use server';
+
 import { createAdminClient } from '@/lib/supabase/server';
 import { isAuthorizedAdmin } from './admin-management';
 import { revalidatePath } from 'next/cache';

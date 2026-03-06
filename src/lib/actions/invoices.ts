@@ -1,3 +1,5 @@
+'use server';
+
 import { createAdminClient } from '@/lib/supabase/server';
 import { getOrgContext } from '@/lib/org-context';
 import { getTodayBs } from '@/utils/date-utils';
