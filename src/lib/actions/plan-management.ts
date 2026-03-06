@@ -105,6 +105,7 @@ export async function updatePlan(id: string, data: any) {
         if (error) return { error: error.message };
         revalidatePath('/admin');
         revalidatePath('/trial-expired');
+        revalidatePath('/dashboard', 'layout');
         return { success: true };
     } catch (err: any) {
         if (err.name === 'ZodError') return { error: err.errors[0].message };
@@ -122,6 +123,7 @@ export async function deletePlan(id: string) {
     if (error) return { error: error.message };
     revalidatePath('/admin');
     revalidatePath('/trial-expired');
+    revalidatePath('/dashboard', 'layout');
     return { success: true };
 }
 
@@ -139,6 +141,7 @@ export async function addFeatureToPlan(planId: string, featureKey: string, featu
 
     if (error) return { error: error.message };
     revalidatePath('/admin');
+    revalidatePath('/dashboard', 'layout');
     return { success: true };
 }
 
@@ -149,6 +152,7 @@ export async function removeFeatureFromPlan(featureId: string) {
     const { error } = await supabase.from('plan_features').delete().eq('id', featureId);
     if (error) return { error: error.message };
     revalidatePath('/admin');
+    revalidatePath('/dashboard', 'layout');
     return { success: true };
 }
 

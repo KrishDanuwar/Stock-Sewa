@@ -73,6 +73,8 @@ const GlassSelect = ({ value, options, onChange, label }: { value: string; optio
 // --- Known feature keys ---
 const KNOWN_FEATURES = [
     { key: 'canExportCSV', label: 'CSV Export' },
+    { key: 'canImportCSV', label: 'CSV Import' },
+    { key: 'hasOfflinePOS', label: 'Offline POS' },
     { key: 'hasPrioritySupport', label: 'Priority Support' },
     { key: 'hasAdvancedReports', label: 'Advanced Reports' },
     { key: 'canManageSuppliers', label: 'Supplier Management' },
@@ -111,6 +113,8 @@ export default function AdminDashboardClient({
     const [editingDescriptions, setEditingDescriptions] = useState<Record<string, string>>({});
     const [editingDurations, setEditingDurations] = useState<Record<string, string>>({});
     const [showNewPlanModal, setShowNewPlanModal] = useState(false);
+    const [addingCustomFeature, setAddingCustomFeature] = useState<string | null>(null);
+    const [customFeature, setCustomFeature] = useState({ key: '', label: '' });
     const [newPlan, setNewPlan] = useState<{
         id: string;
         name: string;
@@ -224,9 +228,39 @@ export default function AdminDashboardClient({
             } else toast.error(result.error || 'Failed');
         } else {
             const result = await addFeatureToPlan(plan.id, featureKey, featureLabel, true);
-            if (result.success) { router.refresh(); }
+            if (result.success) {
+                const updatedPlans = await (await import('@/lib/actions/plan-management')).getPlans();
+                setPlans(updatedPlans);
+            }
             else toast.error(result.error || 'Failed');
         }
+        setPlanLoading(null);
+    }
+
+    async function handleRemoveFeature(planId: string, featureId: string) {
+        if (!confirm('Permanently remove this feature from the plan?')) return;
+        setPlanLoading(planId);
+        const result = await removeFeatureFromPlan(featureId);
+        if (result.success) {
+            setPlans(prev => prev.map(p => p.id === planId ? {
+                ...p, features: p.features.filter(f => f.id !== featureId)
+            } : p));
+            toast.success('Feature removed');
+        } else toast.error(result.error || 'Failed to remove');
+        setPlanLoading(null);
+    }
+
+    async function handleAddCustomFeature(planId: string) {
+        if (!customFeature.key || !customFeature.label) return;
+        setPlanLoading(planId);
+        const result = await addFeatureToPlan(planId, customFeature.key, customFeature.label, true);
+        if (result.success) {
+            toast.success('Custom feature added');
+            setAddingCustomFeature(null);
+            setCustomFeature({ key: '', label: '' });
+            const updatedPlans = await (await import('@/lib/actions/plan-management')).getPlans();
+            setPlans(updatedPlans);
+        } else toast.error(result.error || 'Failed to add feature');
         setPlanLoading(null);
     }
 
@@ -601,20 +635,112 @@ export default function AdminDashboardClient({
 
                                     {/* Feature Toggles */}
                                     <div style={{ padding: '16px 24px', borderTop: '1px solid var(--glass-border)', background: 'rgba(0,0,0,0.02)' }}>
-                                        <label className="glass-label" style={{ marginBottom: 12, display: 'block' }}>Exclusive Features</label>
+                                        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 12 }}>
+                                            <label className="glass-label" style={{ marginBottom: 0 }}>Exclusive Features</label>
+                                            <button
+                                                onClick={() => setAddingCustomFeature(plan.id)}
+                                                className="glass-button"
+                                                style={{ padding: '4px 8px', fontSize: '0.75rem' }}
+                                            >
+                                                <Plus size={12} /> Custom
+                                            </button>
+                                        </div>
+
                                         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+                                            {/* Predefined Features */}
                                             {KNOWN_FEATURES.map(kf => {
                                                 const feat = plan.features.find(f => f.feature_key === kf.key);
                                                 const isEnabled = feat?.enabled ?? false;
                                                 return (
-                                                    <button key={kf.key} onClick={() => handleToggleFeature(plan, kf.key, kf.label)} style={{ display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px', borderRadius: 10, border: '1px solid var(--glass-border)', background: isEnabled ? 'rgba(16, 185, 129, 0.06)' : 'transparent', cursor: 'pointer', transition: 'all 0.15s', width: '100%', textAlign: 'left' }}>
-                                                        {isEnabled ? <ToggleRight size={20} color="var(--brand-success)" /> : <ToggleLeft size={20} color="var(--text-muted)" />}
-                                                        <span style={{ fontSize: '0.8125rem', fontWeight: isEnabled ? 600 : 400, color: isEnabled ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{kf.label}</span>
-                                                        {isEnabled && <CheckCircle2 size={14} color="var(--brand-success)" style={{ marginLeft: 'auto' }} />}
-                                                    </button>
+                                                    <div key={kf.key} className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => handleToggleFeature(plan, kf.key, kf.label)}
+                                                            style={{
+                                                                display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
+                                                                borderRadius: 10, border: '1px solid var(--glass-border)',
+                                                                background: isEnabled ? 'rgba(16, 185, 129, 0.06)' : 'transparent',
+                                                                cursor: 'pointer', transition: 'all 0.15s', flex: 1, textAlign: 'left'
+                                                            }}
+                                                        >
+                                                            {isEnabled ? <ToggleRight size={20} color="var(--brand-success)" /> : <ToggleLeft size={20} color="var(--text-muted)" />}
+                                                            <span style={{ fontSize: '0.8125rem', fontWeight: isEnabled ? 600 : 400, color: isEnabled ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{kf.label}</span>
+                                                            {isEnabled && <CheckCircle2 size={14} color="var(--brand-success)" style={{ marginLeft: 'auto' }} />}
+                                                        </button>
+                                                        {feat && (
+                                                            <button
+                                                                onClick={() => handleRemoveFeature(plan.id, feat.id)}
+                                                                className="p-2 text-red-500/50 hover:text-red-500 transition-colors"
+                                                                title="Remove from plan completely"
+                                                            >
+                                                                <X size={14} />
+                                                            </button>
+                                                        )}
+                                                    </div>
                                                 );
                                             })}
+
+                                            {/* Custom Features that are not in KNOWN_FEATURES */}
+                                            {plan.features.filter(f => !KNOWN_FEATURES.some(kf => kf.key === f.feature_key)).map(feat => (
+                                                <div key={feat.id} className="flex items-center gap-2">
+                                                    <button
+                                                        onClick={() => handleToggleFeature(plan, feat.feature_key, feat.feature_label)}
+                                                        style={{
+                                                            display: 'flex', alignItems: 'center', gap: 10, padding: '8px 12px',
+                                                            borderRadius: 10, border: '1px solid var(--glass-border)',
+                                                            background: feat.enabled ? 'rgba(16, 185, 129, 0.06)' : 'transparent',
+                                                            cursor: 'pointer', transition: 'all 0.15s', flex: 1, textAlign: 'left'
+                                                        }}
+                                                    >
+                                                        {feat.enabled ? <ToggleRight size={20} color="var(--brand-success)" /> : <ToggleLeft size={20} color="var(--text-muted)" />}
+                                                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                                            <span style={{ fontSize: '0.8125rem', fontWeight: feat.enabled ? 600 : 400, color: feat.enabled ? 'var(--text-primary)' : 'var(--text-secondary)' }}>{feat.feature_label}</span>
+                                                            <code style={{ fontSize: '0.625rem', opacity: 0.5 }}>{feat.feature_key}</code>
+                                                        </div>
+                                                        {feat.enabled && <CheckCircle2 size={14} color="var(--brand-success)" style={{ marginLeft: 'auto' }} />}
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleRemoveFeature(plan.id, feat.id)}
+                                                        className="p-2 text-red-500/50 hover:text-red-500 transition-colors"
+                                                        title="Remove from plan completely"
+                                                    >
+                                                        <X size={14} />
+                                                    </button>
+                                                </div>
+                                            ))}
                                         </div>
+
+                                        {addingCustomFeature === plan.id && (
+                                            <div className="mt-4 p-3 rounded-lg border border-dashed border-white/20 bg-white/5 animate-fade-in">
+                                                <div className="flex flex-col gap-2">
+                                                    <input
+                                                        className="glass-input h-8 text-xs"
+                                                        placeholder="Feature Key (e.g. hasAi)"
+                                                        value={customFeature.key}
+                                                        onChange={e => setCustomFeature(prev => ({ ...prev, key: e.target.value }))}
+                                                    />
+                                                    <input
+                                                        className="glass-input h-8 text-xs"
+                                                        placeholder="Display Label (e.g. AI Support)"
+                                                        value={customFeature.label}
+                                                        onChange={e => setCustomFeature(prev => ({ ...prev, label: e.target.value }))}
+                                                    />
+                                                    <div className="flex gap-2">
+                                                        <button
+                                                            onClick={() => handleAddCustomFeature(plan.id)}
+                                                            className="glass-button glass-button-primary flex-1 h-8 text-[10px]"
+                                                        >
+                                                            Add Feature
+                                                        </button>
+                                                        <button
+                                                            onClick={() => setAddingCustomFeature(null)}
+                                                            className="glass-button flex-1 h-8 text-[10px]"
+                                                        >
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
                                     </div>
 
                                     {/* Save Button */}
