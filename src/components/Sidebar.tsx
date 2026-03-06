@@ -24,25 +24,26 @@ export default async function Sidebar() {
             {/* Brand */}
             <div style={{ padding: '32px 24px', borderBottom: '1px solid var(--glass-border)' }}>
                 {logoUrl ? (
-                    <div style={{ width: 44, height: 44, borderRadius: 10, background: 'white', overflow: 'hidden', flexShrink: 0, border: '1px solid var(--glass-border)', padding: 2, marginBottom: 16 }}>
-                        <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                    </div>
+                    <>
+                        <div style={{ width: 44, height: 44, borderRadius: 10, background: 'white', overflow: 'hidden', flexShrink: 0, border: '1px solid var(--glass-border)', padding: 2, marginBottom: 16 }}>
+                            <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        </div>
+                        <div style={{
+                            fontSize: '0.75rem',
+                            fontWeight: 600,
+                            color: 'var(--text-muted)',
+                            paddingLeft: 2,
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 6
+                        }}>
+                            <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: 'var(--brand-success)' }}></span>
+                            {organizationName}
+                        </div>
+                    </>
                 ) : (
-                    <Logo size="lg" />
+                    <Logo size="lg" text={organizationName} tagline="Systems Admin" />
                 )}
-                <div style={{
-                    marginTop: logoUrl ? 0 : 12,
-                    fontSize: '0.75rem',
-                    fontWeight: 600,
-                    color: 'var(--text-muted)',
-                    paddingLeft: 2,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6
-                }}>
-                    <span style={{ width: 6, height: 6, borderRadius: '50%', backgroundColor: 'var(--brand-success)' }}></span>
-                    {organizationName}
-                </div>
             </div>
 
             {/* Navigation */}

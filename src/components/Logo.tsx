@@ -6,9 +6,17 @@ interface LogoProps {
     className?: string;
     showText?: boolean;
     size?: 'sm' | 'md' | 'lg' | 'xl';
+    text?: string;
+    tagline?: string;
 }
 
-export default function Logo({ className = '', showText = true, size = 'md' }: LogoProps) {
+export default function Logo({
+    className = '',
+    showText = true,
+    size = 'md',
+    text = 'Stocksewa',
+    tagline = 'Inventory Management & POS'
+}: LogoProps) {
     const sizes = {
         sm: { icon: 24, font: '0.875rem', sub: '0.625rem', gap: 8 },
         md: { icon: 32, font: '1.125rem', sub: '0.6875rem', gap: 10 },
@@ -54,12 +62,12 @@ export default function Logo({ className = '', showText = true, size = 'md' }: L
                         translate="no"
                         style={{
                             fontSize: currentSize.font,
-                            fontWeight: 900,
+                            fontWeight: 800,
                             color: 'var(--text-primary)',
-                            letterSpacing: '-0.02em',
+                            letterSpacing: '-0.01em',
                         }}
                     >
-                        Stocksewa
+                        {text}
                     </span>
                     <span
                         style={{
@@ -71,7 +79,7 @@ export default function Logo({ className = '', showText = true, size = 'md' }: L
                             opacity: 0.8
                         }}
                     >
-                        Inventory Management & POS
+                        {tagline}
                     </span>
                 </div>
             )}

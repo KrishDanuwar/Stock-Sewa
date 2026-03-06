@@ -77,18 +77,27 @@ export default async function DashboardPage() {
         <div className="animate-fade-in-up">
             <div className="page-header" style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
                 {logoUrl ? (
-                    <div style={{ width: 64, height: 64, borderRadius: 16, background: 'white', flexShrink: 0, overflow: 'hidden', border: '1px solid var(--glass-border)', padding: 4 }}>
-                        <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                        <div style={{ width: 64, height: 64, borderRadius: 16, background: 'white', flexShrink: 0, overflow: 'hidden', border: '1px solid var(--glass-border)', padding: 4 }}>
+                            <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        </div>
+                        <div>
+                            <h1 className="page-title">{organizationName}</h1>
+                            <p className="page-subtitle">
+                                Today: <ClockWrapper fallbackDate={today.formattedEn} />
+                            </p>
+                        </div>
                     </div>
                 ) : (
-                    <Logo size="lg" />
+                    <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
+                        <Logo size="xl" text={organizationName} tagline="Inventory & POS Solutions" />
+                        <div style={{ textAlign: 'right' }}>
+                            <p className="page-subtitle" style={{ marginTop: 0 }}>
+                                Today: <ClockWrapper fallbackDate={today.formattedEn} />
+                            </p>
+                        </div>
+                    </div>
                 )}
-                <div>
-                    <h1 className="page-title">{organizationName}</h1>
-                    <p className="page-subtitle">
-                        Today: <ClockWrapper fallbackDate={today.formattedEn} />
-                    </p>
-                </div>
             </div>
 
             {/* Stat Cards */}
