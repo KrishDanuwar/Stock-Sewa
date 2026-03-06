@@ -2,6 +2,7 @@ import { createAdminClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { auth, currentUser } from '@clerk/nextjs/server';
 import { getPlanConfig, PlanConfig } from '@/config/plans';
+import { cache } from 'react';
 
 export interface OrgContext {
     userId: string;
@@ -21,7 +22,7 @@ export interface OrgContext {
  * The gatekeeper for multi-tenancy.
  * Uses Clerk for auth and Supabase for organization mapping.
  */
-export async function getOrgContext(): Promise<OrgContext> {
+export const getOrgContext = cache(async (): Promise<OrgContext> => {
     const { userId } = await auth();
     const user = await currentUser();
 
@@ -118,4 +119,4 @@ export async function getOrgContext(): Promise<OrgContext> {
         console.error('getOrgContext Exception:', error);
         redirect('/setup');
     }
-}
+});

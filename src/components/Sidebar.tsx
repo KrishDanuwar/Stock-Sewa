@@ -5,7 +5,7 @@ import { LogOut } from 'lucide-react';
 import Logo from './Logo';
 
 export default async function Sidebar() {
-    const { organizationName, organizationId } = await getOrgContext();
+    const { organizationName, organizationId, logoUrl } = await getOrgContext();
 
     return (
         <aside
@@ -23,9 +23,15 @@ export default async function Sidebar() {
         >
             {/* Brand */}
             <div style={{ padding: '32px 24px', borderBottom: '1px solid var(--glass-border)' }}>
-                <Logo size="lg" />
+                {logoUrl ? (
+                    <div style={{ width: 44, height: 44, borderRadius: 10, background: 'white', overflow: 'hidden', flexShrink: 0, border: '1px solid var(--glass-border)', padding: 2, marginBottom: 16 }}>
+                        <img src={logoUrl} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    </div>
+                ) : (
+                    <Logo size="lg" />
+                )}
                 <div style={{
-                    marginTop: 12,
+                    marginTop: logoUrl ? 0 : 12,
                     fontSize: '0.75rem',
                     fontWeight: 600,
                     color: 'var(--text-muted)',
