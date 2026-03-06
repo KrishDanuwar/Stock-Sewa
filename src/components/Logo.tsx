@@ -10,6 +10,7 @@ interface LogoProps {
     size?: 'sm' | 'md' | 'lg' | 'xl';
     text?: string;
     tagline?: string;
+    useImageLogo?: boolean;
 }
 
 export default function Logo({
@@ -19,7 +20,8 @@ export default function Logo({
     showTagline = true,
     size = 'md',
     text = 'Stocksewa',
-    tagline = 'Inventory Management & POS'
+    tagline = 'Inventory Management & POS',
+    useImageLogo = false
 }: LogoProps) {
     const sizes = {
         sm: { icon: 24, font: '0.875rem', sub: '0.625rem', gap: 8 },
@@ -32,34 +34,50 @@ export default function Logo({
 
     return (
         <div className={`flex items-center ${className}`} style={{ gap: (showIcon && showText) ? currentSize.gap : 0 }}>
-            {/* SVG Icon */}
+            {/* Logo Image or SVG Icon */}
             {showIcon && (
-                <svg
-                    width={currentSize.icon}
-                    height={currentSize.icon}
-                    viewBox="0 0 40 40"
-                    fill="none"
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="flex-shrink-0"
-                >
-                    <rect width="40" height="40" rx="10" fill="url(#logo-gradient)" fillOpacity="0.1" />
-                    <path
-                        d="M12 10C10.8954 10 10 10.8954 10 12V20C10 21.1046 10.8954 22 12 22H20C21.1046 22 22 21.1046 22 20V12C22 10.8954 21.1046 10 20 10H12Z"
-                        fill="url(#logo-gradient)"
-                    />
-                    <path
-                        d="M18 18C16.8954 18 16 18.8954 16 20V28C16 29.1046 16.8954 30 18 30H26C27.1046 30 28 29.1046 28 28V20C28 18.8954 27.1046 18 26 18H18Z"
-                        fill="url(#logo-gradient)"
-                        fillOpacity="0.8"
-                    />
-                    <circle cx="28" cy="12" r="3" fill="#10b981" />
-                    <defs>
-                        <linearGradient id="logo-gradient" x1="10" y1="10" x2="28" y2="30" gradientUnits="userSpaceOnUse">
-                            <stop stopColor="#41d886" />
-                            <stop offset="1" stopColor="#10b981" />
-                        </linearGradient>
-                    </defs>
-                </svg>
+                useImageLogo ? (
+                    <div style={{
+                        width: currentSize.icon,
+                        height: currentSize.icon,
+                        borderRadius: 10,
+                        overflow: 'hidden',
+                        border: '1px solid var(--glass-border)',
+                        background: 'white',
+                        padding: 2,
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
+                        flexShrink: 0
+                    }}>
+                        <img src="/logo.jpg" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                    </div>
+                ) : (
+                    <svg
+                        width={currentSize.icon}
+                        height={currentSize.icon}
+                        viewBox="0 0 40 40"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="flex-shrink-0"
+                    >
+                        <rect width="40" height="40" rx="10" fill="url(#logo-gradient)" fillOpacity="0.1" />
+                        <path
+                            d="M12 10C10.8954 10 10 10.8954 10 12V20C10 21.1046 10.8954 22 12 22H20C21.1046 22 22 21.1046 22 20V12C22 10.8954 21.1046 10 20 10H12Z"
+                            fill="url(#logo-gradient)"
+                        />
+                        <path
+                            d="M18 18C16.8954 18 16 18.8954 16 20V28C16 29.1046 16.8954 30 18 30H26C27.1046 30 28 29.1046 28 28V20C28 18.8954 27.1046 18 26 18H18Z"
+                            fill="url(#logo-gradient)"
+                            fillOpacity="0.8"
+                        />
+                        <circle cx="28" cy="12" r="3" fill="#10b981" />
+                        <defs>
+                            <linearGradient id="logo-gradient" x1="10" y1="10" x2="28" y2="30" gradientUnits="userSpaceOnUse">
+                                <stop stopColor="#41d886" />
+                                <stop offset="1" stopColor="#10b981" />
+                            </linearGradient>
+                        </defs>
+                    </svg>
+                )
             )}
 
             {showText && (
@@ -79,11 +97,11 @@ export default function Logo({
                         <span
                             style={{
                                 fontSize: currentSize.sub,
-                                fontWeight: 600,
+                                fontWeight: 500,
                                 color: 'var(--text-secondary)',
                                 textTransform: 'uppercase',
                                 letterSpacing: '0.05em',
-                                opacity: 0.8
+                                opacity: 0.9
                             }}
                         >
                             {tagline}

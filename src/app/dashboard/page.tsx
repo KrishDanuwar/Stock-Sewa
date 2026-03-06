@@ -90,7 +90,7 @@ export default async function DashboardPage() {
                     </div>
                 ) : (
                     <div style={{ display: 'flex', justifyContent: 'space-between', width: '100%', alignItems: 'center' }}>
-                        <Logo size="xl" text={organizationName} showIcon={false} showTagline={false} />
+                        <Logo size="xl" text={organizationName} useImageLogo={true} tagline="Stock Sewa" />
                         <div style={{ textAlign: 'right' }}>
                             <p className="page-subtitle" style={{ marginTop: 0 }}>
                                 Today: <ClockWrapper fallbackDate={today.formattedEn} />
