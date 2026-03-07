@@ -25,9 +25,9 @@ export default async function Sidebar() {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{
                         position: 'relative', width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: 'linear-gradient(135deg, #fff 0%, #f0f7ff 100%)',
-                        borderRadius: 12, border: '1px solid rgba(79, 142, 247, 0.3)',
-                        boxShadow: '0 8px 20px -6px rgba(79, 142, 247, 0.3), inset 0 0 12px rgba(79, 142, 247, 0.05)',
+                        background: 'var(--logo-plate-bg)',
+                        borderRadius: 12, border: '1px solid var(--logo-plate-border)',
+                        boxShadow: '0 8px 20px -6px rgba(79, 142, 247, 0.25), inset 0 0 12px rgba(79, 142, 247, 0.05)',
                         padding: 3, flexShrink: 0
                     }}>
                         <div style={{ position: 'absolute', inset: -2, background: 'var(--brand-primary)', opacity: 0.15, filter: 'blur(8px)', borderRadius: 14, zIndex: -1 }}></div>

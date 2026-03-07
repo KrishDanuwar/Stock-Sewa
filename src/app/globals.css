@@ -37,6 +37,10 @@
   /* Sidebar */
   --sidebar-width: 260px;
   --sidebar-bg: rgba(10, 15, 30, 0.9);
+
+  /* Logo Plate */
+  --logo-plate-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
+  --logo-plate-border: rgba(255, 255, 255, 0.15);
 }
 
 .light-mode {
@@ -59,6 +63,10 @@
 
   /* Sidebar */
   --sidebar-bg: rgba(255, 255, 255, 0.9);
+
+  /* Logo Plate */
+  --logo-plate-bg: linear-gradient(135deg, #ffffff 0%, #f8faff 100%);
+  --logo-plate-border: rgba(79, 142, 247, 0.2);
 }
 
 /* Light mode overrides for components with hardcoded dark values */

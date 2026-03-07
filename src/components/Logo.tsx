@@ -43,9 +43,9 @@ export default function Logo({
                         height: currentSize.icon,
                         display: 'flex', alignItems: 'center', justifyContent: 'center',
                         borderRadius: size === 'xl' ? 20 : 12,
-                        background: 'linear-gradient(135deg, #fff 0%, #f0f7ff 100%)',
-                        border: '1px solid rgba(79, 142, 247, 0.2)',
-                        boxShadow: '0 10px 25px -5px rgba(79, 142, 247, 0.25), inset 0 0 10px rgba(79, 142, 247, 0.05)',
+                        background: 'var(--logo-plate-bg)',
+                        border: '1px solid var(--logo-plate-border)',
+                        boxShadow: '0 10px 25px -5px rgba(79, 142, 247, 0.2), inset 0 0 10px rgba(79, 142, 247, 0.05)',
                         padding: size === 'sm' ? 2 : 3,
                         flexShrink: 0,
                     }}>
