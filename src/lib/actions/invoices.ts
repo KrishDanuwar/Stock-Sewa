@@ -212,27 +212,62 @@ export async function cleanupOldInvoices() {
         cutoffDate.setMonth(cutoffDate.getMonth() - months);
         const cutoffIso = cutoffDate.toISOString().split('T')[0];
 
-        // 3. Find invoices to be deleted for notification placeholder
-        const { data: oldInvoices } = await supabase
+        // 3. Fetch all data for archival (Invoices + Items)
+        const { data: invoicesToArchive, error: fetchError } = await supabase
             .from('invoices')
-            .select('id, invoice_number, customer_id, customers(name, phone)')
+            .select('*, invoice_items(*)')
             .eq('organization_id', organizationId)
-            .lt('date_ad', cutoffIso);
+            .lt('date_ad', cutoffIso)
+            .order('date_ad', { ascending: true });
 
-        if (!oldInvoices || oldInvoices.length === 0) {
-            return { success: true, count: 0, message: 'No old invoices found to clean up.' };
+        if (fetchError) throw fetchError;
+        if (!invoicesToArchive || invoicesToArchive.length === 0) {
+            return { success: true, count: 0, message: 'No old invoices found to archive.' };
         }
 
-        // 4. Notification Placeholder Logic
-        console.log(`[RETENTION] Found ${oldInvoices.length} invoices to delete. Cutoff: ${cutoffIso}`);
-        oldInvoices.forEach(inv => {
-            if (inv.customer_id) {
-                // @ts-ignore
-                console.log(`[NOTIFY] Preparing deletion alert for ${inv.customers?.name || 'Customer'} (Invoice ${inv.invoice_number})`);
-            }
-        });
+        // 4. Transform to JSON
+        const archiveData = {
+            organization_id: organizationId,
+            archived_at: new Date().toISOString(),
+            retention_period_months: months,
+            cutoff_date: cutoffIso,
+            invoices: invoicesToArchive
+        };
 
-        // 5. Delete invoices (Cascading deletes handle items and movements if linked)
+        const fileName = `archive_${organizationId}_${new Date().getTime()}.json`;
+        const jsonBlob = JSON.stringify(archiveData, null, 2);
+
+        // 5. Upload to Supabase Storage
+        // We use the logos bucket but in an archives/ folder
+        const { error: uploadError } = await supabase.storage
+            .from('logos')
+            .upload(`archives/${fileName}`, jsonBlob, {
+                contentType: 'application/json',
+                upsert: true
+            });
+
+        if (uploadError) throw uploadError;
+
+        // 6. Get Public URL
+        const { data: { publicUrl } } = supabase.storage
+            .from('logos')
+            .getPublicUrl(`archives/${fileName}`);
+
+        // 7. Register in archives table
+        const { error: archiveDbError } = await supabase
+            .from('archives')
+            .insert({
+                organization_id: organizationId,
+                file_name: fileName,
+                file_url: publicUrl,
+                period_start: invoicesToArchive[0].date_ad,
+                period_end: invoicesToArchive[invoicesToArchive.length - 1].date_ad,
+                invoice_count: invoicesToArchive.length
+            });
+
+        if (archiveDbError) throw archiveDbError;
+
+        // 8. Delete originals (Cascading deletes handle items and movements)
         const { error: deleteError } = await supabase
             .from('invoices')
             .delete()
@@ -242,8 +277,32 @@ export async function cleanupOldInvoices() {
         if (deleteError) throw deleteError;
 
         revalidatePath('/dashboard/invoices');
-        return { success: true, count: oldInvoices.length, message: `Successfully cleaned up ${oldInvoices.length} invoices older than ${months} months.` };
+        return {
+            success: true,
+            count: invoicesToArchive.length,
+            message: `Successfully archived ${invoicesToArchive.length} invoices to Cold Storage and cleaned up active database.`
+        };
     } catch (err: any) {
-        return { error: err.message || 'Failed to cleanup invoices' };
+        console.error('[CLEANUP_ERROR]', err);
+        return { error: err.message || 'Failed to archive and cleanup invoices' };
+    }
+}
+
+export async function getArchives() {
+    try {
+        const { organizationId } = await getOrgContext();
+        const supabase = await createAdminClient();
+
+        const { data, error } = await supabase
+            .from('archives')
+            .select('*')
+            .eq('organization_id', organizationId)
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        return data || [];
+    } catch (err: any) {
+        console.error('[GET_ARCHIVES_ERROR]', err);
+        return [];
     }
 }
