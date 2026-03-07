@@ -241,39 +241,40 @@ export default function InvoicesClient({ invoices, organization }: { invoices: I
 
             {/* Export & Clear Modal */}
             {showExportModal && (
-                <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
-                    <div className="glass-card animate-scale-in" style={{ maxWidth: 450, padding: 32 }}>
+                <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(12px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                    <div className="glass-card animate-scale-in" style={{ width: '100%', maxWidth: 420, padding: 24, paddingBottom: 20 }}>
                         <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
-                            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <AlertTriangle size={20} color="var(--brand-danger)" />
+                            <div style={{ width: 36, height: 36, borderRadius: 10, background: 'rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                                <AlertTriangle size={18} color="var(--brand-danger)" />
                             </div>
-                            <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--brand-danger)' }}>Clear Local Database</h2>
+                            <h2 style={{ fontSize: '1.125rem', fontWeight: 600, color: 'var(--text-primary)' }}>Export & Wipe History</h2>
                         </div>
 
-                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: 20 }}>
-                            This action will export bills and their items within your selected date range to a CSV file. Once downloaded, those records will be <strong>permanently deleted</strong> from your active cloud database.
-                            <br /><br />
-                            <strong>Warning:</strong> The downloaded CSV will be your ONLY backup. Store it safely!
-                        </p>
+                        <div style={{ padding: '12px 16px', borderRadius: 8, background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', marginBottom: 20 }}>
+                            <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', lineHeight: '1.5' }}>
+                                This action downloads a CSV of the selected period, then <strong>permanently deletes</strong> those records from the cloud.
+                                <br /><span style={{ color: 'var(--brand-danger)', fontWeight: 500, display: 'inline-block', marginTop: 4 }}>Warning: The downloaded CSV will be your ONLY backup.</span>
+                            </p>
+                        </div>
 
-                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
-                            <div className="form-group">
-                                <label className="glass-label">Start Date (A.D.)</label>
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12, marginBottom: 16 }}>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="glass-label" style={{ fontSize: '0.75rem' }}>Start Date</label>
                                 <input
                                     type="date"
                                     className="glass-input"
-                                    style={{ width: '100%' }}
+                                    style={{ width: '100%', padding: '8px 12px', fontSize: '0.875rem' }}
                                     value={startDate}
                                     onChange={(e) => setStartDate(e.target.value)}
                                     max={endDate || undefined}
                                 />
                             </div>
-                            <div className="form-group">
-                                <label className="glass-label">End Date (A.D.)</label>
+                            <div className="form-group" style={{ marginBottom: 0 }}>
+                                <label className="glass-label" style={{ fontSize: '0.75rem' }}>End Date</label>
                                 <input
                                     type="date"
                                     className="glass-input"
-                                    style={{ width: '100%' }}
+                                    style={{ width: '100%', padding: '8px 12px', fontSize: '0.875rem' }}
                                     value={endDate}
                                     onChange={(e) => setEndDate(e.target.value)}
                                     min={startDate || undefined}
@@ -282,19 +283,20 @@ export default function InvoicesClient({ invoices, organization }: { invoices: I
                         </div>
 
                         <div className="form-group" style={{ marginBottom: 24 }}>
-                            <label className="glass-label">Type <strong style={{ color: 'var(--brand-danger)' }}>CONFIRM</strong> to Proceed</label>
+                            <label className="glass-label" style={{ fontSize: '0.75rem' }}>Type <strong style={{ color: 'var(--brand-danger)' }}>CONFIRM</strong> to Proceed</label>
                             <input
                                 className="glass-input"
-                                placeholder="Type CONFIRM"
+                                placeholder="CONFIRM"
                                 value={confirmText}
                                 onChange={(e) => setConfirmText(e.target.value)}
+                                style={{ padding: '8px 12px', fontSize: '0.875rem', letterSpacing: '1px' }}
                             />
                         </div>
 
-                        <div style={{ display: 'flex', gap: 12 }}>
+                        <div style={{ display: 'flex', gap: 10 }}>
                             <button
                                 className="glass-button"
-                                style={{ flex: 1, justifyContent: 'center' }}
+                                style={{ flex: 1, justifyContent: 'center', padding: '10px' }}
                                 onClick={() => { setShowExportModal(false); setStartDate(''); setEndDate(''); setConfirmText(''); }}
                                 disabled={isExporting}
                             >
@@ -305,10 +307,12 @@ export default function InvoicesClient({ invoices, organization }: { invoices: I
                                 style={{
                                     flex: 1,
                                     justifyContent: 'center',
-                                    background: confirmText === 'CONFIRM' && startDate && endDate ? 'var(--brand-danger)' : 'rgba(239, 68, 68, 0.1)',
-                                    color: confirmText === 'CONFIRM' && startDate && endDate ? 'white' : 'rgba(239, 68, 68, 0.4)',
-                                    border: 'none',
-                                    transition: 'all 0.2s ease'
+                                    padding: '10px',
+                                    background: confirmText === 'CONFIRM' && startDate && endDate ? 'var(--brand-danger)' : 'rgba(239, 68, 68, 0.05)',
+                                    color: confirmText === 'CONFIRM' && startDate && endDate ? 'white' : 'var(--text-muted)',
+                                    border: confirmText === 'CONFIRM' && startDate && endDate ? 'none' : '1px solid var(--glass-border)',
+                                    transition: 'all 0.2s ease',
+                                    fontWeight: 500
                                 }}
                                 disabled={confirmText !== 'CONFIRM' || !startDate || !endDate || isExporting}
                                 onClick={handleExportAndClear}
