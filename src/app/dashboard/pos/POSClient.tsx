@@ -229,13 +229,6 @@ export default function POSClient({
             <div style={{ display: 'flex', flexDirection: 'column', gap: 16, overflow: 'hidden' }}>
                 <div className="page-header" style={{ marginBottom: 0 }}>
                     <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                        {!organization?.logo_url ? (
-                            <Logo size="md" text={organization?.name || 'Stocksewa'} useImageLogo={true} tagline="Stock Sewa" showText={false} />
-                        ) : (
-                            <div style={{ width: 44, height: 44, borderRadius: 10, background: 'white', overflow: 'hidden', flexShrink: 0, border: '1px solid var(--glass-border)', padding: 2 }}>
-                                <img src={organization.logo_url} alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-                            </div>
-                        )}
                         <div>
                             <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: '0.75rem', padding: '2px 8px', borderRadius: 20, background: isOnline ? 'rgba(16,185,129,0.1)' : 'rgba(239,68,68,0.1)', color: isOnline ? '#10b981' : '#ef4444', border: '1px solid currentColor', fontWeight: 600 }}>
                                 {isOnline ? <Wifi size={12} /> : <WifiOff size={12} />}
