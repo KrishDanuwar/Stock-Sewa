@@ -192,13 +192,12 @@ export async function getInvoices() {
     return data ?? [];
 }
 
-export async function getAllInvoicesForExport() {
+export async function getAllInvoicesForExport(startDateIso?: string, endDateIso?: string) {
     try {
         const { organizationId } = await getOrgContext();
         const supabase = await createAdminClient();
 
-        // Fetch all invoices with their items and customer name
-        const { data, error } = await supabase
+        let query = supabase
             .from('invoices')
             .select(`
                 *,
@@ -213,6 +212,15 @@ export async function getAllInvoicesForExport() {
             .eq('organization_id', organizationId)
             .order('date_ad', { ascending: true }); // Oldest first
 
+        if (startDateIso) {
+            query = query.gte('date_ad', startDateIso);
+        }
+        if (endDateIso) {
+            query = query.lte('date_ad', endDateIso);
+        }
+
+        const { data, error } = await query;
+
         if (error) throw error;
         return data || [];
     } catch (err: any) {
@@ -221,14 +229,18 @@ export async function getAllInvoicesForExport() {
     }
 }
 
-export async function exportAndClearInvoices(upToDateIso: string) {
+export async function exportAndClearInvoices(startDateIso: string, endDateIso: string) {
     try {
         const { organizationId } = await getOrgContext();
         const supabase = await createAdminClient();
 
-        // Security check: ensure upToDateIso is a valid date string
-        if (!upToDateIso || isNaN(Date.parse(upToDateIso))) {
+        // Security check: ensure dates are valid
+        if (!startDateIso || isNaN(Date.parse(startDateIso)) || !endDateIso || isNaN(Date.parse(endDateIso))) {
             return { error: 'Invalid date format provided for clearance.' };
+        }
+
+        if (new Date(startDateIso) > new Date(endDateIso)) {
+            return { error: 'Start date cannot be after end date.' };
         }
 
         // 1. Delete originals
@@ -238,7 +250,8 @@ export async function exportAndClearInvoices(upToDateIso: string) {
             .from('invoices')
             .delete({ count: 'exact' })
             .eq('organization_id', organizationId)
-            .lte('date_ad', upToDateIso);
+            .gte('date_ad', startDateIso)
+            .lte('date_ad', endDateIso);
 
         if (deleteError) throw deleteError;
 
@@ -246,7 +259,7 @@ export async function exportAndClearInvoices(upToDateIso: string) {
         return {
             success: true,
             deletedCount: count || 0,
-            message: `Successfully cleared ${count || 0} local invoices up to ${upToDateIso}.`
+            message: `Successfully cleared ${count || 0} local invoices from ${startDateIso} to ${endDateIso}.`
         };
     } catch (err: any) {
         console.error('[CLEAR_INVOICES_ERROR]', err);

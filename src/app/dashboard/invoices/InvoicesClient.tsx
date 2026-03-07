@@ -38,7 +38,9 @@ type Organization = { name: string; pan_vat: string | null; pan_vat_type?: 'pan'
 export default function InvoicesClient({ invoices, organization }: { invoices: Invoice[]; organization: Organization; }) {
     const [isExporting, setIsExporting] = useState(false);
     const [showExportModal, setShowExportModal] = useState(false);
-    const [exportDateBs, setExportDateBs] = useState('');
+    const [startDate, setStartDate] = useState('');
+    const [endDate, setEndDate] = useState('');
+    const [confirmText, setConfirmText] = useState('');
 
     const statusBadge = (status: string) => {
         const styles = {
@@ -85,21 +87,20 @@ export default function InvoicesClient({ invoices, organization }: { invoices: I
     };
 
     const handleExportAndClear = async () => {
-        if (!exportDateBs) return toast.error("Please enter a valid B.S. date");
+        if (!startDate || !endDate) return toast.error("Please select both a start and end date.");
+        if (new Date(startDate) > new Date(endDate)) return toast.error("Start date cannot be after end date.");
+        if (confirmText !== 'CONFIRM') return toast.error("Please type CONFIRM to proceed.");
 
         setIsExporting(true);
         try {
             // 1. Fetch deep records
             toast.loading("Gathering deep records for export...", { id: 'export' });
-            const exportData = await getAllInvoicesForExport();
+            const exportData = await getAllInvoicesForExport(startDate, endDate);
             if (!exportData || exportData.length === 0) {
                 toast.error("No invoices found to export.", { id: 'export' });
                 setIsExporting(false);
                 return;
             }
-
-            // Optional: Filter the exportData by the user's provided BS date
-            // For safety and simplicity, we export everything, then delete up to that date.
 
             // 2. Generate CSV
             toast.loading("Generating CSV file...", { id: 'export' });
@@ -108,7 +109,7 @@ export default function InvoicesClient({ invoices, organization }: { invoices: I
             // Header
             csvRows.push(['Invoice Number', 'Date (B.S.)', 'Date (A.D.)', 'Type', 'Customer Name', 'Subtotal', 'Tax', 'Total', 'Paid', 'Due', 'Status', 'Product Details']);
 
-            exportData.forEach(inv => {
+            exportData.forEach((inv: any) => {
                 const due = Number(inv.total_amount) - Number(inv.amount_paid || 0);
                 const itemsStr = inv.invoice_items?.map((item: any) => `${item.product_name} (Qty: ${item.quantity} @ Rs.${item.unit_price})`).join(' | ') || '';
 
@@ -135,7 +136,7 @@ export default function InvoicesClient({ invoices, organization }: { invoices: I
             // 3. Trigger Download
             const link = document.createElement("a");
             link.setAttribute("href", url);
-            link.setAttribute("download", `StockSewa_Bills_Export_${new Date().toISOString().split('T')[0]}.csv`);
+            link.setAttribute("download", `StockSewa_Bills_Export_${startDate}_to_${endDate}.csv`);
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
@@ -144,16 +145,16 @@ export default function InvoicesClient({ invoices, organization }: { invoices: I
             await new Promise(r => setTimeout(r, 2000));
 
             // 4. Delete Records Database-side
-            toast.loading(`File downloaded! Now clearing database up to ${exportDateBs}...`, { id: 'export' });
+            toast.loading(`File downloaded! Now clearing database from ${startDate} to ${endDate}...`, { id: 'export' });
 
-            // Convert provided B.S. date (approx) to A.D. for backend query if needed, 
-            // but for safety, let's just use the current date to clear everything exactly as exported.
-            const todayIso = new Date().toISOString().split('T')[0];
-            const clearRes = await exportAndClearInvoices(todayIso);
+            const clearRes = await exportAndClearInvoices(startDate, endDate);
 
             if (clearRes.success) {
                 toast.success(clearRes.message, { id: 'export' });
                 setShowExportModal(false);
+                setStartDate('');
+                setEndDate('');
+                setConfirmText('');
             } else {
                 toast.error(clearRes.error, { id: 'export' });
             }
@@ -250,18 +251,43 @@ export default function InvoicesClient({ invoices, organization }: { invoices: I
                         </div>
 
                         <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: 20 }}>
-                            This action will export <strong>ALL</strong> your bills and their items to a CSV file. Once downloaded, those records will be <strong>permanently deleted</strong> from your active cloud database.
+                            This action will export bills and their items within your selected date range to a CSV file. Once downloaded, those records will be <strong>permanently deleted</strong> from your active cloud database.
                             <br /><br />
                             <strong>Warning:</strong> The downloaded CSV will be your ONLY backup. Store it safely!
                         </p>
 
+                        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, marginBottom: 20 }}>
+                            <div className="form-group">
+                                <label className="glass-label">Start Date (A.D.)</label>
+                                <input
+                                    type="date"
+                                    className="glass-input"
+                                    style={{ width: '100%' }}
+                                    value={startDate}
+                                    onChange={(e) => setStartDate(e.target.value)}
+                                    max={endDate || undefined}
+                                />
+                            </div>
+                            <div className="form-group">
+                                <label className="glass-label">End Date (A.D.)</label>
+                                <input
+                                    type="date"
+                                    className="glass-input"
+                                    style={{ width: '100%' }}
+                                    value={endDate}
+                                    onChange={(e) => setEndDate(e.target.value)}
+                                    min={startDate || undefined}
+                                />
+                            </div>
+                        </div>
+
                         <div className="form-group" style={{ marginBottom: 24 }}>
-                            <label className="glass-label">Confirm Action Date (Type <strong style={{ color: 'var(--brand-primary)' }}>CONFIRM</strong>)</label>
+                            <label className="glass-label">Type <strong style={{ color: 'var(--brand-danger)' }}>CONFIRM</strong> to Proceed</label>
                             <input
                                 className="glass-input"
-                                placeholder="Type CONFIRM to proceed"
-                                value={exportDateBs}
-                                onChange={(e) => setExportDateBs(e.target.value)}
+                                placeholder="Type CONFIRM"
+                                value={confirmText}
+                                onChange={(e) => setConfirmText(e.target.value)}
                             />
                         </div>
 
@@ -269,7 +295,7 @@ export default function InvoicesClient({ invoices, organization }: { invoices: I
                             <button
                                 className="glass-button"
                                 style={{ flex: 1, justifyContent: 'center' }}
-                                onClick={() => { setShowExportModal(false); setExportDateBs(''); }}
+                                onClick={() => { setShowExportModal(false); setStartDate(''); setEndDate(''); setConfirmText(''); }}
                                 disabled={isExporting}
                             >
                                 Cancel
@@ -279,11 +305,12 @@ export default function InvoicesClient({ invoices, organization }: { invoices: I
                                 style={{
                                     flex: 1,
                                     justifyContent: 'center',
-                                    background: exportDateBs === 'CONFIRM' ? 'var(--brand-danger)' : 'rgba(239, 68, 68, 0.1)',
-                                    color: exportDateBs === 'CONFIRM' ? 'white' : 'rgba(239, 68, 68, 0.4)',
-                                    border: 'none'
+                                    background: confirmText === 'CONFIRM' && startDate && endDate ? 'var(--brand-danger)' : 'rgba(239, 68, 68, 0.1)',
+                                    color: confirmText === 'CONFIRM' && startDate && endDate ? 'white' : 'rgba(239, 68, 68, 0.4)',
+                                    border: 'none',
+                                    transition: 'all 0.2s ease'
                                 }}
-                                disabled={exportDateBs !== 'CONFIRM' || isExporting}
+                                disabled={confirmText !== 'CONFIRM' || !startDate || !endDate || isExporting}
                                 onClick={handleExportAndClear}
                             >
                                 {isExporting ? 'Processing...' : 'Download & Wipe'}
