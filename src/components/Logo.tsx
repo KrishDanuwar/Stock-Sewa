@@ -38,17 +38,19 @@ export default function Logo({
             {showIcon && (
                 useImageLogo ? (
                     <div style={{
+                        position: 'relative',
                         width: currentSize.icon,
                         height: currentSize.icon,
-                        borderRadius: 10,
-                        overflow: 'hidden',
-                        border: '1px solid var(--glass-border)',
-                        background: 'white',
-                        padding: 2,
-                        boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
-                        flexShrink: 0
+                        display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        borderRadius: size === 'xl' ? 20 : 12,
+                        background: 'linear-gradient(135deg, #fff 0%, #f0f7ff 100%)',
+                        border: '1px solid rgba(79, 142, 247, 0.2)',
+                        boxShadow: '0 10px 25px -5px rgba(79, 142, 247, 0.25), inset 0 0 10px rgba(79, 142, 247, 0.05)',
+                        padding: size === 'sm' ? 2 : 3,
+                        flexShrink: 0,
                     }}>
-                        <img src="/images/removedbg{logo}.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                        <div style={{ position: 'absolute', inset: -3, background: 'var(--brand-primary)', opacity: 0.12, filter: 'blur(10px)', borderRadius: size === 'xl' ? 24 : 14, zIndex: -1 }}></div>
+                        <img src="/images/removedbg{logo}.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: size === 'xl' ? 17 : 9 }} />
                     </div>
                 ) : (
                     <svg

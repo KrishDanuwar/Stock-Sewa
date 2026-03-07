@@ -24,11 +24,14 @@ export default async function Sidebar() {
             <div style={{ padding: '28px 24px', borderBottom: '1px solid var(--glass-border)' }}>
                 <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
                     <div style={{
-                        width: 40, height: 40, borderRadius: 10, overflow: 'hidden',
-                        border: '1px solid var(--glass-border)', background: 'white',
-                        padding: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', flexShrink: 0
+                        position: 'relative', width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                        background: 'linear-gradient(135deg, #fff 0%, #f0f7ff 100%)',
+                        borderRadius: 12, border: '1px solid rgba(79, 142, 247, 0.3)',
+                        boxShadow: '0 8px 20px -6px rgba(79, 142, 247, 0.3), inset 0 0 12px rgba(79, 142, 247, 0.05)',
+                        padding: 3, flexShrink: 0
                     }}>
-                        <img src="/images/removedbg{logo}.png" alt="Stock Sewa" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 7 }} />
+                        <div style={{ position: 'absolute', inset: -2, background: 'var(--brand-primary)', opacity: 0.15, filter: 'blur(8px)', borderRadius: 14, zIndex: -1 }}></div>
+                        <img src="/images/removedbg{logo}.png" alt="Stock Sewa" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 9 }} />
                     </div>
                     <span style={{
                         fontSize: '1.125rem', fontWeight: 700,
