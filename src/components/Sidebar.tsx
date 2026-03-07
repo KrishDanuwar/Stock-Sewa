@@ -28,7 +28,7 @@ export default async function Sidebar() {
                         border: '1px solid var(--glass-border)', background: 'white',
                         padding: 2, boxShadow: '0 2px 8px rgba(0,0,0,0.06)', flexShrink: 0
                     }}>
-                        <img src="/logo.jpg" alt="Stock Sewa" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 7 }} />
+                        <img src="/images/logo{stocksewa}.png" alt="Stock Sewa" style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 7 }} />
                     </div>
                     <span style={{
                         fontSize: '1.125rem', fontWeight: 700,
