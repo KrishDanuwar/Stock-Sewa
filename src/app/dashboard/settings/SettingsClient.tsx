@@ -2,9 +2,10 @@
 
 import { useState } from 'react';
 import { updateOrganizationLogo, updateOrganizationDetails, removeOrganizationLogo } from '@/lib/actions/organizations';
+import { cleanupOldInvoices } from '@/lib/actions/invoices';
 import { deleteAccount } from '@/lib/actions/user';
 import { toast } from 'sonner';
-import { Building2, Upload, Camera, Save, Trash2, Mail, Sun, Moon, Palette, UserCircle, CreditCard, ShieldCheck, HeartPulse, Lock } from 'lucide-react';
+import { Building2, Upload, Camera, Save, Trash2, Mail, Sun, Moon, Palette, UserCircle, CreditCard, ShieldCheck, HeartPulse, Lock, History, AlertTriangle } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import Link from 'next/link';
 import { PlanConfig } from '@/config/plans';
@@ -21,6 +22,7 @@ type Organization = {
     subscription_status?: string;
     trial_ends_at?: string | null;
     subscription_ends_at?: string | null;
+    bill_retention_months?: number;
 };
 
 export default function SettingsClient({
@@ -57,6 +59,7 @@ export default function SettingsClient({
     const [panVatType, setPanVatType] = useState<'pan' | 'vat'>(organization?.pan_vat_type || 'pan');
     const [address, setAddress] = useState(organization?.address || '');
     const [phone, setPhone] = useState(organization?.phone || '');
+    const [retentionMonths, setRetentionMonths] = useState<number>(organization?.bill_retention_months || 0);
 
     const compressImage = (file: File, maxWidth: number, maxHeight: number, quality: number): Promise<Blob> => {
         return new Promise((resolve, reject) => {
@@ -155,6 +158,7 @@ export default function SettingsClient({
         formData.append('pan_vat_type', panVatType);
         formData.append('address', address);
         formData.append('phone', phone);
+        formData.append('bill_retention_months', retentionMonths.toString());
 
         const result = await updateOrganizationDetails(formData);
         if (result.success) {
@@ -374,6 +378,66 @@ export default function SettingsClient({
                                 </button>
                             </Link>
                         </div>
+                    </div>
+                </div>
+
+                {/* Data Retention & Compliance */}
+                <div className="glass-card" style={{ padding: 32 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
+                        <History size={24} color="var(--brand-primary)" />
+                        <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Data Retention & Compliance</h2>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32, marginBottom: 32 }}>
+                        <div>
+                            <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 8 }}>Retention Period</h3>
+                            <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: 20 }}>
+                                Set how long you want to keep bills in your active system.
+                                <br /><span style={{ color: 'var(--brand-danger)', fontWeight: 600 }}>Note: Deleting financial records may have legal implications.</span>
+                            </p>
+                            <select
+                                className="glass-input"
+                                value={retentionMonths}
+                                onChange={(e) => setRetentionMonths(parseInt(e.target.value))}
+                                style={{ width: '100%' }}
+                            >
+                                <option value={0}>Keep Forever (Recommended)</option>
+                                <option value={3}>3 Months</option>
+                                <option value={6}>6 Months</option>
+                                <option value={12}>12 Months (1 Year)</option>
+                            </select>
+                        </div>
+
+                        <div style={{ borderLeft: '1px solid var(--glass-border)', paddingLeft: 32, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                            <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 12 }}>Manual Cleanup</h3>
+                            <button
+                                className="glass-button"
+                                disabled={retentionMonths === 0 || loading}
+                                onClick={async () => {
+                                    if (!confirm(`Are you absolutely sure? This will PERMANENTLY delete all invoices older than ${retentionMonths} months for all customers.`)) return;
+                                    setLoading(true);
+                                    const res = await cleanupOldInvoices();
+                                    setLoading(false);
+                                    if (res.success) toast.success(res.message);
+                                    else toast.error(res.error || 'Cleanup failed');
+                                }}
+                                style={{
+                                    width: '100%',
+                                    justifyContent: 'center',
+                                    color: retentionMonths === 0 ? 'var(--text-muted)' : 'var(--brand-danger)',
+                                    borderColor: retentionMonths === 0 ? 'var(--glass-border)' : 'rgba(239, 68, 68, 0.2)'
+                                }}
+                            >
+                                <Trash2 size={16} /> Run Cleanup Now
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style={{ padding: 16, borderRadius: 12, background: 'rgba(239, 68, 68, 0.05)', border: '1px solid rgba(239, 68, 68, 0.1)', display: 'flex', gap: 12 }}>
+                        <AlertTriangle size={20} color="var(--brand-danger)" style={{ flexShrink: 0 }} />
+                        <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
+                            <strong>Customer Notification Policy:</strong> By running a manual cleanup, the system will log a notification record for all affected customers. In a future update, this will trigger automated email/SMS alerts to customers before their bills are removed.
+                        </p>
                     </div>
                 </div>
 

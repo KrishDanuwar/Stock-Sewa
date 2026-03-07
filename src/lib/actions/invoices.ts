@@ -191,3 +191,59 @@ export async function getInvoices() {
     if (error) throw new Error(error.message);
     return data ?? [];
 }
+
+export async function cleanupOldInvoices() {
+    try {
+        const { organizationId } = await getOrgContext();
+        const supabase = await createAdminClient();
+
+        // 1. Get retention setting
+        const { data: org } = await supabase
+            .from('organizations')
+            .select('bill_retention_months')
+            .eq('id', organizationId)
+            .single();
+
+        const months = org?.bill_retention_months || 0;
+        if (months === 0) return { error: 'Retention is set to "Keep Forever". No action taken.' };
+
+        // 2. Calculate cutoff date
+        const cutoffDate = new Date();
+        cutoffDate.setMonth(cutoffDate.getMonth() - months);
+        const cutoffIso = cutoffDate.toISOString().split('T')[0];
+
+        // 3. Find invoices to be deleted for notification placeholder
+        const { data: oldInvoices } = await supabase
+            .from('invoices')
+            .select('id, invoice_number, customer_id, customers(name, phone)')
+            .eq('organization_id', organizationId)
+            .lt('date_ad', cutoffIso);
+
+        if (!oldInvoices || oldInvoices.length === 0) {
+            return { success: true, count: 0, message: 'No old invoices found to clean up.' };
+        }
+
+        // 4. Notification Placeholder Logic
+        console.log(`[RETENTION] Found ${oldInvoices.length} invoices to delete. Cutoff: ${cutoffIso}`);
+        oldInvoices.forEach(inv => {
+            if (inv.customer_id) {
+                // @ts-ignore
+                console.log(`[NOTIFY] Preparing deletion alert for ${inv.customers?.name || 'Customer'} (Invoice ${inv.invoice_number})`);
+            }
+        });
+
+        // 5. Delete invoices (Cascading deletes handle items and movements if linked)
+        const { error: deleteError } = await supabase
+            .from('invoices')
+            .delete()
+            .eq('organization_id', organizationId)
+            .lt('date_ad', cutoffIso);
+
+        if (deleteError) throw deleteError;
+
+        revalidatePath('/dashboard/invoices');
+        return { success: true, count: oldInvoices.length, message: `Successfully cleaned up ${oldInvoices.length} invoices older than ${months} months.` };
+    } catch (err: any) {
+        return { error: err.message || 'Failed to cleanup invoices' };
+    }
+}
