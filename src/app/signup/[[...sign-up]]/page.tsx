@@ -116,17 +116,6 @@ export default function SignupPage() {
                     position: relative;
                     z-index: 1;
                 }
-                .brand-title {
-                    font-size: 2rem;
-                    font-weight: 800;
-                    color: var(--text-primary);
-                    letter-spacing: -0.02em;
-                }
-                .brand-tagline {
-                    font-size: 0.875rem;
-                    color: var(--text-secondary);
-                    margin-top: 4px;
-                }
                 .premium-auth-card {
                     background: var(--glass-bg);
                     backdrop-filter: var(--glass-blur);

@@ -27,7 +27,7 @@ export default function Logo({
         sm: { icon: 24, font: '0.875rem', sub: '0.625rem', gap: 8 },
         md: { icon: 32, font: '1.125rem', sub: '0.6875rem', gap: 10 },
         lg: { icon: 44, font: '1.5rem', sub: '0.75rem', gap: 14 },
-        xl: { icon: 56, font: '1.875rem', sub: '0.875rem', gap: 16 },
+        xl: { icon: 56, font: '2.125rem', sub: '0.9375rem', gap: 16 },
     };
 
     const currentSize = sizes[size];

@@ -1,6 +1,7 @@
 import { SignOutButton } from '@clerk/nextjs';
 import { getOrgContext } from '@/lib/org-context';
 import SidebarNav from './SidebarNav';
+import Logo from './Logo';
 import { LogOut } from 'lucide-react';
 
 export default async function Sidebar() {
@@ -22,22 +23,7 @@ export default async function Sidebar() {
         >
             {/* Brand */}
             <div style={{ padding: '28px 24px', borderBottom: '1px solid var(--glass-border)' }}>
-                <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                    <div style={{
-                        position: 'relative', width: 42, height: 42, display: 'flex', alignItems: 'center', justifyContent: 'center',
-                        background: 'var(--logo-plate-bg)',
-                        borderRadius: 12, border: '1px solid var(--logo-plate-border)',
-                        boxShadow: '0 8px 20px -6px rgba(79, 142, 247, 0.25), inset 0 0 12px rgba(79, 142, 247, 0.05)',
-                        padding: 3, flexShrink: 0
-                    }}>
-                        <div style={{ position: 'absolute', inset: -2, background: 'var(--brand-primary)', opacity: 0.15, filter: 'blur(8px)', borderRadius: 14, zIndex: -1 }}></div>
-                        <img src="/images/removedbg{logo}.png" alt="Stock Sewa" style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 9 }} />
-                    </div>
-                    <span style={{
-                        fontSize: '1.125rem', fontWeight: 700,
-                        color: 'var(--text-primary)', letterSpacing: '-0.01em'
-                    }}>Stock Sewa</span>
-                </div>
+                <Logo size="md" useImageLogo={true} text="Stock Sewa" showTagline={false} />
             </div>
 
             {/* Navigation */}

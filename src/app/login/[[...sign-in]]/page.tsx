@@ -128,18 +128,6 @@ export default function LoginPage() {
                     position: relative;
                     z-index: 1;
                 }
-                .brand-title {
-                    font-size: 2rem;
-                    font-weight: 800;
-                    color: var(--text-primary);
-                    letter-spacing: -0.02em;
-                }
-                .brand-tagline {
-                    font-size: 0.9375rem;
-                    color: var(--text-secondary);
-                    font-weight: 500;
-                    margin-top: 6px;
-                }
                 .premium-auth-card {
                     background: var(--glass-bg);
                     backdrop-filter: var(--glass-blur);
