@@ -1,7 +1,8 @@
 'use client';
 
 import React, { useState } from 'react';
-import { Check, CreditCard, MessageCircle, Sparkles, Send, ShieldCheck, Zap, Rocket } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Check, CreditCard, MessageCircle, Sparkles, Send, ShieldCheck, Zap, Rocket, ArrowLeft } from 'lucide-react';
 import { submitTransactionId } from '@/lib/actions/subscriptions';
 import { toast } from 'sonner';
 import type { PlanWithFeatures } from '@/lib/actions/plan-management';
@@ -12,6 +13,7 @@ interface TrialExpiredClientProps {
 }
 
 export default function TrialExpiredClient({ email, plans }: TrialExpiredClientProps) {
+    const router = useRouter();
     const [selectedPlan, setSelectedPlan] = useState<string>(
         plans.find(p => p.is_popular)?.id || plans[0]?.id || 'monthly'
     );
@@ -52,10 +54,19 @@ export default function TrialExpiredClient({ email, plans }: TrialExpiredClientP
     const planIcons = [Rocket, Zap];
 
     return (
-        <div className="animate-fade-in-up" style={{ width: '100%', maxWidth: '1000px', margin: '0 auto', paddingBottom: '100px' }}>
+        <div className="animate-fade-in-up" style={{ width: '100%', maxWidth: '1000px', margin: '0 auto', paddingBottom: '100px', position: 'relative' }}>
             {/* Header */}
-            <header style={{ textAlign: 'center', marginBottom: '64px' }}>
-                <div className="badge badge-info" style={{ marginBottom: '16px', padding: '6px 16px', fontSize: '0.8125rem' }}>
+            <header style={{ textAlign: 'center', marginBottom: '64px', position: 'relative' }}>
+                <button
+                    onClick={() => router.back()}
+                    className="glass-button"
+                    style={{ position: 'absolute', top: 0, left: 0, padding: '8px 16px', fontSize: '0.875rem' }}
+                >
+                    <ArrowLeft size={16} style={{ marginRight: '8px' }} />
+                    Back
+                </button>
+
+                <div className="badge badge-info" style={{ marginBottom: '16px', padding: '6px 16px', fontSize: '0.8125rem', marginTop: '8px' }}>
                     <Sparkles size={14} style={{ marginRight: '6px' }} />
                     Trial Period Concluded
                 </div>
