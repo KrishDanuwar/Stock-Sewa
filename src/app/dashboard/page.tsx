@@ -83,7 +83,7 @@ export default async function DashboardPage() {
                     display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}>
                     {logoUrl ? (
-                        <img src={logoUrl} alt={organizationName} style={{ width: '100%', height: '100%', objectFit: 'contain', borderRadius: 8 }} />
+                        <img src={logoUrl} alt={organizationName} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8 }} />
                     ) : (
                         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--text-muted)" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" opacity="0.5">
                             <rect x="3" y="3" width="18" height="18" rx="2" />

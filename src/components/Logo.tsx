@@ -48,7 +48,7 @@ export default function Logo({
                         boxShadow: '0 4px 12px rgba(0,0,0,0.1)',
                         flexShrink: 0
                     }}>
-                        <img src="/images/logo{stocksewa}.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+                        <img src="/images/logo{stocksewa}.png" alt="Logo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                     </div>
                 ) : (
                     <svg
