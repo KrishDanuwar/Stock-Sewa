@@ -21,6 +21,7 @@ CREATE TABLE IF NOT EXISTS organizations (
     subscription_status TEXT DEFAULT 'active' CHECK (subscription_status IN ('active', 'pending', 'expired')),
     trial_ends_at TIMESTAMPTZ,
     subscription_ends_at TIMESTAMPTZ,
+    bill_retention_months INTEGER DEFAULT 0,
     last_transaction_id TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
