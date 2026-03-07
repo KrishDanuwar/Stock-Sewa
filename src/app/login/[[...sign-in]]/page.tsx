@@ -100,18 +100,10 @@ export default function LoginPage() {
                 }
                 .brand-icon-wrapper-premium {
                     position: relative;
-                    width: 72px;
-                    height: 72px;
-                    background: var(--bg-card);
-                    border: 1px solid var(--glass-border);
-                    border-radius: 20px;
                     display: flex;
-
                     align-items: center;
                     justify-content: center;
                     margin-bottom: 24px;
-                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-                    padding: 8px;
                 }
                 .brand-glow {
                     position: absolute;

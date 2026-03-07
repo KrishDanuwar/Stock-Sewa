@@ -91,6 +91,7 @@ export default function Logo({
                             fontWeight: 700,
                             color: 'var(--text-primary)',
                             letterSpacing: '-0.01em',
+                            whiteSpace: 'nowrap'
                         }}
                     >
                         {text}
