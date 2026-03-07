@@ -101,7 +101,7 @@ export default function CustomersClient({ customers }: { customers: Customer[] }
                                 <th style={{ width: '15%' }}>Contact</th>
                                 <th style={{ width: '15%' }}>Credit Balance</th>
                                 <th style={{ width: '15%' }}>Credit Limit</th>
-                                <th style={{ width: '10%', textAlign: 'right' }}>Actions</th>
+                                <th style={{ width: '10%', textAlign: 'right', paddingRight: 24 }}>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -152,12 +152,12 @@ export default function CustomersClient({ customers }: { customers: Customer[] }
                                             {c.credit_limit > 0 ? `Rs. ${c.credit_limit.toLocaleString()}` : <span className="opacity-30 italic">No Limit</span>}
                                         </span>
                                     </td>
-                                    <td style={{ textAlign: 'right' }}>
+                                    <td style={{ textAlign: 'right', paddingRight: 24 }}>
                                         <div className="flex justify-end gap-2">
-                                            <Link href={`/dashboard/invoices?customer=${c.id}`} className="glass-button h-8 w-8 !p-0" title="Sale History">
+                                            <Link href={`/dashboard/invoices?customer=${c.id}`} className="glass-button h-8 w-8 !p-0 !justify-center" title="Sale History">
                                                 <History size={14} />
                                             </Link>
-                                            <button onClick={() => handleDelete(c.id, c.name)} className="glass-button h-8 w-8 !p-0" style={{ color: 'var(--brand-danger)', borderColor: 'rgba(239, 68, 68, 0.1)' }}>
+                                            <button onClick={() => handleDelete(c.id, c.name)} className="glass-button h-8 w-8 !p-0 !justify-center" style={{ color: 'var(--brand-danger)', borderColor: 'rgba(239, 68, 68, 0.1)' }}>
                                                 <Trash2 size={14} />
                                             </button>
                                         </div>
