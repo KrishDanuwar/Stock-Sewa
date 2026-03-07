@@ -15,7 +15,7 @@ export default function LoginPage() {
                 <div className="flex flex-col items-center mb-10">
                     <div className="brand-icon-wrapper-premium" style={{ border: 'none', background: 'transparent', boxShadow: 'none', padding: 0 }}>
                         <div className="brand-glow"></div>
-                        <Logo size="xl" className="relative z-10" />
+                        <Logo size="xl" className="relative z-10" useImageLogo={true} text="Stock Sewa" />
                     </div>
                 </div>
 
