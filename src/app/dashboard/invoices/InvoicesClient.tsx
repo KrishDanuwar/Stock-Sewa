@@ -1,7 +1,10 @@
 'use client';
 
-import { Receipt } from 'lucide-react';
+import { useState } from 'react';
+import { Receipt, DownloadCloud, AlertTriangle } from 'lucide-react';
 import { generateInvoicePDF } from '@/lib/utils/invoiceGenerator';
+import { getAllInvoicesForExport, exportAndClearInvoices } from '@/lib/actions/invoices';
+import { toast } from 'sonner';
 
 type InvoiceItem = {
     product_name?: string;
@@ -33,6 +36,10 @@ type Invoice = {
 type Organization = { name: string; pan_vat: string | null; pan_vat_type?: 'pan' | 'vat'; address: string | null; phone: string | null; } | null;
 
 export default function InvoicesClient({ invoices, organization }: { invoices: Invoice[]; organization: Organization; }) {
+    const [isExporting, setIsExporting] = useState(false);
+    const [showExportModal, setShowExportModal] = useState(false);
+    const [exportDateBs, setExportDateBs] = useState('');
+
     const statusBadge = (status: string) => {
         const styles = {
             paid: { bg: 'rgba(16,185,129,0.15)', color: 'var(--brand-success)' },
@@ -77,17 +84,108 @@ export default function InvoicesClient({ invoices, organization }: { invoices: I
         generateInvoicePDF(invData);
     };
 
+    const handleExportAndClear = async () => {
+        if (!exportDateBs) return toast.error("Please enter a valid B.S. date");
+
+        setIsExporting(true);
+        try {
+            // 1. Fetch deep records
+            toast.loading("Gathering deep records for export...", { id: 'export' });
+            const exportData = await getAllInvoicesForExport();
+            if (!exportData || exportData.length === 0) {
+                toast.error("No invoices found to export.", { id: 'export' });
+                setIsExporting(false);
+                return;
+            }
+
+            // Optional: Filter the exportData by the user's provided BS date
+            // For safety and simplicity, we export everything, then delete up to that date.
+
+            // 2. Generate CSV
+            toast.loading("Generating CSV file...", { id: 'export' });
+
+            const csvRows = [];
+            // Header
+            csvRows.push(['Invoice Number', 'Date (B.S.)', 'Date (A.D.)', 'Type', 'Customer Name', 'Subtotal', 'Tax', 'Total', 'Paid', 'Due', 'Status', 'Product Details']);
+
+            exportData.forEach(inv => {
+                const due = Number(inv.total_amount) - Number(inv.amount_paid || 0);
+                const itemsStr = inv.invoice_items?.map((item: any) => `${item.product_name} (Qty: ${item.quantity} @ Rs.${item.unit_price})`).join(' | ') || '';
+
+                csvRows.push([
+                    inv.invoice_number,
+                    inv.date_bs,
+                    inv.date_ad,
+                    inv.invoice_type,
+                    inv.customers?.name || inv.customer_name_manual || 'Walk-in',
+                    inv.subtotal,
+                    inv.tax_amount || 0,
+                    inv.total_amount,
+                    inv.amount_paid || 0,
+                    due,
+                    inv.payment_status || 'paid',
+                    `"${itemsStr}"` // Quote strings containing commas/pipes
+                ].join(','));
+            });
+
+            const csvContent = csvRows.join('\n');
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+
+            // 3. Trigger Download
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `StockSewa_Bills_Export_${new Date().toISOString().split('T')[0]}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            // Wait a moment for download to start before deleting
+            await new Promise(r => setTimeout(r, 2000));
+
+            // 4. Delete Records Database-side
+            toast.loading(`File downloaded! Now clearing database up to ${exportDateBs}...`, { id: 'export' });
+
+            // Convert provided B.S. date (approx) to A.D. for backend query if needed, 
+            // but for safety, let's just use the current date to clear everything exactly as exported.
+            const todayIso = new Date().toISOString().split('T')[0];
+            const clearRes = await exportAndClearInvoices(todayIso);
+
+            if (clearRes.success) {
+                toast.success(clearRes.message, { id: 'export' });
+                setShowExportModal(false);
+            } else {
+                toast.error(clearRes.error, { id: 'export' });
+            }
+
+        } catch (error) {
+            console.error(error);
+            toast.error("Process failed. Check console.", { id: 'export' });
+        } finally {
+            setIsExporting(false);
+        }
+    };
+
     const totalCollected = invoices.reduce((sum, inv) => sum + Number(inv.amount_paid || 0), 0);
     const totalDue = invoices.reduce((sum, inv) => sum + (Number(inv.total_amount) - Number(inv.amount_paid || 0)), 0);
 
     return (
         <div className="animate-fade-in-up">
             <div className="page-header">
-                <div>
-                    <h1 className="page-title">Bills</h1>
-                    <p className="page-subtitle">
-                        Bills — {invoices.length} total | Collection: Rs. {totalCollected.toLocaleString()} | Due: Rs. {totalDue.toLocaleString()}
-                    </p>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '100%' }}>
+                    <div>
+                        <h1 className="page-title">Bills</h1>
+                        <p className="page-subtitle">
+                            Bills — {invoices.length} total | Collection: Rs. {totalCollected.toLocaleString()} | Due: Rs. {totalDue.toLocaleString()}
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => setShowExportModal(true)}
+                        className="glass-button"
+                        style={{ color: 'var(--brand-danger)', borderColor: 'rgba(239, 68, 68, 0.2)', fontWeight: 600 }}
+                    >
+                        <DownloadCloud size={16} /> Download & Clear Bills
+                    </button>
                 </div>
             </div>
 
@@ -139,6 +237,61 @@ export default function InvoicesClient({ invoices, organization }: { invoices: I
                     </tbody>
                 </table>
             </div>
+
+            {/* Export & Clear Modal */}
+            {showExportModal && (
+                <div className="modal-overlay" style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.8)', backdropFilter: 'blur(8px)', zIndex: 1000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: 20 }}>
+                    <div className="glass-card animate-scale-in" style={{ maxWidth: 450, padding: 32 }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 16 }}>
+                            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(239, 68, 68, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                <AlertTriangle size={20} color="var(--brand-danger)" />
+                            </div>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: 600, color: 'var(--brand-danger)' }}>Clear Local Database</h2>
+                        </div>
+
+                        <p style={{ fontSize: '0.875rem', color: 'var(--text-secondary)', lineHeight: '1.6', marginBottom: 20 }}>
+                            This action will export <strong>ALL</strong> your bills and their items to a CSV file. Once downloaded, those records will be <strong>permanently deleted</strong> from your active cloud database.
+                            <br /><br />
+                            <strong>Warning:</strong> The downloaded CSV will be your ONLY backup. Store it safely!
+                        </p>
+
+                        <div className="form-group" style={{ marginBottom: 24 }}>
+                            <label className="glass-label">Confirm Action Date (Type <strong style={{ color: 'var(--brand-primary)' }}>CONFIRM</strong>)</label>
+                            <input
+                                className="glass-input"
+                                placeholder="Type CONFIRM to proceed"
+                                value={exportDateBs}
+                                onChange={(e) => setExportDateBs(e.target.value)}
+                            />
+                        </div>
+
+                        <div style={{ display: 'flex', gap: 12 }}>
+                            <button
+                                className="glass-button"
+                                style={{ flex: 1, justifyContent: 'center' }}
+                                onClick={() => { setShowExportModal(false); setExportDateBs(''); }}
+                                disabled={isExporting}
+                            >
+                                Cancel
+                            </button>
+                            <button
+                                className="glass-button"
+                                style={{
+                                    flex: 1,
+                                    justifyContent: 'center',
+                                    background: exportDateBs === 'CONFIRM' ? 'var(--brand-danger)' : 'rgba(239, 68, 68, 0.1)',
+                                    color: exportDateBs === 'CONFIRM' ? 'white' : 'rgba(239, 68, 68, 0.4)',
+                                    border: 'none'
+                                }}
+                                disabled={exportDateBs !== 'CONFIRM' || isExporting}
+                                onClick={handleExportAndClear}
+                            >
+                                {isExporting ? 'Processing...' : 'Download & Wipe'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

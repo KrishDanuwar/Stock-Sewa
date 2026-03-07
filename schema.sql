@@ -21,7 +21,6 @@ CREATE TABLE IF NOT EXISTS organizations (
     subscription_status TEXT DEFAULT 'active' CHECK (subscription_status IN ('active', 'pending', 'expired')),
     trial_ends_at TIMESTAMPTZ,
     subscription_ends_at TIMESTAMPTZ,
-    bill_retention_months INTEGER DEFAULT 0,
     last_transaction_id TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -313,21 +312,3 @@ INSERT INTO plan_features (plan_id, feature_key, feature_label, enabled) VALUES
     ('yearly', 'hasPrioritySupport', 'Priority Support', true),
     ('yearly', 'hasAdvancedReports', 'Advanced Reports', true),
     ('yearly', 'canManageSuppliers', 'Supplier Management', true);
-
--- ======================================================
--- 14. ARCHIVES (Cold Storage tracking)
--- ======================================================
-CREATE TABLE IF NOT EXISTS archives (
-    id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-    organization_id UUID REFERENCES organizations(id) ON DELETE CASCADE NOT NULL,
-    file_name       TEXT NOT NULL,
-    file_url        TEXT NOT NULL,
-    period_start    DATE,
-    period_end      DATE,
-    invoice_count   INTEGER DEFAULT 0,
-    created_at      TIMESTAMPTZ DEFAULT NOW()
-);
-
-ALTER TABLE archives ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "archives_isolation" ON archives
-    FOR ALL USING (organization_id = public.current_org_id());

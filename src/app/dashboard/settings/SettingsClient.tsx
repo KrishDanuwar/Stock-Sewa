@@ -2,10 +2,9 @@
 
 import { useState } from 'react';
 import { updateOrganizationLogo, updateOrganizationDetails, removeOrganizationLogo } from '@/lib/actions/organizations';
-import { cleanupOldInvoices, getArchives } from '@/lib/actions/invoices';
 import { deleteAccount } from '@/lib/actions/user';
 import { toast } from 'sonner';
-import { Building2, Upload, Camera, Save, Trash2, Mail, Sun, Moon, Palette, UserCircle, CreditCard, ShieldCheck, HeartPulse, Lock, History, AlertTriangle } from 'lucide-react';
+import { Building2, Upload, Camera, Save, Trash2, Mail, Sun, Moon, Palette, UserCircle, CreditCard, ShieldCheck, HeartPulse, Lock } from 'lucide-react';
 import { useTheme } from '@/components/ThemeProvider';
 import Link from 'next/link';
 import { PlanConfig } from '@/config/plans';
@@ -22,17 +21,6 @@ type Organization = {
     subscription_status?: string;
     trial_ends_at?: string | null;
     subscription_ends_at?: string | null;
-    bill_retention_months?: number;
-};
-
-type Archive = {
-    id: string;
-    file_name: string;
-    file_url: string;
-    period_start: string;
-    period_end: string;
-    invoice_count: number;
-    created_at: string;
 };
 
 export default function SettingsClient({
@@ -69,9 +57,6 @@ export default function SettingsClient({
     const [panVatType, setPanVatType] = useState<'pan' | 'vat'>(organization?.pan_vat_type || 'pan');
     const [address, setAddress] = useState(organization?.address || '');
     const [phone, setPhone] = useState(organization?.phone || '');
-    const [retentionMonths, setRetentionMonths] = useState<number>(organization?.bill_retention_months || 0);
-    const [archives, setArchives] = useState<Archive[]>([]);
-    const [loadingArchives, setLoadingArchives] = useState(false);
 
     const compressImage = (file: File, maxWidth: number, maxHeight: number, quality: number): Promise<Blob> => {
         return new Promise((resolve, reject) => {
@@ -170,7 +155,6 @@ export default function SettingsClient({
         formData.append('pan_vat_type', panVatType);
         formData.append('address', address);
         formData.append('phone', phone);
-        formData.append('bill_retention_months', retentionMonths.toString());
 
         const result = await updateOrganizationDetails(formData);
         if (result.success) {
@@ -179,34 +163,6 @@ export default function SettingsClient({
             toast.error(result.error || 'Failed to update details');
         }
         setSaving(false);
-    }
-
-    async function fetchArchives() {
-        setLoadingArchives(true);
-        const data = await getArchives();
-        setArchives(data as Archive[]);
-        setLoadingArchives(false);
-    }
-
-    // Load archives on mount
-    useState(() => {
-        fetchArchives();
-        return;
-    });
-
-    async function handleArchiveCleanup() {
-        if (!confirm(`Are you absolutely sure? This will export all invoices older than ${retentionMonths} months to Cold Storage (JSON) and then PERMANENTLY delete them from the active database.`)) return;
-
-        setLoading(true);
-        const res = await cleanupOldInvoices();
-        setLoading(false);
-
-        if (res.success) {
-            toast.success(res.message);
-            fetchArchives(); // Refresh the list
-        } else {
-            toast.error(res.error || 'Cleanup failed');
-        }
     }
 
     async function handleFinalDeletion() {
@@ -418,89 +374,6 @@ export default function SettingsClient({
                                 </button>
                             </Link>
                         </div>
-                    </div>
-                </div>
-
-                {/* Data Retention & Compliance */}
-                <div className="glass-card" style={{ padding: 32 }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 24 }}>
-                        <History size={24} color="var(--brand-primary)" />
-                        <h2 style={{ fontSize: '1.25rem', fontWeight: 600 }}>Data Retention & Compliance</h2>
-                    </div>
-
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 32, marginBottom: 32 }}>
-                        <div>
-                            <h3 style={{ fontSize: '1rem', fontWeight: 600, marginBottom: 8 }}>Retention Period</h3>
-                            <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)', marginBottom: 20 }}>
-                                Set how long you want to keep bills in your active system.
-                                <br /><span style={{ color: 'var(--brand-danger)', fontWeight: 600 }}>Note: Deleting financial records may have legal implications.</span>
-                            </p>
-                            <select
-                                className="glass-input"
-                                value={retentionMonths}
-                                onChange={(e) => setRetentionMonths(parseInt(e.target.value))}
-                                style={{ width: '100%' }}
-                            >
-                                <option value={0}>Keep Forever (Recommended)</option>
-                                <option value={3}>3 Months</option>
-                                <option value={6}>6 Months</option>
-                                <option value={12}>12 Months (1 Year)</option>
-                            </select>
-                        </div>
-
-                        <div style={{ borderLeft: '1px solid var(--glass-border)', paddingLeft: 32, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                            <h3 style={{ fontSize: '0.875rem', fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 12 }}>Data Archival</h3>
-                            <button
-                                className="glass-button glass-button-primary"
-                                disabled={retentionMonths === 0 || loading}
-                                onClick={handleArchiveCleanup}
-                                style={{
-                                    width: '100%',
-                                    justifyContent: 'center'
-                                }}
-                            >
-                                <History size={16} /> Archive & Cleanup Now
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Archives List */}
-                    {archives.length > 0 && (
-                        <div style={{ marginBottom: 32 }}>
-                            <h3 style={{ fontSize: '0.9375rem', fontWeight: 700, marginBottom: 16 }}>Cold Storage History</h3>
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                                {archives.map(archive => (
-                                    <div key={archive.id} className="glass-card" style={{ padding: '16px 20px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: 'rgba(255,255,255,0.02)' }}>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-                                            <div style={{ width: 40, height: 40, borderRadius: 10, background: 'rgba(79, 142, 247, 0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                                <History size={20} color="var(--brand-primary)" />
-                                            </div>
-                                            <div>
-                                                <p style={{ fontWeight: 600, fontSize: '0.875rem' }}>{archive.invoice_count} Invoices Archived</p>
-                                                <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                                                    Period: {archive.period_start} to {archive.period_end}
-                                                </p>
-                                            </div>
-                                        </div>
-                                        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-                                            <p style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textAlign: 'right' }}>
-                                                Created: {new Date(archive.created_at).toLocaleDateString()}
-                                            </p>
-                                            <a href={archive.file_url} target="_blank" rel="noopener noreferrer" className="glass-button" style={{ padding: '6px 14px', fontSize: '0.75rem' }}>
-                                                <Upload size={12} /> Download JSON
-                                            </a>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    )}
-
-                    <div style={{ padding: 16, borderRadius: 12, background: 'rgba(79, 142, 247, 0.05)', border: '1px solid rgba(79, 142, 247, 0.1)', display: 'flex', gap: 12 }}>
-                        <ShieldCheck size={20} color="var(--brand-primary)" style={{ flexShrink: 0 }} />
-                        <p style={{ fontSize: '0.8125rem', color: 'var(--text-secondary)' }}>
-                            <strong>Cold Storage Policy:</strong> Unlike permanent deletion, archiving exports your data to a secure JSON format before removal. These files can be downloaded anytime for tax audits or re-importing.
-                        </p>
                     </div>
                 </div>
 

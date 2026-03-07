@@ -35,8 +35,7 @@ export async function getOrganization() {
         subscription_plan: org.subscription_plan,
         subscription_status: org.subscription_status,
         trial_ends_at: org.trial_ends_at,
-        subscription_ends_at: org.subscription_ends_at,
-        bill_retention_months: org.bill_retention_months || 0 // 0 means keep forever
+        subscription_ends_at: org.subscription_ends_at
     };
 }
 
@@ -93,8 +92,7 @@ export async function updateOrganizationDetails(formData: FormData) {
             pan_vat,
             pan_vat_type,
             address,
-            phone,
-            bill_retention_months: parseInt(formData.get('bill_retention_months') as string) || 0
+            phone
         })
         .eq('id', org.id);
 
