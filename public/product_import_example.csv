@@ -1,0 +1,4 @@
+name,price,cost_price,stock_quantity,unit,category,barcode,mfg_date,expiry_date,batch_number
+Example Product 1,1200,950,50,pcs,Electronics,89012345,2024-01-01,2026-01-01,BATCH-A
+Sample Item 2,450,380,120,box,Stationery,,2024-02-15,2025-02-15,BATCH-B
+Premium Widget,2500,1800,15,set,Hardware,77665544,2024-03-01,2027-03-01,BATCH-C

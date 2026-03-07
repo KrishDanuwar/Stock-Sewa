@@ -108,7 +108,7 @@ export default function SettingsClient({
             setLogoPreview(previewUrl);
 
             const formData = new FormData();
-            formData.append('logo', compressedBlob, 'logo{stocksewa}.png');
+            formData.append('logo', compressedBlob, 'removedbg{logo}.png');
 
             const result = await updateOrganizationLogo(formData);
             if (result.success) {
